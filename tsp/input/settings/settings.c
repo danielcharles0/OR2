@@ -1,15 +1,16 @@
 /*
 * Project  : Travelling Salesman Problem implementations
-* Authors    : Luigi Frigione, Daniel Carlesso
-* IDs       : 2060685, 2088626
-* File      : parser.c
+* Authors  : Luigi Frigione, Daniel Carlesso
+* IDs      : 2060685, 2088626
+* File     : settings.c
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
 
-#include "parser.h"
+#include "settings.h"
 
 static struct option long_options[] = {
         {"seed", required_argument, 0, 's'},
@@ -55,7 +56,7 @@ void init(Settings* set){
 * IP set settings
 * OV settings values
 */
-void printSettings(Settings* set){
+void printSettings(const Settings* set){
     printf("Settings:\n");
     if(!set->nodes)
         printf("\tinput file name: %s\n", set->input_file_name);

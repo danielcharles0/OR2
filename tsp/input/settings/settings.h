@@ -1,9 +1,10 @@
 /*
 * Project  : Travelling Salesman Problem implementations
-* Authors    : Luigi Frigione, Daniel Carlesso
-* IDs       : 2060685, 2088626
-* File      : parser.h
+* Authors  : Luigi Frigione, Daniel Carlesso
+* IDs      : 2060685, 2088626
+* File     : settings.h
 */
+
 #include <stdbool.h>
 
 #pragma once /* Allows to do not recreate these object on further includes */
@@ -29,7 +30,7 @@ typedef enum {
 
 void help(void);
 
-void printSettings(Settings*);
+void printSettings(const Settings*);
 
 void init(Settings*);
 
