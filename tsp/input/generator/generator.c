@@ -12,18 +12,19 @@
 
 /*
  * IP set settings
- * IP inst instance
+ * OP inst instance to random generate
  */
-void generateInstance(Settings* set, TSPInstance* inst){
-    int i;
+void generateInstance(const Settings* set, TSPInstance* inst){
 
-    strcpy(inst->name, "RANDOM");
-    inst->dimension = set->n;
-    allocInst(inst);
+	int i;
 
-    srand(set->seed);
+    initInst((*set).n, inst);
 
-    for(i=0; i<inst->dimension; i++)
-        randomPoint(i+1, &(inst->points[i]));
+	strcpy(inst->name, "RANDOM");
+
+    srand((*set).seed);
+
+    for(i = 0; i < (*inst).dimension; i++)
+        randomPoint(&((*inst).points[i]));
 
 }/* generateInstance */

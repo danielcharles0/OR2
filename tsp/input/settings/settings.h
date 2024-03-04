@@ -29,10 +29,6 @@ typedef enum {
     RANDOM_GENERATION
 } CONF;
 
-void help(void);
-
 void printSettings(const Settings*);
-
-void init(Settings*);
 
 CONF parseCMDLine(int, char* const*, Settings*);

@@ -1,5 +1,5 @@
-STD_FLAGS = -ansi -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/tsp.o
+STD_FLAGS = -ansi -Werror -Wall -pedantic -c
+OBJS = ./obj/main.o ./obj/settings.o ./obj/generator.o ./obj/point.o ./obj/tsp.o ./obj/utility.o ./obj/validator.o #./obj/reader.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -17,14 +17,20 @@ main: $(OBJS)
 ./obj/settings.o: ./tsp/input/settings/settings.h ./tsp/input/settings/settings.c
 	gcc $(FLAGS) ./tsp/input/settings/settings.c -o ./obj/settings.o
 
-./obj/reader.o: ./tsp/input/reader/reader.h ./tsp/input/reader/reader.c
-	gcc $(FLAGS) ./tsp/input/reader/reader.c -o ./obj/reader.o
+./obj/utility.o: ./tsp/utility/utility.h ./tsp/utility/utility.c
+	gcc $(FLAGS) ./tsp/utility/utility.c -o ./obj/utility.o
+
+./obj/validator.o: ./tsp/input/settings/validator/validator.h ./tsp/input/settings/validator/validator.c
+	gcc $(FLAGS) ./tsp/input/settings/validator/validator.c -o ./obj/validator.o
+
+# ./obj/reader.o: ./tsp/input/reader/reader.h ./tsp/input/reader/reader.c
+# 	gcc $(FLAGS) ./tsp/input/reader/reader.c -o ./obj/reader.o
 
 ./obj/generator.o: ./tsp/input/generator/generator.h ./tsp/input/generator/generator.c
 	gcc $(FLAGS) ./tsp/input/generator/generator.c -o ./obj/generator.o
 
-./obj/point.o: ./tsp/input/point/point.h ./tsp/input/point/point.c
-	gcc $(FLAGS) ./tsp/input/point/point.c -o ./obj/point.o
+./obj/point.o: ./tsp/point/point.h ./tsp/point/point.c
+	gcc $(FLAGS) ./tsp/point/point.c -o ./obj/point.o
 
 ./obj/tsp.o: ./tsp/tsp.h ./tsp/tsp.c
 	gcc $(FLAGS) ./tsp/tsp.c -o ./obj/tsp.o

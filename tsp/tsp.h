@@ -5,7 +5,7 @@
 * File     : tsp.h
 */
 
-#include "input/point/point.h"
+#include "point/point.h"
 
 #pragma once
 
@@ -15,22 +15,11 @@
 typedef struct {
     char name[MAX_NAME_LENGTH];
     int dimension;
-    Point* points;
+    Point2D* points;
 } TSPInstance;
 
-typedef struct {
-    int* succ;   /* succ := array containing the indexes of the nodes of the instance in the order they have to be visited */
-    int val;  /* val  := value of the cost of the solution $succ */
-} TSPSolution;
-
-void allocInst(TSPInstance*);
+void initInst(int, TSPInstance*);
 
 void freeInst(TSPInstance*);
 
-void allocSol(TSPInstance*, TSPSolution*);
-
-void freeSol(TSPSolution*);
-
 void printInst(const TSPInstance*);
-
-void plotSolution(const TSPSolution*);

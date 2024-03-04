@@ -11,11 +11,14 @@
 #include <getopt.h>
 
 #include "settings.h"
+#include "validator/validator.h"
+#include "../../utility/utility.h"
 
 #define DEFAULT_TIME_LIMIT 300 /* 60 s/m * 5 m */
-#define DEFAULT_SEED 20606852088626
+#define DEFAULT_SEED 2060685 + 2088626
 
 static struct option long_options[] = {
+		/* {name, kind_arg, flag, key} */
         {"seed", required_argument, 0, 's'},
         {"file", required_argument, 0, 'f'},
         {"nodes", required_argument, 0, 'n'},
@@ -27,22 +30,23 @@ static struct option long_options[] = {
 /*
 * OV help section
 */
-void help(void){
+void help(){
 
     printf("Options:\n");
+	                                                            /* remember that the last character contains the special EOS value '\0' */
     printf("\t-f, --file  <file_name>\t\tinput file (no file names with more than %d characters are accepted)\n", MAX_FILE_NAME_SIZE - 1);
-    printf("\t-s, --seed  <seed_value>\t\tseed used for random generation (integer value)\n");
+    printf("\t-s, --seed  <seed_value>\tseed used for random generation (integer value)\n");
     printf("\t-tl         <timelimit_value>\tset an execution time limit (in seconds)\n");
-    printf("\t-n, --nodes <number_of_nodes>\tnumber of nodes for the random instance\n");
+    printf("\t-v          <\\>\t\t\tset the verbose flag to true\n");
+	printf("\t-n, --nodes <number_of_nodes>\tnumber of nodes for the random instance\n");
     printf("\t-h  --help\t\t\tto reach this section\n");
     printf("\n");
 
     printf("Usage:\n");
     printf("\tYou must specify an input file or the number of nodes for a random generation (you cannot specify both).\n");
-    printf("\tParameters <timelimit_value> accepts only strictly positive integer values\n");
+    printf("\tParameter <timelimit_value> accepts only strictly positive integer values\n");
     printf("\tParameter <seed_value> accepts only positive integer values\n");
     printf("\tParameter <number_of_nodes> accepts only integer values strictly greater than 2\n");
-    printf("\tIf you want to execute a refinement method you need first to compute a solution with one of the available approaches\n");
     printf("\tOption help must be specified itself\n\n");
 
 }/* help */
@@ -74,19 +78,73 @@ void printSettings(const Settings* set){
 	if(set->n)
     	printf("\tnumber of nodes: %d\n", set->n);
     printf("\ttime limit: %d\n", set->tl);
-    printf("\tverbose: %s\n", set->v ? "true" : "false");
-    printf("\n");
+    printBool("\tverbose: ", set->v);
+	printf("\n");
 
 }/* printSettings */
 
 /*
+* IP opt_val value representing the option id
+* OP set settings for the program execution
+* OR char representing the readed symbol associated to the setted option in the switch-case list,
+*    the value 0 has a special meaning, if zero is returned then there was some problem with
+*    the option (missing required or unconsistent value)
+*/
+char setOption(int opt_val, Settings* set){
+
+    switch (opt_val){
+
+        case 'f':
+            /* remember that the last character contains the special EOS value '\0' */
+            if(strlen(optarg) >= MAX_FILE_NAME_SIZE){
+                printf("The filename exceed the allowed number of characters.\n");
+                return 0;
+            }/*if*/
+            strcpy((*set).input_file_name, optarg);
+            return 1;
+
+        case 's':
+            (*set).seed = strtol(optarg, NULL, 10);
+            if((*set).seed < 0)
+                return 0;
+            return 2;
+
+        case 't':
+            (*set).tl = strtol(optarg, NULL, 10);
+            if((*set).tl <= 0)
+                return 0;
+            return 3;
+
+        case 'n':
+            (*set).n = strtol(optarg, NULL, 10);
+            if((*set).n < 3)
+                return 0;
+            return 4;
+        
+        case 'v':
+            (*set).v = true;
+            return 5;
+        
+        case 'h':
+            (*set).v = true;
+            return 6;
+
+        default:
+            printf("Type 'main -h' or 'main --help' to see the options\n");
+            return 0;
+
+    }/* switch */
+
+}/* setOption */
+
+/*
 * IP argc number of elements contained in argv
-* IP argv[] -f, --file: input file name
-* IP argv[] -s, --seed: seed used for random generation
-* IP argv[] -tl       : set an execution time limit (in seconds)
-* IP argv[] -v        : set the verbose flag at true
-* IP argv[] -n        : number of nodes for the random instance
-* IP argv[] -h  --help: to reach the help section
+* IP argv[] -f, --file	: input file name
+* IP argv[] -s, --seed	: seed used for random generation
+* IP argv[] -tl       	: set an execution time limit (in seconds)
+* IP argv[] -v        	: set the verbose flag at true
+* IP argv[] -n, --nodes	: number of nodes for the random instance
+* IP argv[] -h  --help	: to reach the help section
 * OP set settings for the program execution
 * OR CONF (
     ERROR: error in the configuration
@@ -97,53 +155,29 @@ void printSettings(const Settings* set){
 */
 CONF parseCMDLine(int argc, char* const* argv, Settings* set){
     
-	int opt, opt_index;
-    CONF config = RANDOM_GENERATION;
+	int opt_indx, opt_val;
+    FSM_STATES curr = START;
 
     init(set);
 
-    while((opt = getopt_long_only(argc, argv, ":f:n:s:tl:hv", long_options, &opt_index)) != -1) {
-        switch(opt){
-            case 'f':
-                if(strlen(optarg) >= MAX_FILE_NAME_SIZE){
-                    printf("The filename exceed the allowed number of characters.\n");
-                    return ERROR;
-                }
-                strcpy(set->input_file_name, optarg);
-                config = INPUT_FILE;
-                break;
-            case 's':
-                set->seed = strtol(optarg, NULL, 10);
-                if(set->seed < 0){
-                    printf("The seed must be a natural number.\n");
-                    return ERROR;
-                }
-                break;
-            case 'n':
-                set->n = strtol(optarg, NULL, 10);
-                if(set->n <= 2){
-                    printf("The number of nodes must be an integer greater than 2.\n");
-                    return ERROR;
-                }
-                break;
-            case 't':
-                set->tl = strtol(optarg, NULL, 10);
-                if(set->tl <= 0){
-                    printf("The time limit must be a positive integer.\n");
-                    return ERROR;
-                }
-                break;
-            case 'v':
-                set->v = true;
-                break;
-            case 'h':
-                return HELP;
-            default:
-                printf("Unrecognized option. Type -h or --help for usage.\n");
-                return ERROR;
-        }
-    }
+    while((opt_val = getopt_long_only(argc, argv, "f:s:n:hv", long_options, &opt_indx)) != EOF)
+        curr = delta(curr, setOption(opt_val, set));
 
-    return config;
+    if(optopt) /* if the library recognize an error stores the option character into the variable optopt */
+        printf("\n");
+
+    if(curr <= __VALID_END_STATES){
+        help();
+
+        if(curr == H)
+            return HELP;
+        
+        return ERROR;
+    }/* if */
+
+    if((*set).n == 0)
+        return INPUT_FILE;
+
+    return RANDOM_GENERATION;
 
 }/* parseCMDLine */

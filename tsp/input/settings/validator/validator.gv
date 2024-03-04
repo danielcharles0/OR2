@@ -1,0 +1,148 @@
+digraph finite_state_machine {
+    rankdir=LR;
+    ranksep=1.5;
+
+    node [shape = point]; 0
+
+    node [shape = circle, label="q0", fontsize=12] q0;
+    node [shape = circle, label="h", fontsize=12] h;
+    node [shape = circle, label="s", fontsize=12] s;
+    node [shape = circle, label="tl", fontsize=12] tl;
+    node [shape = circle, label="v", fontsize=12] v;
+    node [shape = circle, label="stl", fontsize=12] stl;
+    node [shape = circle, label="sv", fontsize=12] sv;
+    node [shape = circle, label="tlv", fontsize=12] tlv;
+    node [shape = circle, label="stlv", fontsize=12] stlv;
+
+    node [shape = circle, label="ts", fontsize=12] ts;
+
+    node [shape = doublecircle, label="f", fontsize=12] f;
+    node [shape = doublecircle, label="n", fontsize=12] n;
+    node [shape = doublecircle, label="fs", fontsize=12] fs;
+    node [shape = doublecircle, label="ftl", fontsize=12] ftl;
+    node [shape = doublecircle, label="fv", fontsize=12] fv;
+    node [shape = doublecircle, label="sn", fontsize=12] sn;
+    node [shape = doublecircle, label="tln", fontsize=12] tln;
+    node [shape = doublecircle, label="nv", fontsize=12] nv;
+    node [shape = doublecircle, label="fstl", fontsize=12] fstl;
+    node [shape = doublecircle, label="fsv", fontsize=12] fsv;
+    node [shape = doublecircle, label="ftlv", fontsize=12] ftlv;
+    node [shape = doublecircle, label="stln", fontsize=12] stln;
+    node [shape = doublecircle, label="snv", fontsize=12] snv;
+    node [shape = doublecircle, label="tlnv", fontsize=12] tlnv;
+    node [shape = doublecircle, label="fstlv", fontsize=12] fstlv;
+    node [shape = doublecircle, label="stlnv", fontsize=12] stlnv;
+
+    { rank = same; f; s; tl; n; v; h; }
+    { rank = same; stl; sv; tlv; fs; ftl; fv; sn; tln; nv; }
+    { rank = same; stlv; fstl; fsv; ftlv; stln; snv; tlnv; }
+    { rank = same; fstlv; stlnv; }
+
+    0 -> q0 [ label = "Start" ];
+    
+    q0 -> ts [ label = "0" ];
+    q0 -> f [ label = "1" ];
+    q0 -> s [ label = "2" ];
+    q0 -> tl [ label = "3" ];
+    q0 -> n [ label = "4" ];
+    q0 -> v [ label = "5" ];
+    q0 -> h [ label = "6" ];
+
+    h -> ts [ label = "0,1,2,3,4,5,6" ];
+
+    f -> ts [ label = "0,1,4,6" ];
+    f -> fs [ label = "2" ];
+    f -> ftl [ label = "3" ];
+    f -> fv [ label = "5" ];
+
+    s -> ts [ label = "0,2,6" ];
+    s -> fs [ label = "1" ];
+    s -> stl [ label = "3" ];
+    s -> sn [ label = "4" ];
+    s -> sv [ label = "5" ];
+
+    tl -> ts [ label = "0,3,6" ];
+    tl -> ftl [ label = "1" ];
+    tl -> stl [ label = "2" ];
+    tl -> tln [ label = "4" ];
+    tl -> tlv [ label = "5" ];
+
+    n -> ts [ label = "0,1,4,6" ];
+    n -> sn [ label = "2" ];
+    n -> tln [ label = "3" ];
+    n -> nv [ label = "5" ];
+
+    v -> ts [ label = "0,5,6" ];
+    v -> fv [ label = "1" ];
+    v -> sv [ label = "2" ];
+    v -> tlv [ label = "3" ];
+    v -> nv [ label = "4" ];
+
+    fs -> ts [ label = "0,1,2,4,6" ];
+    fs -> fstl [ label = "3" ];
+    fs -> fsv [ label = "5" ];
+
+    ftl -> ts [ label = "0,1,3,4,6" ];
+    ftl -> fstl [ label = "2" ];
+    ftl -> ftlv [ label = "5" ];
+
+    fv -> ts [ label = "0,1,4,5,6" ];
+    fv -> fsv [ label = "2" ];
+    fv -> ftlv [ label = "3" ];
+
+    stl -> ts [ label = "0,2,3,6" ];
+    stl -> fstl [ label = "1" ];
+    stl -> stln [ label = "4" ];
+    stl -> stlv [ label = "5" ];
+
+    sn -> ts [ label = "0,1,2,4,6" ];
+    sn -> stln [ label = "3" ];
+    sn -> snv [ label = "5" ];
+
+    sv -> ts [ label = "0,2,5,6" ];
+    sv -> fsv [ label = "1" ];
+    sv -> stlv [ label = "3" ];
+    sv -> snv [ label = "4" ];
+
+    tln -> ts [ label = "0,1,3,4,6" ];
+    tln -> stln [ label = "2" ];
+    tln -> tlnv [ label = "5" ];
+
+    tlv -> ts [ label = "0,3,5,6" ];
+    tlv -> ftlv [ label = "1" ];
+    tlv -> stlv [ label = "2" ];
+    tlv -> tlnv [ label = "4" ];
+
+    stlv -> ts [ label = "0,2,3,5,6" ];
+    stlv -> fstlv [ label = "1" ];
+    stlv -> stlnv [ label = "4" ];
+
+    nv -> ts [ label = "0,1,4,5,6" ];
+    nv -> snv [ label = "2" ];
+    nv -> tlnv [ label = "3" ];
+
+    fstl -> ts [ label = "0,1,2,3,4,6" ];
+    fstl -> fstlv [ label = "5" ];
+
+    fsv -> ts [ label = "0,1,2,4,5,6" ];
+    fsv -> fstlv [ label = "3" ];
+
+    ftlv -> ts [ label = "0,1,3,4,5,6" ];
+    ftlv -> fstlv [ label = "2" ];
+
+    stln -> ts [ label = "0,1,2,3,4,6" ];
+    stln -> stlnv [ label = "5" ];
+
+    snv -> ts [ label = "0,1,2,4,5,6" ];
+    snv -> stlnv [ label = "3" ];
+
+    tlnv -> ts [ label = "0,1,3,4,5,6" ];
+    tlnv -> stlnv [ label = "2" ];
+
+    fstlv -> ts [ label = "0,1,2,3,4,5,6" ];
+
+    stlnv -> ts [ label = "0,1,2,3,4,5,6" ];
+    
+    ts -> ts [ label = "0,1,2,3,4,5,6" ];
+
+}

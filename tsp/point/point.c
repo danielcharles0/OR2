@@ -6,32 +6,15 @@
 */
 
 #include <stdlib.h>
-#include <math.h>
 
 #include "point.h"
-
-double rand01(void){
-
-    return ((double) rand()) / RAND_MAX; 
-
-} /* rand01 */
+#include "../utility/utility.h"
 
 /*
-* IP n
-* OR random integer value in [0, $n - 1]
+* OP p random point in the square [0, MAX_RANDOM_VALUE]^2
 */
-int rand0N(int n){
-    
-    return round(rand01() * n);  
+void randomPoint(Point2D* p){
 
-}/* rand0N */
-
-/*
-* IP p point
-*/
-void randomPoint(int i, Point* p){
-
-    p->id = i;
     p->x = rand0N(MAX_RANDOM_VALUE + 1);
     p->y = rand0N(MAX_RANDOM_VALUE + 1);
 

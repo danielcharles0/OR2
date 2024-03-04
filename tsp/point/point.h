@@ -7,14 +7,9 @@
 
 #define MAX_RANDOM_VALUE 1e4
 
+/* Bidimensional point on the cartesian plane */
 typedef struct {
-    int id;
-    double x;
-    double y;
-} Point;
+    double x, y;
+} Point2D;
 
-double rand01(void);
-
-int rand0N(int);
-
-void randomPoint(int, Point*);
+void randomPoint(Point2D*);

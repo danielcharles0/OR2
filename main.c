@@ -9,44 +9,49 @@
 #include <stdlib.h>
 
 #include "tsp/input/settings/settings.h"
-#include "tsp/input/reader/reader.h"
+/*#include "tsp/input/reader/reader.h"*/
 #include "tsp/input/generator/generator.h"
 
 /*
 * IP conf configuration to run
 * IP set settings of the configuration
+* OR boolean false if there was some error, true otherwise.
 */
-void runConfig(CONF config, const Settings* set){
+bool runConfig(CONF config, const Settings* set){
     
 	int error;
     TSPInstance inst;
 
     switch(config){
         case INPUT_FILE:
-            error = readInstance(set, &inst);
-            if(error)
-                return;
-            if(set->v){
-                printSettings(set);
-                printInst(&inst);
-            }
+			/* TO BE COMPLETED */
+            /*error = readInstance(set, &inst);*/
+			error = -1;
+            if(error){
+                if(error == -1)
+                    printf("Error while opening the file \"%s\"\n\n", (*set).input_file_name);
+                else
+                    printf("The instance must contains at least three nodes and the number of nodes must have been specified into the input file.\n\n");
+                return 0;
+            }/* if */
             break;
         case RANDOM_GENERATION:
             generateInstance(set, &inst);
-            if(set->v){
-                printSettings(set);
-                printInst(&inst);
-            }
             break;
-        case ERROR:
+		case HELP:
+            return 1;
+        default: /* ERROR */
             printf("Error in the configuration.\n\n");
-            return;
-        case HELP:
-            help();
-            return;
+            return 0;
     }
 
+	/* TO BE COMPLETED */
+	if((*set).v)
+		printInst(&inst);
+
     freeInst(&inst);
+
+	return 1;
     
 }/* runConfig */
 
@@ -65,6 +70,14 @@ int main(int argc, char* const* argv){
     printf("Program started...\n\n");
 
     config = parseCMDLine(argc, argv, &set);
+
+	if(config && config != HELP && set.v){
+        
+        printf("Result code configuration: %d\n\n", config);
+
+        printSettings(&set);
+
+    }/* if */
     
     runConfig(config, &set);
 
