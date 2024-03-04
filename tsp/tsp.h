@@ -18,8 +18,19 @@ typedef struct {
     Point* points;
 } TSPInstance;
 
+typedef struct {
+    int* succ;   /* succ := array containing the indexes of the nodes of the instance in the order they have to be visited */
+    int val;  /* val  := value of the cost of the solution $succ */
+} TSPSolution;
+
 void allocInst(TSPInstance*);
 
 void freeInst(TSPInstance*);
 
+void allocSol(TSPInstance*, TSPSolution*);
+
+void freeSol(TSPSolution*);
+
 void printInst(const TSPInstance*);
+
+void plotSolution(const TSPSolution*);

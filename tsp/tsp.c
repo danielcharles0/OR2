@@ -25,6 +25,21 @@ void freeInst(TSPInstance* inst){
 }/* freeInst */
 
 /*
+* IP inst instance to get dimension
+* IP sol solution to allocate
+*/
+void allocSol(TSPInstance* inst, TSPSolution* sol){
+    sol->succ = malloc(inst->dimension * sizeof(Point));
+}/* allocSol */
+
+/*
+* IP sol solution to free
+*/
+void freeSol(TSPSolution* sol){
+    free(sol->succ);
+}/* freeSol */
+
+/*
 * IP inst instance to print
 */
 void printInst(const TSPInstance* inst){
@@ -43,3 +58,12 @@ void printInst(const TSPInstance* inst){
     printf("\n");
 
 }/* printInst */
+
+/*
+* IP sol solution to plot
+*/
+void plotSolution(const TSPSolution* sol){
+
+    /* TODO */
+
+}/* plotSolution */

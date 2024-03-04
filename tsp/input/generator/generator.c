@@ -10,6 +10,10 @@
 
 #include "generator.h"
 
+/*
+ * IP set settings
+ * IP inst instance
+ */
 void generateInstance(Settings* set, TSPInstance* inst){
     int i;
 
@@ -22,4 +26,4 @@ void generateInstance(Settings* set, TSPInstance* inst){
     for(i=0; i<inst->dimension; i++)
         randomPoint(i+1, &(inst->points[i]));
 
-}
+}/* generateInstance */
