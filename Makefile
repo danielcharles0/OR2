@@ -1,5 +1,5 @@
 STD_FLAGS = -ansi -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/reader.o ./obj/tsp.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/tsp.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -18,6 +18,12 @@ main: $(OBJS)
 
 ./obj/reader.o: ./tsp/input/reader/reader.h ./tsp/input/reader/reader.c
 	gcc $(FLAGS) ./tsp/input/reader/reader.c -o ./obj/reader.o
+
+./obj/generator.o: ./tsp/input/generator/generator.h ./tsp/input/generator/generator.c
+	gcc $(FLAGS) ./tsp/input/generator/generator.c -o ./obj/generator.o
+
+./obj/point.o: ./tsp/input/point/point.h ./tsp/input/point/point.c
+	gcc $(FLAGS) ./tsp/input/point/point.c -o ./obj/point.o
 
 ./obj/tsp.o: ./tsp/tsp.h ./tsp/tsp.c
 	gcc $(FLAGS) ./tsp/tsp.c -o ./obj/tsp.o

@@ -18,7 +18,7 @@ static struct option long_options[] = {
         {"nodes", required_argument, 0, 'n'},
         {"tl", required_argument, 0, 't'},
         {"help", no_argument, 0, 'h'},
-        {0, 0, 0, 0} // End of options
+        {0, 0, 0, 0} /* End of options */
 };
 
 /*
@@ -92,6 +92,7 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
                 }
                 strcpy(set->input_file_name, optarg);
                 config = INPUT_FILE;
+                break;
             case 's':
                 set->seed = strtol(optarg, NULL, 10);
                 if(set->seed < 0){
@@ -125,4 +126,5 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
     }
 
     return config;
+
 }/* parseCMDLine */

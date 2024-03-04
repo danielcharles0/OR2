@@ -38,6 +38,8 @@ int readInstance(Settings* set, TSPInstance* inst){
         }
 
         if(strstr(line, "NAME: ") != NULL){
+            int len = strlen(line);
+            line[len-1] = '\0';
             strcpy(inst->name, &line[sizeof("NAME: ") - 1]);
         }
         else if(strstr(line, "DIMENSION: ") != NULL){
@@ -60,4 +62,5 @@ int readInstance(Settings* set, TSPInstance* inst){
     fclose(file); 
 
     return 0;  
+    
 }/* readInstance */

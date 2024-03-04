@@ -10,6 +10,7 @@
 
 #include "tsp/input/settings/settings.h"
 #include "tsp/input/reader/reader.h"
+#include "tsp/input/generator/generator.h"
 
 /*
 * IP conf configuration to run
@@ -24,13 +25,17 @@ void runConfig(CONF config, Settings* set){
             error = readInstance(set, &inst);
             if(error)
                 return;
-            if(set->v)
+            if(set->v){
                 printSettings(set);
+                printInst(&inst);
+            }
             break;
         case RANDOM_GENERATION:
-            /* add generator */
-            if(set->v)
+            generateInstance(set, &inst);
+            if(set->v){
                 printSettings(set);
+                printInst(&inst);
+            }
             break;
         case ERROR:
             printf("Error in the configuration.\n\n");
@@ -65,4 +70,5 @@ int main(int argc, char* const* argv){
     printf("Progran ended.\n");
 
     return 0;
+
 } /* main */

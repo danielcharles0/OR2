@@ -18,7 +18,7 @@ typedef struct{
     /* n    := number of nodes for the random instance */
     /* tl   := execution time limit (in seconds) */
     /* seed := seed used for random generation */
-    /* v    := verbosity, true or false*/
+    /* v    := verbosity, true or false */
 } Settings;
 
 typedef enum {

@@ -5,15 +5,12 @@
 * File     : tsp.h
 */
 
+#include "input/point/point.h"
+
 #pragma once
 
 #define MAX_NAME_LENGTH 64
-
-typedef struct {
-    int id;
-    double x;
-    double y;
-} Point;
+#define POINTS_TO_PRINT 10
 
 typedef struct {
     char name[MAX_NAME_LENGTH];
@@ -24,3 +21,5 @@ typedef struct {
 void allocInst(TSPInstance*);
 
 void freeInst(TSPInstance*);
+
+void printInst(const TSPInstance*);
