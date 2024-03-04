@@ -11,6 +11,7 @@ main: $(OBJS)
 	gcc -o main $(OBJS)
 
 ./obj/main.o: main.c
+	mkdir -p ./obj
 	gcc $(FLAGS) main.c -o ./obj/main.o
 
 ./obj/settings.o: ./tsp/input/settings/settings.h ./tsp/input/settings/settings.c
@@ -39,3 +40,6 @@ rebuild:
 
 # target: dependencies
 # 	action
+
+# https://pages.di.unipi.it/gadducci/PR1L-13/exeC/make.pdf
+# We express how to update the target if a file in the dependency list is updated.

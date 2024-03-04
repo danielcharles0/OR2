@@ -16,8 +16,9 @@
 * IP conf configuration to run
 * IP set settings of the configuration
 */
-void runConfig(CONF config, Settings* set){
-    int error;
+void runConfig(CONF config, const Settings* set){
+    
+	int error;
     TSPInstance inst;
 
     switch(config){

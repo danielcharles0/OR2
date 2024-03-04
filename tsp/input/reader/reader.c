@@ -20,8 +20,9 @@
    1: error;
 )
 */
-int readInstance(Settings* set, TSPInstance* inst){
-    int i;
+int readInstance(const Settings* set, TSPInstance* inst){
+    
+	int i;
     char line[MAX_LINE_LENGTH];
 
     FILE *file = fopen(set->input_file_name, "r");
@@ -49,7 +50,6 @@ int readInstance(Settings* set, TSPInstance* inst){
                 fclose(file);
                 return 1;
             }
-            set->nodes = inst->dimension;
             
             allocInst(inst);
         }

@@ -12,6 +12,9 @@
 
 #include "settings.h"
 
+#define DEFAULT_TIME_LIMIT 300 /* 60 s/m * 5 m */
+#define DEFAULT_SEED 20606852088626
+
 static struct option long_options[] = {
         {"seed", required_argument, 0, 's'},
         {"file", required_argument, 0, 'f'},
@@ -25,6 +28,7 @@ static struct option long_options[] = {
 * OV help section
 */
 void help(void){
+
     printf("Options:\n");
     printf("\t-f, --file  <file_name>\t\tinput file (no file names with more than %d characters are accepted)\n", MAX_FILE_NAME_SIZE - 1);
     printf("\t-s, --seed  <seed_value>\t\tseed used for random generation (integer value)\n");
@@ -32,6 +36,7 @@ void help(void){
     printf("\t-n, --nodes <number_of_nodes>\tnumber of nodes for the random instance\n");
     printf("\t-h  --help\t\t\tto reach this section\n");
     printf("\n");
+
     printf("Usage:\n");
     printf("\tYou must specify an input file or the number of nodes for a random generation (you cannot specify both).\n");
     printf("\tParameters <timelimit_value> accepts only strictly positive integer values\n");
@@ -39,17 +44,20 @@ void help(void){
     printf("\tParameter <number_of_nodes> accepts only integer values strictly greater than 2\n");
     printf("\tIf you want to execute a refinement method you need first to compute a solution with one of the available approaches\n");
     printf("\tOption help must be specified itself\n\n");
+
 }/* help */
 
 /*
 * OP set the function will initialize the settings with default values
 */
 void init(Settings* set){
-    set->input_file_name[0] = '\0';
-    set->nodes = 0;
+
+    set->input_file_name[0] = '\0'; /* The empty string */
+    set->n = 0;
     set->seed = 1;
     set->tl = DEFAULT_TIME_LIMIT;
     set->v = false;
+
 }/* init */
 
 /*
@@ -57,14 +65,18 @@ void init(Settings* set){
 * OV settings values
 */
 void printSettings(const Settings* set){
+
     printf("Settings:\n");
-    if(!set->nodes)
+
+    if(!set->n)
         printf("\tinput file name: %s\n", set->input_file_name);
     printf("\tseed: %d\n", set->seed);
-    printf("\tnumber of nodes: %d\n", set->nodes);
+	if(set->n)
+    	printf("\tnumber of nodes: %d\n", set->n);
     printf("\ttime limit: %d\n", set->tl);
     printf("\tverbose: %s\n", set->v ? "true" : "false");
     printf("\n");
+
 }/* printSettings */
 
 /*
@@ -75,10 +87,17 @@ void printSettings(const Settings* set){
 * IP argv[] -v        : set the verbose flag at true
 * IP argv[] -n        : number of nodes for the random instance
 * IP argv[] -h  --help: to reach the help section
-* OP integer with error value
+* OP set settings for the program execution
+* OR CONF (
+    ERROR: error in the configuration
+    HELP: help section
+    INPUT_FILE: read data from the specified input file
+    RANDOM_GENERATION: generate a random instance of the specified size
+)
 */
 CONF parseCMDLine(int argc, char* const* argv, Settings* set){
-    int opt, opt_index;
+    
+	int opt, opt_index;
     CONF config = RANDOM_GENERATION;
 
     init(set);
@@ -101,8 +120,8 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
                 }
                 break;
             case 'n':
-                set->nodes = strtol(optarg, NULL, 10);
-                if(set->nodes <= 2){
+                set->n = strtol(optarg, NULL, 10);
+                if(set->n <= 2){
                     printf("The number of nodes must be an integer greater than 2.\n");
                     return ERROR;
                 }

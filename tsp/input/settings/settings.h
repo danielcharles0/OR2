@@ -8,17 +8,18 @@
 #include <stdbool.h>
 
 #pragma once /* Allows to do not recreate these object on further includes */
-#define DEFAULT_TIME_LIMIT 300
 #define MAX_FILE_NAME_SIZE 41
 
 typedef struct{
+
     char input_file_name[MAX_FILE_NAME_SIZE];
-    int nodes, tl, seed;
+    int n, tl, seed;
     bool v;
     /* n    := number of nodes for the random instance */
     /* tl   := execution time limit (in seconds) */
     /* seed := seed used for random generation */
     /* v    := verbosity, true or false */
+	
 } Settings;
 
 typedef enum {

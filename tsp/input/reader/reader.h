@@ -10,4 +10,4 @@
 
 #define MAX_LINE_LENGTH 133
 
-int readInstance(Settings*, TSPInstance*);
+int readInstance(const Settings*, TSPInstance*);
