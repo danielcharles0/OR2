@@ -5,12 +5,12 @@
 * File     : tsp.h
 */
 
-#include "point/point.h"
-
 #pragma once
+#include "point/point.h"
 
 #define MAX_NAME_LENGTH 64
 #define POINTS_TO_PRINT 10
+#define PLOT_STYLE "pointtype 7 pointsize 2 linewidth 2"
 
 typedef struct {
     char name[MAX_NAME_LENGTH];
@@ -18,8 +18,15 @@ typedef struct {
     Point2D* points;
 } TSPInstance;
 
+typedef struct {
+    int* succ;	/* succ := array containing the indexes of the nodes of the instance in the order they have to be visited */
+    int val;	/* val  := value of the cost of the solution $succ */
+} TSPSolution;
+
 void initInst(int, TSPInstance*);
 
 void freeInst(TSPInstance*);
 
 void printInst(const TSPInstance*);
+
+void plotSolution(const TSPSolution*, const TSPInstance*);

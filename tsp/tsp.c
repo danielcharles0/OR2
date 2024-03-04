@@ -50,3 +50,34 @@ void printInst(const TSPInstance* inst){
     printf("\n");
 
 }/* printInst */
+
+/*
+* IP sol solution to plot
+* OV hamiltonian cycle
+*/
+void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
+    int i;
+    
+    FILE *gnuplotPipe = popen("gnuplot -persist", "w");
+    if (gnuplotPipe == NULL) {
+        fprintf(stderr, "Error opening Gnuplot pipe\n");
+        return;
+    }
+
+    fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
+    fprintf(gnuplotPipe, "set xlabel 'X'\n");
+    fprintf(gnuplotPipe, "set ylabel 'Y'\n");
+    fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
+
+    for (i = 0; i < inst->dimension; i++) {
+        int idx = i; /* just for test purposes */
+        /*int idx = sol->succ[i];*/
+        fprintf(gnuplotPipe, "%f %f\n", (inst->points[idx]).x, (inst->points[idx]).y);
+    }
+    fprintf(gnuplotPipe, "%f %f\n", (inst->points[0]).x, (inst->points[0]).y); /* connect last to first */
+
+    fprintf(gnuplotPipe, "e\n");
+
+    pclose(gnuplotPipe);
+
+}/* plotSolution */
