@@ -14,7 +14,7 @@ void generateInstance(Settings* set, TSPInstance* inst){
     int i;
 
     strcpy(inst->name, "RANDOM");
-    inst->dimension = set->nodes;
+    inst->dimension = set->n;
     allocInst(inst);
 
     srand(set->seed);

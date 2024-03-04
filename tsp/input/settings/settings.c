@@ -54,7 +54,7 @@ void init(Settings* set){
 
     set->input_file_name[0] = '\0'; /* The empty string */
     set->n = 0;
-    set->seed = 1;
+    set->seed = DEFAULT_SEED;
     set->tl = DEFAULT_TIME_LIMIT;
     set->v = false;
 
