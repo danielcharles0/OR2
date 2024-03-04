@@ -20,6 +20,7 @@ void runConfig(CONF config, const Settings* set){
     
 	int error;
     TSPInstance inst;
+    TSPSolution sol;
 
     switch(config){
         case INPUT_FILE:
@@ -45,6 +46,8 @@ void runConfig(CONF config, const Settings* set){
             help();
             return;
     }
+
+    plotSolution(&sol, &inst);
 
     freeInst(&inst);
     
