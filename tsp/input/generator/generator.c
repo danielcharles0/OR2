@@ -18,7 +18,7 @@ void generateInstance(const Settings* set, TSPInstance* inst){
 
 	int i;
 
-    initInst((*set).n, inst);
+    allocInst((*set).n, inst);
 
 	strcpy(inst->name, "RANDOM");
 

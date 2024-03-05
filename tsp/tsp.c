@@ -13,16 +13,16 @@
 
 /*
 * IP n number of nodes of the instance
-* inst instance to initialize
+* IP inst instance to initialize
 */
-void initInst(int n, TSPInstance* inst){
+void allocInst(int n, TSPInstance* inst){
 
     (*inst).dimension = n;
     (*inst).points = malloc((*inst).dimension * sizeof(Point2D));
     
 	assert((*inst).points != NULL);
 
-}/* initInst */
+}/* allocInst */
 
 /*
 * IOP inst instance to free memory
@@ -30,6 +30,25 @@ void initInst(int n, TSPInstance* inst){
 void freeInst(TSPInstance* inst){
     free(inst->points);
 }/* freeInst */
+
+/*
+* IP n number of nodes of the instance
+* IP sol solution to initialize
+*/
+void allocSol(int n, TSPSolution* sol){
+
+    sol->succ = malloc(n * sizeof(int));
+
+	assert(sol->succ != NULL);
+
+}/* allocSol */
+
+/*
+* IOP sol solution to free memory
+*/
+void freeSol(TSPSolution* sol){
+    free(sol->succ);
+}/* freeSol */
 
 /*
 * IP inst instance to print
@@ -53,13 +72,13 @@ void printInst(const TSPInstance* inst){
 
 /*
 * IP sol solution to plot
-* OV hamiltonian cycle
+* OV hamiltonian path
 */
 void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     int i;
     
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
-    if (gnuplotPipe == NULL) {
+    if(gnuplotPipe == NULL){
         fprintf(stderr, "Error opening Gnuplot pipe\n");
         return;
     }
@@ -69,7 +88,7 @@ void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
 
-    for (i = 0; i < inst->dimension; i++) {
+    for(i = 0; i < inst->dimension; i++){
         int idx = i; /* just for test purposes */
         /*int idx = sol->succ[i];*/
         fprintf(gnuplotPipe, "%f %f\n", (inst->points[idx]).x, (inst->points[idx]).y);

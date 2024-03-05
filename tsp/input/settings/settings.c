@@ -130,7 +130,7 @@ char setOption(int opt_val, Settings* set){
             return 6;
 
         default:
-            printf("Type 'main -h' or 'main --help' to see the options\n");
+            printf("Unrecognized option: type 'main -h' or 'main --help' to see the options\n");
             return 0;
 
     }/* switch */
@@ -160,7 +160,7 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
 
     init(set);
 
-    while((opt_val = getopt_long_only(argc, argv, "f:s:n:hv", long_options, &opt_indx)) != EOF)
+    while((opt_val = getopt_long_only(argc, argv, ":f:s:n:hv", long_options, &opt_indx)) != EOF)
         curr = delta(curr, setOption(opt_val, set));
 
     if(optopt) /* if the library recognize an error stores the option character into the variable optopt */
