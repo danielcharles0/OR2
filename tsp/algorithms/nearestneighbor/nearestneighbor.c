@@ -88,7 +88,7 @@ int NN_solver(const TSPInstance* inst, TSPSolution* sol){
         len++;
     }
 
-    sol->val += getDist(sol->succ[0], sol->succ[len-1]); /* add cost of connection of last to first node */
+    sol->val += getDist(sol->succ[0], sol->succ[len-1], inst); /* add cost of connection of last to first node */
 
      /* store current time in curr_time */
 
@@ -142,8 +142,8 @@ bool NN_controller(const TSPInstance* inst, const TSPSolution* sol){
 * OP false if found a valid solution, true otherwise.
 */
 bool nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-    int time;
-    bool error;
+    
+	int time;
 
     NN_initSol(inst, sol);
 
