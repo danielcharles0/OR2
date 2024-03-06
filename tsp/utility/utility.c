@@ -41,7 +41,8 @@ int rand0N(int n){
 * IP b pointer to index of a node
 */
 void swapInt(int* a, int* b){
-    int temp;
+    
+	int temp;
 
     temp = *a;
     *a = *b;
@@ -55,34 +56,61 @@ void swapInt(int* a, int* b){
 * OR integer passed in input
 */
 int readInt(const char lab[]){
-    int num;
+    
+	int num;
 
     printf("%s", lab);
     scanf("%d", &num);
     printf("\n\n");
 
     return num;
+
 }/* readInt */
+
+/*
+* IP start starting value of the range
+* IP end end value of the range
+* IP lab label for the output
+* OR integer value in [$start, $end]
+*/
+int readIntRange(int start, int end, const char lab[]){
+	
+	int val;
+
+	printf("Please insert a value in the range [%d, %d]\n", start, end);
+
+	do{
+        val = readInt(lab);
+
+        if(val < start || val > end)
+            printf("Invalid value, please insert a value in the range [%d, %d]\n", start, end);
+
+    }while(val < start || val > end);
+
+	return val;
+
+}/* readIntRange */
 
 /*
 * IP a double number
 * IP b double number to check equality with $a
 * IP epsilon precision of equality
-* OR true if $a equal to $b, false otherwise
+* OR true if $a dists less then $epsilon to $b, false otherwise
 */
 bool isEqualPrecision(double a, double b, double epsilon){
     
-    return fabs(a-b) <= epsilon;
+    return fabs(a - b) < epsilon;
 
 }/* isEqualPrecision */
 
 /*
 * IP a double number
 * IP b double number to check equality with $a
+* OR true if $a dists less then EPSILON to $b, false otherwise
 */
 bool isEqual(double a, double b){
     
-    return isEqualPrecision(a, b, 0);
+    return isEqualPrecision(a, b, EPSILON);
 
 }/* isEqual */
 

@@ -23,3 +23,5 @@ bool isEqualPrecision(double, double, double);
 bool isEqual(double, double);
 
 int getSeconds(clock_t, clock_t);
+
+int readIntRange(int, int, const char[]);

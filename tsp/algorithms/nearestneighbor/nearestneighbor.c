@@ -56,16 +56,9 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
 
     ascendentSol(inst, sol);
     
-    while(true){
-        i = readInt("Insert starting node: ");
+	i = readIntRange(1, inst->dimension, "Insert starting node: ") - 1; /* i-th node in position i - 1 */
 
-        if(i < 0 || i >= inst->dimension)
-            printf("Invalid starting node.\n");
-        else   
-            break;
-    }
-    
-    swapInt(&(sol->succ[0]), &(sol->succ[i-1])); /* i-th node in position i-1 */
+    swapInt(&(sol->succ[0]), &(sol->succ[i])); 
 
 }/* initSol */
 
@@ -75,7 +68,8 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
 * OP time at which solution was found
 */
 int NN_solver(const TSPInstance* inst, TSPSolution* sol){
-    int len=1;
+    
+	int len=1;
     clock_t start = clock();
     
     while(len < inst->dimension){
