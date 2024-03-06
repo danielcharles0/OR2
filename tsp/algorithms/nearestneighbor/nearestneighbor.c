@@ -56,9 +56,9 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
     char lab[MAX_STRING_LENGTH];
 
     ascendentSol(inst, sol);
-    sol->val = 0;
     
-    sprintf(lab, "Insert starting node[1,%d]: ", inst->dimension);
+    ascendentSol(inst, sol);
+    sol->val = 0;
 
     while(true){
         i = readInt(lab);

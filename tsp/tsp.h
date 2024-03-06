@@ -23,7 +23,7 @@ typedef struct {
 
 typedef struct {
     int* succ;	/* succ := array containing the indexes of the nodes of the instance in the order they have to be visited */
-    int val;	/* val  := value of the cost of the solution $succ */
+    double val;	/* val  := value of the cost of the solution $succ */
 } TSPSolution;
 
 typedef enum{
@@ -50,5 +50,9 @@ void algorithmLegend(void);
 bool run(int, const TSPInstance*, TSPSolution*, const Settings*);
 
 double getDist(int, int, const TSPInstance*);
+
+void ascendentSol(const TSPInstance*, TSPSolution*);
+
+double getSolCost(const TSPInstance*, const TSPSolution*);
 
 bool checkSol(const TSPInstance*, const TSPSolution*);

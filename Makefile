@@ -1,5 +1,5 @@
 STD_FLAGS = -ansi -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/generator.o ./obj/point.o ./obj/tsp.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/nearestneighbor.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/generator.o ./obj/point.o ./obj/tsp.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/nearestneighbor.o ./obj/random.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -37,6 +37,9 @@ main: $(OBJS)
 
 ./obj/nearestneighbor.o: ./tsp/algorithms/nearestneighbor/nearestneighbor.h ./tsp/algorithms/nearestneighbor/nearestneighbor.c
 	gcc $(FLAGS) ./tsp/algorithms/nearestneighbor/nearestneighbor.c -o ./obj/nearestneighbor.o
+
+./obj/random.o: ./tsp/algorithms/random/random.h ./tsp/algorithms/random/random.c
+	gcc $(FLAGS) ./tsp/algorithms/random/random.c -o ./obj/random.o
 
 debug:
 	make DEBUG=1
