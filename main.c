@@ -22,10 +22,12 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 	int alg;
     bool error;
     TSPSolution sol;
-
+	
     algorithmLegend();
 
     alg = readInt("Insert the code of the algorithm you want to run: ");
+
+	allocSol(inst->dimension, &sol);
 
     error = run(alg, inst, &sol, set);
     

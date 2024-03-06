@@ -54,10 +54,7 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
     
 	int i;
 
-    allocSol(inst->dimension, sol);
-
-    for(i=0; i<inst->dimension; i++)
-        sol->succ[i] = i;
+    ascendentSol(inst, sol);
     
     while(true){
         i = readInt("Insert starting node: ");

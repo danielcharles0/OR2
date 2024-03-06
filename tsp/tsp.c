@@ -11,6 +11,7 @@
 
 #include "tsp.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
+#include "algorithms/random/random.h"
 
 /*
 * IP x
@@ -24,6 +25,38 @@ int nint(double x){
     return (int)(x + .5);
 
 }/* nint */
+
+/*
+* IP inst instance
+* IP sol solution
+* OR cost of the solution $sol
+*/
+double getSolCost(const TSPInstance* inst, const TSPSolution* sol){
+	
+	int i;
+	double cost = 0;
+
+	for(i = 0; i < inst->dimension; i++)
+        cost += getDist(i, (i + 1) % inst->dimension, inst);
+
+	return cost;
+
+}/* getSolCost */
+
+/*
+* IP inst instance
+* OP sol solution to compute
+*/
+void ascendentSol(const TSPInstance* inst, TSPSolution* sol){
+	
+	int i;
+
+	for(i = 0; i < inst->dimension; i++)
+        (*sol).succ[i] = i;
+
+	(*sol).val = getSolCost(inst, sol);
+
+}/* ascendentSol */
 
 /*
 * IOP inst instance to initialize $inst->dist
@@ -188,18 +221,19 @@ void algorithmLegend(void){
 * OP error true if an error occurred, false otherwise.
 */
 bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
-    bool error = false;
+    
+	bool error = false;
     
     switch (alg){
-    case RANDOM:
-        /* code */
-        break;
-    case NEAREST_NEIGHBOR:
-        error = nearestNeighbor(set, inst, sol);
-        break;
-    default:
-        printf("Error: Algorithm code not found.\n\n");
-        return true;
+	    case RANDOM:
+	        randomSol(inst, sol);
+	        break;
+	    case NEAREST_NEIGHBOR:
+	        error = nearestNeighbor(set, inst, sol);
+	        break;
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+	        return true;
     }
 
     return error;
