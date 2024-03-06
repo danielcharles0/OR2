@@ -9,6 +9,22 @@
 #include <string.h>
 
 #include "generator.h"
+#include "../../tsp.h"
+
+/*
+* IP seed for the random generation
+* OP inst instance to random generate
+*/
+void generatePoints(int seed, TSPInstance* inst){
+	
+	int i;
+
+	srand(seed);
+
+    for(i = 0; i < (*inst).dimension; i++)
+        randomPoint(&((*inst).points[i]));
+
+}/* generatePoints */
 
 /*
  * IP set settings
@@ -16,15 +32,12 @@
  */
 void generateInstance(const Settings* set, TSPInstance* inst){
 
-	int i;
-
     initInst((*set).n, inst);
 
 	strcpy(inst->name, "RANDOM");
 
-    srand((*set).seed);
-
-    for(i = 0; i < (*inst).dimension; i++)
-        randomPoint(&((*inst).points[i]));
+	generatePoints((*set).seed, inst);
+	
+	computeDistances(inst);
 
 }/* generateInstance */

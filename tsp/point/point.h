@@ -5,7 +5,6 @@
 * File     : point.h
 */
 
-#pragma once
 #define MAX_RANDOM_VALUE 1e4
 
 /* Bidimensional point on the cartesian plane */

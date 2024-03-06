@@ -16,6 +16,7 @@ typedef struct {
     char name[MAX_NAME_LENGTH];
     int dimension;
     Point2D* points;
+	double** dist;	/* dist  := precomputed distances among nodes */
 } TSPInstance;
 
 typedef struct {
@@ -26,6 +27,8 @@ typedef struct {
 void initInst(int, TSPInstance*);
 
 void freeInst(TSPInstance*);
+
+void computeDistances(TSPInstance*);
 
 void printInst(const TSPInstance*);
 
