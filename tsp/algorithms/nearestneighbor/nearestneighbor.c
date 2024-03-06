@@ -120,9 +120,10 @@ void initSolV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 * IP p point
 * IP n number of points, n > 0
 * IP ps set of $n points
-* OR the index of the nearest point to $p in $ps
+* OP oi the index of the nearest point to $p in $ps
+* OR the distance to the nearest point
 */
-double nearestPoint(int p, int n, const int* ps, const TSPInstance* inst){
+double nearestPoint(int p, int n, const int* ps, const TSPInstance* inst, int* oi){
 	
 	int i;
 	double mini, mind, temp;
@@ -138,7 +139,8 @@ double nearestPoint(int p, int n, const int* ps, const TSPInstance* inst){
 			mind = temp;
 		}/* if */
 
-	return mini;
+	*oi = mini;
+	return mind;
 
 }/* nearestPoint */
 
@@ -159,9 +161,7 @@ void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 		
 		int curr = (*sol).succ[i - 1];
 
-		(*sol).succ[i] = nearestPoint(curr, (*inst).dimension - i, &((*sol).succ[i]), inst);
-
-		(*sol).val += getDist(curr, (*sol).succ[i], inst);
+		(*sol).val += nearestPoint(curr, (*inst).dimension - i, &((*sol).succ[i]), inst, &((*sol).succ[i]));
 
 	}/* for */
 
