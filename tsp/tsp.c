@@ -104,7 +104,6 @@ void freeInst(TSPInstance* inst){
 void allocSol(int n, TSPSolution* sol){
 
     sol->succ = malloc(n * sizeof(int));
-
 	assert(sol->succ != NULL);
 
 }/* allocSol */
