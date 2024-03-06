@@ -78,14 +78,15 @@ int readInt(const char lab[]){
 int readIntRange(int start, int end, const char lab[]){
 	
 	int val;
-
-	printf("Please insert a value in the range [%d, %d]\n", start, end);
+    char str[MAX_STRING_LENGTH];
+    
+    sprintf(str, "%s in the range [%d, %d]: ", lab, start, end);
 
 	do{
-        val = readInt(lab);
+        val = readInt(str);
 
         if(val < start || val > end)
-            printf("Invalid value, please insert a value in the range [%d, %d]\n", start, end);
+            printf("Invalid value.\n");
 
     }while(val < start || val > end);
 

@@ -13,6 +13,7 @@
 #include "./utility/utility.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
+#include "utility/utility.h"
 
 /*
 * IP x
@@ -262,34 +263,47 @@ double getDist(int i, int j, const TSPInstance* inst){
 * OP valid true if valid solution, false otherwise.
 */
 bool checkSol(const TSPInstance* inst, const TSPSolution* sol){
+    bool distinct;
+    double cost;
+
+    distinct = isDistinct(inst->dimension, sol->succ);
+
+    if(!distinct)
+        return false;
+    
+    cost = getSolCost(inst, sol);
+
+    return isEqual(sol->val, cost);    
+
+}/* checkSol */
+
+/*
+* Check that each element of the array appears once.
+* IP n dimension of the array
+* IP arr array
+* OP distinct true if each element appears once, false otherwise.
+*/
+bool isDistinct(int n, int* arr){
     int i;
-    bool valid;
+    bool distinct = true;
 
-    double cost = 0.0;
-    int* counters = malloc(inst->dimension * sizeof(int));
-
+    int* counters = malloc(n * sizeof(int));
     assert(counters != NULL);
 
-    for(i=1; i<inst->dimension; i++){
-        
-        ++counters[sol->succ[i-1]];
+    for(i=0; i<n; i++){
+        if(arr[i] < 0 || arr[i] >= n){
+            free(counters);
+            return false;
+        }
 
-        cost += getDist(sol->succ[i-1], sol->succ[i], inst);
+        ++counters[arr[i]];
     }
-    
-    ++counters[sol->succ[i-1]];
-
-    cost += getDist(sol->succ[i-1], sol->succ[0], inst); /* add cost of connection of last to first node */
-
-    valid = isEqual(sol->val, cost);
-
-    for(i=0; i<inst->dimension; i++){
+    for(i=0; i<n; i++){
         if(counters[i] != 1)
-            valid = false;
+            distinct = false;
     }
 
     free(counters);
 
-    return valid;
-
-}/* NN_controller */
+    return distinct;
+}

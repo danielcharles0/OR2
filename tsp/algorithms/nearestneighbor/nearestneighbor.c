@@ -31,9 +31,9 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
     
     for(i=len+1; i<inst->dimension; i++){
         
-        curr = sol->succ[i]; /* index in inst->distances of next unvisited node */
+        curr = sol->succ[i]; /* index in inst->points of next unvisited node */
 
-        curr_dist = getDist(last, curr, inst); /* get distance from last visited node and the current unvisited node in succ */
+        curr_dist = getDist(last, curr, inst); /* get distance between last visited node and the current unvisited node in succ */
 
         if(curr_dist < min_dist){
             min_dist = curr_dist;
@@ -55,8 +55,10 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
 	int i;
 
     ascendentSol(inst, sol);
+
+    sol->val = 0;
     
-	i = readIntRange(1, inst->dimension, "Insert starting node: ") - 1; /* i-th node in position i - 1 */
+	i = readIntRange(1, inst->dimension, "Insert starting node") - 1; 
 
     swapInt(&(sol->succ[0]), &(sol->succ[i])); 
 
@@ -65,7 +67,7 @@ void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
 /*
 * IP inst tsp instance to solve
 * IOP sol tsp solution
-* OP time at which solution was found
+* OR time at which solution was found
 */
 int NN_solver(const TSPInstance* inst, TSPSolution* sol){
     
@@ -89,7 +91,7 @@ int NN_solver(const TSPInstance* inst, TSPSolution* sol){
 * IP set settings
 * IP inst tsp instance
 * IOP sol solution
-* OP false if found a valid solution, true otherwise.
+* OR false if found a valid solution, true otherwise.
 */
 void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     
