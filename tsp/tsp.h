@@ -54,3 +54,5 @@ double getDist(int, int, const TSPInstance*);
 void ascendentSol(const TSPInstance*, TSPSolution*);
 
 double getSolCost(const TSPInstance*, const TSPSolution*);
+
+bool checkSol(const TSPInstance*, const TSPSolution*);

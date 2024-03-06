@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define EPSILON 1e-9
+#define MAX_STRING_LENGTH 65
 
 void printBool(const char[], bool);
 

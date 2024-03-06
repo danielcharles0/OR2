@@ -189,8 +189,7 @@ void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
 
     for(i = 0; i < inst->dimension; i++){
-        int idx = i; /* just for test purposes */
-        /*int idx = sol->succ[i];*/
+        int idx = sol->succ[i];
         fprintf(gnuplotPipe, "%f %f\n", (inst->points[idx]).x, (inst->points[idx]).y);
     }
     fprintf(gnuplotPipe, "%f %f\n", (inst->points[0]).x, (inst->points[0]).y); /* connect last to first */
@@ -229,7 +228,7 @@ bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set
 	        randomSol(inst, sol);
 	        break;
 	    case NEAREST_NEIGHBOR:
-	        error = nearestNeighbor(set, inst, sol);
+	        nearestNeighbor(set, inst, sol);
 	        break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
@@ -254,3 +253,42 @@ double getDist(int i, int j, const TSPInstance* inst){
 	return (i < j) ? (*inst).dist[j - 1][i] : (*inst).dist[i - 1][j];
 
 }/* getDist */
+
+/*
+* Checks whether the solution is valid.
+* IP inst tsp instance
+* IP sol solution we want to check validity of
+* OP valid true if valid solution, false otherwise.
+*/
+bool checkSol(const TSPInstance* inst, const TSPSolution* sol){
+    int i;
+    bool valid;
+
+    double cost = 0.0;
+    int* counters = malloc(inst->dimension * sizeof(int));
+
+    assert(counters != NULL);
+
+    for(i=1; i<inst->dimension; i++){
+        
+        ++counters[sol->succ[i-1]];
+
+        cost += getDist(sol->succ[i-1], sol->succ[i], inst);
+    }
+    
+    ++counters[sol->succ[i-1]];
+
+    cost += getDist(sol->succ[i-1], sol->succ[0], inst); /* add cost of connection of last to first node */
+
+    valid = isEqual(sol->val, cost);
+
+    for(i=0; i<inst->dimension; i++){
+        if(counters[i] != 1)
+            valid = false;
+    }
+
+    free(counters);
+
+    return valid;
+
+}/* NN_controller */

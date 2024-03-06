@@ -10,6 +10,8 @@
 #include <math.h>
 #include "utility.h"
 
+#define EPSILON 1e-9
+
 /*
 * Print a boolean.
 * IP lab label for the output
