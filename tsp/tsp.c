@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "tsp.h"
+#include "./utility/utility.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 

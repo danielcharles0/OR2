@@ -53,7 +53,6 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
 void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
 
 	int i;
-    char lab[MAX_STRING_LENGTH];
 
     ascendentSol(inst, sol);
     
@@ -101,3 +100,86 @@ void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* 
     time = NN_solver(inst, sol);
 
 }/* nearestNeighbor */
+
+/*
+* IP sn starting node index
+* IP inst tsp instance
+* OP sol tsp solution initialized with starting node in first position
+*/
+void initSolV2(int sn, const TSPInstance* inst, TSPSolution* sol){
+
+    ascendentSol(inst, sol);
+
+    swapInt((*sol).succ, &((*sol).succ[sn])); 
+
+}/* initSolV2 */
+
+/*
+* IP p point
+* IP n number of points, n > 0
+* IP ps set of $n points
+* OR the index of the nearest point to $p in $ps
+*/
+double nearestPoint(int p, int n, const int* ps, const TSPInstance* inst){
+	
+	int i;
+	double mini, mind, temp;
+	/* mind := minimum distance so far */
+	/* mini := minimum distance point index so far */
+
+	mini = ps[0];
+	mind = getDist(p, mini, inst);
+
+	for(i = 1; i < n; i++)
+		if((temp = getDist(p, ps[i], inst)) < mind){
+			mini = ps[i];
+			mind = temp;
+		}/* if */
+
+	return mini;
+
+}/* nearestPoint */
+
+/*
+* IP sn starting node index
+* IP inst tsp instance to solve
+* IOP sol tsp solution
+*/
+void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
+	
+	int i;
+
+	initSolV2(sn, inst, sol);
+
+	(*sol).val = 0;
+
+	for(i = 1; i < (*inst).dimension - 1; i++){
+		
+		int curr = (*sol).succ[i - 1];
+
+		(*sol).succ[i] = nearestPoint(curr, (*inst).dimension - i, &((*sol).succ[i]), inst);
+
+		(*sol).val += getDist(curr, (*sol).succ[i], inst);
+
+	}/* for */
+
+	(*sol).val += getDist((*sol).succ[(*inst).dimension - 2], (*sol).succ[(*inst).dimension - 1], inst);
+	(*sol).val += getDist((*sol).succ[(*inst).dimension - 1], (*sol).succ[0], inst);
+
+}/* NN_solverV2 */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IOP sol solution
+* OP false if found a valid solution, true otherwise.
+*/
+void nearestNeighborV2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+    
+	int i;
+
+	i = readIntRange(1, inst->dimension, "Insert starting node: ") - 1; /* i-th node in position i - 1 */
+
+	NN_solverV2(i, inst, sol);
+
+}/* nearestNeighborV2 */
