@@ -18,7 +18,8 @@
 * IP set settings
 */
 void runAlgorithm(const TSPInstance* inst, const Settings* set){
-    int alg;
+    
+	int alg;
     bool error;
     TSPSolution sol;
 

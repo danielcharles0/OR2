@@ -205,3 +205,18 @@ bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set
     return error;
 
 }/* run */
+
+/*
+* IP first node index
+* IP second node index
+* IP inst tsp instance
+* OR distance between nodes i and j
+*/
+double getDist(int i, int j, const TSPInstance* inst){
+
+	if(i == j)
+		return 0;
+	
+	return (i < j) ? (*inst).dist[j - 1][i] : (*inst).dist[i - 1][j];
+
+}/* getDist */

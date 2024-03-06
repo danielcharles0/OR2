@@ -37,6 +37,8 @@ void allocSol(int, TSPSolution*);
 
 void freeInst(TSPInstance*);
 
+void freeSol(TSPSolution*);
+
 void computeDistances(TSPInstance*);
 
 void printInst(const TSPInstance*);
@@ -46,3 +48,5 @@ void plotSolution(const TSPSolution*, const TSPInstance*);
 void algorithmLegend(void);
 
 bool run(int, const TSPInstance*, TSPSolution*, const Settings*);
+
+double getDist(int, int, const TSPInstance*);
