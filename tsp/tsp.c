@@ -12,6 +12,7 @@
 #include "tsp.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
+#include "utility/utility.h"
 
 /*
 * IP x
@@ -261,8 +262,7 @@ double getDist(int i, int j, const TSPInstance* inst){
 * OP valid true if valid solution, false otherwise.
 */
 bool checkSol(const TSPInstance* inst, const TSPSolution* sol){
-    int i;
-    bool valid, distinct;
+    bool distinct;
     double cost;
 
     distinct = isDistinct(inst->dimension, sol->succ);
