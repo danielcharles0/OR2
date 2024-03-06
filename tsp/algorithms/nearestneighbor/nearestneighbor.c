@@ -110,12 +110,14 @@ bool NN_controller(const TSPInstance* inst, const TSPSolution* sol){
 
     for(i=1; i<inst->dimension; i++){
         
-        ++counters[sol->succ[i] - 1];
+        ++counters[sol->succ[i-1]];
 
-        cost += inst->dist[sol->succ[i-1] - 1][sol->succ[i] - 1];
+        cost += inst->dist[sol->succ[i-1]][sol->succ[i]];
     }
     
-    cost += inst->dist[sol->succ[i-1] - 1][sol->succ[0] - 1]; /* add cost of connection of last to first node */
+    ++counters[sol->succ[i-1]];
+
+    cost += inst->dist[sol->succ[i-1]][sol->succ[0]]; /* add cost of connection of last to first node */
 
     valid = isEqualPrecision(sol->val, cost, EPSILON);
 
