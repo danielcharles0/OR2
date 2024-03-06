@@ -27,6 +27,8 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 
     alg = readInt("Insert the code of the algorithm you want to run: ");
 
+    allocSol(inst->dimension, &sol);
+
     error = run(alg, inst, &sol, set);
     
     if(error)
@@ -113,4 +115,4 @@ int main(int argc, char* const* argv){
 
     return 0;
 
-} /* main */
+}/* main */

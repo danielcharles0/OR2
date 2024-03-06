@@ -10,6 +10,8 @@
 #include <math.h>
 #include "utility.h"
 
+#define EPSILON 1e-9
+
 /*
 * Print a boolean.
 * IP lab label for the output
@@ -82,7 +84,7 @@ bool isEqualPrecision(double a, double b, double epsilon){
 */
 bool isEqual(double a, double b){
     
-    return isEqualPrecision(a, b, 0);
+    return isEqualPrecision(a, b, EPSILON);
 
 }/* isEqual */
 

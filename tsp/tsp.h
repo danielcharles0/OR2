@@ -50,3 +50,5 @@ void algorithmLegend(void);
 bool run(int, const TSPInstance*, TSPSolution*, const Settings*);
 
 double getDist(int, int, const TSPInstance*);
+
+bool checkSol(const TSPInstance*, const TSPSolution*);

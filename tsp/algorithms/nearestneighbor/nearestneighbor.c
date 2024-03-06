@@ -19,7 +19,7 @@
 * IP inst tsp instance
 * IOP sol solution we want to update
 */
-static void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
+void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
     int i;
 
     int last = sol->succ[len-1];
@@ -51,18 +51,19 @@ static void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
 * IOP sol tsp solution allocated and initialized with starting node in first position
 */
 void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
-    
+
 	int i;
+    char lab[MAX_STRING_LENGTH];
 
-    allocSol(inst->dimension, sol);
-
-    for(i=0; i<inst->dimension; i++)
-        sol->succ[i] = i;
+    ascendentSol(inst, sol);
+    sol->val = 0;
     
-    while(true){
-        i = readInt("Insert starting node: ");
+    sprintf(lab, "Insert starting node[1,%d]: ", inst->dimension);
 
-        if(i < 0 || i >= inst->dimension)
+    while(true){
+        i = readInt(lab);
+
+        if(i <= 0 || i > inst->dimension)
             printf("Invalid starting node.\n");
         else   
             break;
@@ -90,50 +91,9 @@ int NN_solver(const TSPInstance* inst, TSPSolution* sol){
 
     sol->val += getDist(sol->succ[0], sol->succ[len-1], inst); /* add cost of connection of last to first node */
 
-     /* store current time in curr_time */
-
     return getSeconds(start, clock());
 
 }/* NN_solver */
-
-/*
-* Checks whether the solution is valid.
-* IP inst tsp instance
-* IP sol solution we want to check validity of
-* OP false if there is no error, true otherwise.
-*/
-bool NN_controller(const TSPInstance* inst, const TSPSolution* sol){
-    int i;
-    bool valid;
-
-    double cost = 0.0;
-    int* counters = malloc(inst->dimension * sizeof(int));
-
-    assert(counters != NULL);
-
-    for(i=1; i<inst->dimension; i++){
-        
-        ++counters[sol->succ[i-1]];
-
-        cost += inst->dist[sol->succ[i-1]][sol->succ[i]];
-    }
-    
-    ++counters[sol->succ[i-1]];
-
-    cost += inst->dist[sol->succ[i-1]][sol->succ[0]]; /* add cost of connection of last to first node */
-
-    valid = isEqualPrecision(sol->val, cost, EPSILON);
-
-    for(i=0; i<inst->dimension; i++){
-        if(counters[i] != 1)
-            valid = false;
-    }
-
-    free(counters);
-
-    return !valid;
-
-}/* NN_controller */
 
 /*
 * IP set settings
@@ -141,14 +101,12 @@ bool NN_controller(const TSPInstance* inst, const TSPSolution* sol){
 * IOP sol solution
 * OP false if found a valid solution, true otherwise.
 */
-bool nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     
 	int time;
 
     NN_initSol(inst, sol);
 
     time = NN_solver(inst, sol);
-
-    return NN_controller(inst, sol);
 
 }/* nearestNeighbor */
