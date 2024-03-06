@@ -45,7 +45,8 @@ static int minDistNode(int len, const TSPSolution* sol, const TSPInstance* inst)
 * IOP sol tsp solution allocated and initialized with starting node in first position
 */
 void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
-    int i;
+    
+	int i;
 
     allocSol(inst->dimension, sol);
 

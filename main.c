@@ -66,7 +66,7 @@ bool runConfig(CONF config, const Settings* set){
   ).
 */
 int main(int argc, char* const* argv){
-    int a;
+    
     Settings set;
     CONF config; 
 

@@ -25,6 +25,8 @@ typedef struct {
 
 void allocInst(int, TSPInstance*);
 
+void allocSol(int, TSPSolution*);
+
 void freeInst(TSPInstance*);
 
 void computeDistances(TSPInstance*);
