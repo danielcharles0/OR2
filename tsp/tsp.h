@@ -6,7 +6,10 @@
 */
 
 #pragma once
+#include <stdbool.h>
+
 #include "point/point.h"
+#include "input/settings/settings.h"
 
 #define MAX_NAME_LENGTH 64
 #define POINTS_TO_PRINT 10
@@ -23,6 +26,11 @@ typedef struct {
     int val;	/* val  := value of the cost of the solution $succ */
 } TSPSolution;
 
+typedef enum{
+    RANDOM,
+    NEAREST_NEIGHBOR
+} ALGORITHM;
+
 void allocInst(int, TSPInstance*);
 
 void allocSol(int, TSPSolution*);
@@ -34,3 +42,7 @@ void computeDistances(TSPInstance*);
 void printInst(const TSPInstance*);
 
 void plotSolution(const TSPSolution*, const TSPInstance*);
+
+void algorithmLegend(void);
+
+bool run(int, const TSPInstance*, TSPSolution*, const Settings*);

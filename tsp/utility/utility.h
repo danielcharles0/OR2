@@ -6,15 +6,20 @@
 */
 
 #include <stdbool.h>
+#include <time.h>
+
+#define EPSILON 1e-9
 
 void printBool(const char[], bool);
 
 int rand0N(int);
 
-void swap_int(int*, int*);
+void swapInt(int*, int*);
 
-int read_int(const char[]);
+int readInt(const char[]);
 
-bool is_equal_prescision(double, double, double);
+bool isEqualPrecision(double, double, double);
 
-bool is_equal(double, double);
+bool isEqual(double, double);
+
+int getSeconds(clock_t, clock_t);

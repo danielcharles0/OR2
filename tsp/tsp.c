@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "tsp.h"
+#include "algorithms/nearestneighbor/nearestneighbor.h"
 
 /*
 * IP x
@@ -119,7 +120,6 @@ void freeSol(TSPSolution* sol){
 * IP inst instance to print
 */
 void printInst(const TSPInstance* inst){
-    
 	int i;
 
     printf("Instance:\n");
@@ -167,3 +167,41 @@ void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     pclose(gnuplotPipe);
 
 }/* plotSolution */
+
+/*
+* Print algorithm legend.
+*/
+void algorithmLegend(void){
+    
+    printf("Available algorithms:\n");
+    printf("Code: %d, Algorithm: Just a random solution\n", RANDOM);
+    printf("Code: %d, Algorithm: Nearest neighbor search\n", NEAREST_NEIGHBOR);
+    printf("\n");
+    
+}/* algorithmLegend */
+
+/*
+* IP alg algorithm to run
+* IP inst tsp instance
+* IOP sol solution 
+* IP set settings
+* OP error true if an error occurred, false otherwise.
+*/
+bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
+    bool error = false;
+    
+    switch (alg){
+    case RANDOM:
+        /* code */
+        break;
+    case NEAREST_NEIGHBOR:
+        error = nearestNeighbor(set, inst, sol);
+        break;
+    default:
+        printf("Error: Algorithm code not found.\n\n");
+        return true;
+    }
+
+    return error;
+
+}/* run */

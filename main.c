@@ -14,15 +14,40 @@
 #include "tsp/utility/utility.h"
 
 /*
+* IP inst tsp instance
+* IP set settings
+*/
+void runAlgorithm(const TSPInstance* inst, const Settings* set){
+    int alg;
+    bool error;
+    TSPSolution sol;
+
+    algorithmLegend();
+
+    alg = readInt("Insert the code of the algorithm you want to run: ");
+
+    error = run(alg, inst, &sol, set);
+    
+    if(error)
+        return;
+
+    if(set->v){
+        plotSolution(&sol, inst);
+        /* printSolutionTime(sol) */
+    }
+
+    freeSol(&sol);
+
+}/* runAlgorithm */
+
+/*
 * IP conf configuration to run
 * IP set settings of the configuration
 * OR boolean false if there was some error, true otherwise.
 */
 bool runConfig(CONF config, const Settings* set){
-    
 	int error;
     TSPInstance inst;
-    TSPSolution sol;
 
     switch(config){
         case INPUT_FILE:
@@ -50,7 +75,7 @@ bool runConfig(CONF config, const Settings* set){
 	if((*set).v)
 		printInst(&inst);
 
-	plotSolution(&sol, &inst);
+    runAlgorithm(&inst, set);
 
     freeInst(&inst);
 
@@ -66,7 +91,6 @@ bool runConfig(CONF config, const Settings* set){
   ).
 */
 int main(int argc, char* const* argv){
-    
     Settings set;
     CONF config; 
 

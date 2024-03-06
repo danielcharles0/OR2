@@ -12,4 +12,6 @@ void NN_initSol(const TSPInstance*, TSPSolution*);
 
 int NN_solver(const TSPInstance*, TSPSolution*);
 
-void NN_controller(void);
+bool NN_controller(const TSPInstance*, const TSPSolution*);
+
+bool nearestNeighbor(const Settings*, const TSPInstance*, TSPSolution*);
