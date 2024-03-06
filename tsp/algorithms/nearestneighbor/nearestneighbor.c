@@ -26,14 +26,14 @@ static void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
     int curr = sol->succ[len];
     int next = len;
 
-    double min_dist = getDist(last, curr);
+    double min_dist = getDist(last, curr, inst);
     double curr_dist;
     
     for(i=len+1; i<inst->dimension; i++){
         
         curr = sol->succ[i]; /* index in inst->distances of next unvisited node */
 
-        curr_dist = getDist(last, curr); /* get distance from last visited node and the current unvisited node in succ */
+        curr_dist = getDist(last, curr, inst); /* get distance from last visited node and the current unvisited node in succ */
 
         if(curr_dist < min_dist){
             min_dist = curr_dist;
@@ -113,12 +113,14 @@ bool NN_controller(const TSPInstance* inst, const TSPSolution* sol){
 
     for(i=1; i<inst->dimension; i++){
         
-        ++counters[sol->succ[i] - 1];
+        ++counters[sol->succ[i-1]];
 
-        cost += inst->dist[sol->succ[i-1] - 1][sol->succ[i] - 1];
+        cost += inst->dist[sol->succ[i-1]][sol->succ[i]];
     }
     
-    cost += inst->dist[sol->succ[i-1] - 1][sol->succ[0] - 1]; /* add cost of connection of last to first node */
+    ++counters[sol->succ[i-1]];
+
+    cost += inst->dist[sol->succ[i-1]][sol->succ[0]]; /* add cost of connection of last to first node */
 
     valid = isEqualPrecision(sol->val, cost, EPSILON);
 
