@@ -31,8 +31,10 @@ void generatePoints(int seed, TSPInstance* inst){
  * OP inst instance to random generate
  */
 void generateInstance(const Settings* set, TSPInstance* inst){
-
-    initInst((*set).n, inst);
+	
+	int i;
+	
+    allocInst((*set).n, inst);
 
 	strcpy(inst->name, "RANDOM");
 

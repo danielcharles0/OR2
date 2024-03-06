@@ -10,3 +10,11 @@
 void printBool(const char[], bool);
 
 int rand0N(int);
+
+void swap_int(int*, int*);
+
+int read_int(const char[]);
+
+bool is_equal_prescision(double, double, double);
+
+bool is_equal(double, double);

@@ -7,7 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "utility.h"
+
+#define EPSILON 1e-9
 
 /*
 * Print a boolean.
@@ -34,3 +37,53 @@ int rand0N(int n){
     return rand() % n;
 
 }/* rand0N */
+
+/*
+* IP a pointer to index of a node
+* IP b pointer to index of a node
+*/
+void swap_int(int* a, int* b){
+    int temp;
+
+    temp = *a;
+    *a = *b;
+    *b = temp;
+
+}/* swap_int */
+
+/*
+* Read integer in input.
+* IP lab label for the output
+* OR integer passed in input
+*/
+int read_int(const char lab[]){
+    int num;
+
+    printf("%s", lab);
+    scanf("%d", &num);
+    printf("\n\n");
+
+    return num;
+}/* read_int */
+
+/*
+* IP a double number
+* IP b double number to check equality with $a
+* IP epsilon precision of equality
+* OR true if $a equal to $b, false otherwise
+*/
+bool is_equal_prescision(double a, double b, double epsilon){
+    
+    return fabs(a-b) <= epsilon;
+
+}/* is_equal_precision */
+
+/*
+* IP a double number
+* IP b double number to check equality with $a
+*/
+bool is_equal(double a, double b){
+    
+    return is_equal_prescision(a, b, 0);
+
+}/* is_equal */

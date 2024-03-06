@@ -22,17 +22,16 @@
 */
 int readInstance(const Settings* set, TSPInstance* inst){
     
-	int i;
+	int i, dummy;
     char line[MAX_LINE_LENGTH];
 
     FILE *file = fopen(set->input_file_name, "r");
 
-    if (file == NULL){
-        printf("Error opening file: %s\n\n", set->input_file_name);
-        return 1;
-    }
+    if (file == NULL)
+        return -1;
 
     while(fgets(line, MAX_LINE_LENGTH, file)){
+        int n;
 
         if(!strncmp(line, "EOF", 3)){
             break;
@@ -44,23 +43,22 @@ int readInstance(const Settings* set, TSPInstance* inst){
             strcpy(inst->name, &line[sizeof("NAME: ") - 1]);
         }
         else if(strstr(line, "DIMENSION: ") != NULL){
-            inst->dimension = strtol(&line[sizeof("DIMENSION: ") - 1], NULL, 10);
-            if(inst->dimension <= 2){
-                printf("Error: too few nodes in the file.\n\n");
+            n = strtol(&line[sizeof("DIMENSION: ") - 1], NULL, 10);
+            if(n <= 2){
                 fclose(file);
-                return 1;
+                return -2;
             }
             
-            allocInst(inst);
+            allocInst(n, inst);
         }
         else if(strstr(line, "NODE_COORD_SECTION") != NULL){
             for(i=0; i<inst->dimension; i++)
-                fscanf(file, "%d %lf %lf", &((inst->points)[i].id), &((inst->points[i]).x), &((inst->points[i]).y));
+                fscanf(file, "%d %lf %lf", &dummy, &((inst->points[i]).x), &((inst->points[i]).y));
         }
     }
 
     fclose(file); 
 
     return 0;  
-    
+
 }/* readInstance */

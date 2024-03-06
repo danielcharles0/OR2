@@ -10,7 +10,6 @@
 
 #define MAX_NAME_LENGTH 64
 #define POINTS_TO_PRINT 10
-#define PLOT_STYLE "pointtype 7 pointsize 2 linewidth 2"
 
 typedef struct {
     char name[MAX_NAME_LENGTH];
@@ -24,7 +23,7 @@ typedef struct {
     int val;	/* val  := value of the cost of the solution $succ */
 } TSPSolution;
 
-void initInst(int, TSPInstance*);
+void allocInst(int, TSPInstance*);
 
 void freeInst(TSPInstance*);
 

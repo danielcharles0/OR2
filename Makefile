@@ -1,5 +1,5 @@
-STD_FLAGS = -ansi -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/generator.o ./obj/point.o ./obj/tsp.o ./obj/utility.o ./obj/validator.o #./obj/reader.o
+STD_FLAGS = -ansi -Wall -pedantic -c
+OBJS = ./obj/main.o ./obj/settings.o ./obj/generator.o ./obj/point.o ./obj/tsp.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/nearestneighbor.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -23,8 +23,8 @@ main: $(OBJS)
 ./obj/validator.o: ./tsp/input/settings/validator/validator.h ./tsp/input/settings/validator/validator.c
 	gcc $(FLAGS) ./tsp/input/settings/validator/validator.c -o ./obj/validator.o
 
-# ./obj/reader.o: ./tsp/input/reader/reader.h ./tsp/input/reader/reader.c
-# 	gcc $(FLAGS) ./tsp/input/reader/reader.c -o ./obj/reader.o
+./obj/reader.o: ./tsp/input/reader/reader.h ./tsp/input/reader/reader.c
+	gcc $(FLAGS) ./tsp/input/reader/reader.c -o ./obj/reader.o
 
 ./obj/generator.o: ./tsp/input/generator/generator.h ./tsp/input/generator/generator.c
 	gcc $(FLAGS) ./tsp/input/generator/generator.c -o ./obj/generator.o
@@ -34,6 +34,9 @@ main: $(OBJS)
 
 ./obj/tsp.o: ./tsp/tsp.h ./tsp/tsp.c
 	gcc $(FLAGS) ./tsp/tsp.c -o ./obj/tsp.o
+
+./obj/nearestneighbor.o: ./tsp/algorithms/nearestneighbor/nearestneighbor.h ./tsp/algorithms/nearestneighbor/nearestneighbor.c
+	gcc $(FLAGS) ./tsp/algorithms/nearestneighbor/nearestneighbor.c -o ./obj/nearestneighbor.o
 
 debug:
 	make DEBUG=1

@@ -9,8 +9,9 @@
 #include <stdlib.h>
 
 #include "tsp/input/settings/settings.h"
-/*#include "tsp/input/reader/reader.h"*/
+#include "tsp/input/reader/reader.h"
 #include "tsp/input/generator/generator.h"
+#include "tsp/utility/utility.h"
 
 /*
 * IP conf configuration to run
@@ -21,18 +22,17 @@ bool runConfig(CONF config, const Settings* set){
     
 	int error;
     TSPInstance inst;
-    /*TSPSolution sol;*/
+    TSPSolution sol;
 
     switch(config){
         case INPUT_FILE:
 			/* TO BE COMPLETED */
-            /*error = readInstance(set, &inst);*/
-			error = -1;
+            error = readInstance(set, &inst);
             if(error){
                 if(error == -1)
                     printf("Error while opening the file \"%s\"\n\n", (*set).input_file_name);
                 else
-                    printf("The instance must contains at least three nodes and the number of nodes must have been specified into the input file.\n\n");
+                    printf("The instance must contain at least three nodes and the number of nodes must have been specified into the input file.\n\n");
                 return 0;
             }/* if */
             break;
@@ -50,7 +50,7 @@ bool runConfig(CONF config, const Settings* set){
 	if((*set).v)
 		printInst(&inst);
 
-	/*plotSolution(&sol, &inst);*/
+	plotSolution(&sol, &inst);
 
     freeInst(&inst);
 
@@ -66,7 +66,7 @@ bool runConfig(CONF config, const Settings* set){
   ).
 */
 int main(int argc, char* const* argv){
-
+    int a;
     Settings set;
     CONF config; 
 
@@ -81,7 +81,7 @@ int main(int argc, char* const* argv){
         printSettings(&set);
 
     }/* if */
-    
+
     runConfig(config, &set);
 
     printf("Progran ended.\n");

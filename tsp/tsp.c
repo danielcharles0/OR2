@@ -58,9 +58,9 @@ void computeDistances(TSPInstance* inst){
 
 /*
 * IP n number of nodes of the instance
-* inst instance to initialize
+* IP inst instance to initialize
 */
-void initInst(int n, TSPInstance* inst){
+void allocInst(int n, TSPInstance* inst){
 
     (*inst).dimension = n;
     (*inst).points = malloc((*inst).dimension * sizeof(Point2D));
@@ -69,7 +69,7 @@ void initInst(int n, TSPInstance* inst){
 
 	initDist(inst);
 
-}/* initInst */
+}/* allocInst */
 
 /*
 * IOP inst instance to free $inst->dist
@@ -98,6 +98,25 @@ void freeInst(TSPInstance* inst){
 }/* freeInst */
 
 /*
+* IP n number of nodes of the instance
+* IP sol solution to initialize
+*/
+void allocSol(int n, TSPSolution* sol){
+
+    sol->succ = malloc(n * sizeof(int));
+
+	assert(sol->succ != NULL);
+
+}/* allocSol */
+
+/*
+* IOP sol solution to free memory
+*/
+void freeSol(TSPSolution* sol){
+    free(sol->succ);
+}/* freeSol */
+
+/*
 * IP inst instance to print
 */
 void printInst(const TSPInstance* inst){
@@ -119,7 +138,7 @@ void printInst(const TSPInstance* inst){
 
 /*
 * IP sol solution to plot
-* OV hamiltonian cycle
+* OV hamiltonian path
 */
 void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     
@@ -137,7 +156,7 @@ void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
 
-    for (i = 0; i < inst->dimension; i++) {
+    for(i = 0; i < inst->dimension; i++){
         int idx = i; /* just for test purposes */
         /*int idx = sol->succ[i];*/
         fprintf(gnuplotPipe, "%f %f\n", (inst->points[idx]).x, (inst->points[idx]).y);
