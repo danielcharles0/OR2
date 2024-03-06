@@ -13,3 +13,5 @@ typedef struct {
 } Point2D;
 
 void randomPoint(Point2D*);
+
+double distance(const Point2D*, const Point2D*);

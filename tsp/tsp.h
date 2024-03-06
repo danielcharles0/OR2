@@ -18,7 +18,7 @@ typedef struct {
     char name[MAX_NAME_LENGTH];
     int dimension;
     Point2D* points;
-    int** dist;     /* dist  := precomputed distances among nodes */
+	double** dist;	/* dist  := precomputed distances among nodes */
 } TSPInstance;
 
 typedef struct {
@@ -33,11 +33,11 @@ typedef enum{
 
 void allocInst(int, TSPInstance*);
 
-void freeInst(TSPInstance*);
-
 void allocSol(int, TSPSolution*);
 
-void freeSol(TSPSolution*);
+void freeInst(TSPInstance*);
+
+void computeDistances(TSPInstance*);
 
 void printInst(const TSPInstance*);
 

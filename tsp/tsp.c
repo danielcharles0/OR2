@@ -13,6 +13,51 @@
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 
 /*
+* IP x
+* OR $x rounded to the nearest integer
+* Reference:
+*	- http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/
+*	- Page 6: http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp95.pdf
+*/
+int nint(double x){
+
+    return (int)(x + .5);
+
+}/* nint */
+
+/*
+* IOP inst instance to initialize $inst->dist
+*/
+void initDist(TSPInstance* inst){
+
+    int i;
+
+    (*inst).dist = malloc(((*inst).dimension - 1) * sizeof(double*));
+    assert((*inst).dist != NULL);
+
+    for (i = 0; i < (*inst).dimension - 1; i++){
+
+        (*inst).dist[i] = malloc((i + 1) * sizeof(double));
+        assert((*inst).dist[i] != NULL);
+
+    }/* for */
+
+}/* initDist */
+
+/*
+* IOP inst, compute and store into $inst->dist all the distances
+*/
+void computeDistances(TSPInstance* inst){
+	
+	int i, j;
+
+	for(i = 1; i < (*inst).dimension; i++)
+		for(j = 0; j < i; j++)
+	        (*inst).dist[i - 1][j] = distance(&((*inst).points[j]), &((*inst).points[i]));
+
+}/* computeDistances */
+
+/*
 * IP n number of nodes of the instance
 * IP inst instance to initialize
 */
@@ -23,13 +68,34 @@ void allocInst(int n, TSPInstance* inst){
     
 	assert((*inst).points != NULL);
 
+	initDist(inst);
+
 }/* allocInst */
+
+/*
+* IOP inst instance to free $inst->dist
+*/
+void freeDist(TSPInstance* inst){
+
+    int i;
+
+    if((*inst).dimension > 1){
+
+        for (i = 0; i < (*inst).dimension - 1; i++)
+            free((*inst).dist[i]);
+
+        free((*inst).dist);
+
+    }/* if */
+
+}/* freeDist */
 
 /*
 * IOP inst instance to free memory
 */
 void freeInst(TSPInstance* inst){
     free(inst->points);
+	freeDist(inst);
 }/* freeInst */
 
 /*
@@ -75,10 +141,12 @@ void printInst(const TSPInstance* inst){
 * OV hamiltonian path
 */
 void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
-    int i;
+    
+	int i;
     
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
-    if(gnuplotPipe == NULL){
+	
+    if (gnuplotPipe == NULL) {
         fprintf(stderr, "Error opening Gnuplot pipe\n");
         return;
     }

@@ -51,7 +51,8 @@ static void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
 * IOP sol tsp solution allocated and initialized with starting node in first position
 */
 void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
-    int i;
+    
+	int i;
 
     allocSol(inst->dimension, sol);
 
