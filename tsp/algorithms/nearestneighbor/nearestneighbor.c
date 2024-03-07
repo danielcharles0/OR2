@@ -186,6 +186,32 @@ void algorithmConfigurations(){
 }/* algorithmLegend */
 
 /*
+* IP inst tsp instance
+* OP sol solution
+*/
+void best_start(const TSPInstance* inst, TSPSolution* sol){
+
+	int i;
+	TSPSolution temp;
+
+	allocSol((*inst).dimension, &temp);
+	
+	NN_solverV2(0, inst, sol);
+
+	for(i = 1; i < (*inst).dimension; i++){
+		
+		NN_solverV2(i, inst, &temp);
+
+		if(temp.val < (*sol).val)
+			cpSol(inst, &temp, sol);
+			
+	}/* for */
+
+	freeSol(&temp);
+
+}/* best_start */
+
+/*
 * IP conf configuration code
 */
 void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol){
@@ -202,7 +228,7 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 			NN_solverV2(readIntRange(1, inst->dimension, "Insert starting node: ") - 1, inst, sol);
 	        break;
 		case BEST_START:
-			/* TO IMPLEMENT */
+			best_start(inst, sol);
 			break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
