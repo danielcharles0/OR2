@@ -8,4 +8,11 @@
 #include "../../tsp.h"
 #include "../../input/settings/settings.h"
 
+typedef enum{
+    START_FIRST_NODE,
+	START_RANDOM_NODE,
+	SELECT_STARTING_NODE,
+    BEST_START
+} NN_CONFIG;
+
 void nearestNeighbor(const Settings*, const TSPInstance*, TSPSolution*);

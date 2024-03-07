@@ -172,17 +172,59 @@ void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 }/* NN_solverV2 */
 
 /*
+* Print algorithm configurations.
+*/
+void algorithmConfigurations(){
+    
+    printf("Available nearest neighbor search configurations:\n");
+    printf("Code: %d, Algorithm: Search starts from the first node\n", START_FIRST_NODE);
+    printf("Code: %d, Algorithm: Search starts from a random node\n", START_RANDOM_NODE);
+	printf("Code: %d, Algorithm: Search starts from a node you select\n", SELECT_STARTING_NODE);
+	printf("Code: %d, Algorithm: Search will be performed starting from any node, the best solution is returned\n", BEST_START);
+    printf("\n");
+    
+}/* algorithmLegend */
+
+/*
+* IP conf configuration code
+*/
+void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol){
+
+	switch (conf){
+	    case START_FIRST_NODE:
+	        NN_solverV2(0, inst, sol);
+	        break;
+	    case START_RANDOM_NODE:
+	        NN_solverV2(rand0N((*inst).dimension), inst, sol);
+	        break;
+		case SELECT_STARTING_NODE:
+						/* i-th node in position i - 1 */
+			NN_solverV2(readIntRange(1, inst->dimension, "Insert starting node: ") - 1, inst, sol);
+	        break;
+		case BEST_START:
+			/* TO IMPLEMENT */
+			break;
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+	        break;
+    }
+
+}/* runConfiguration */
+
+/*
 * IP set settings
 * IP inst tsp instance
 * IOP sol solution
 * OP false if found a valid solution, true otherwise.
 */
 void nearestNeighborV2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-    
-	int i;
+	
+	int conf;
 
-	i = readIntRange(1, inst->dimension, "Insert starting node: ") - 1; /* i-th node in position i - 1 */
+	algorithmConfigurations();
 
-	NN_solverV2(i, inst, sol);
+	conf = readInt("Insert the configuration code you want to run: ");
+
+	runConfiguration(conf, inst, sol);
 
 }/* nearestNeighborV2 */
