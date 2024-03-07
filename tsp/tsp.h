@@ -58,3 +58,5 @@ double getSolCost(const TSPInstance*, const TSPSolution*);
 bool checkSol(const TSPInstance*, const TSPSolution*);
 
 bool isDistinct(int, int*);
+
+void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
