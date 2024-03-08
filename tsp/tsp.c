@@ -38,8 +38,10 @@ double getSolCost(const TSPInstance* inst, const TSPSolution* sol){
 	int i;
 	double cost = 0;
 
-	for(i = 0; i < inst->dimension; i++)
-        cost += getDist(i, (i + 1) % inst->dimension, inst);
+	for(i = 0; i < inst->dimension; i++){
+		int s = (*sol).succ[i], t = (*sol).succ[(i + 1) % inst->dimension];
+        cost += getDist(s, t, inst);
+	}/* for */
 
 	return cost;
 
