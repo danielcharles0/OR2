@@ -180,6 +180,7 @@ void printInst(const TSPInstance* inst){
 void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     
 	int i;
+    Point2D* p;
     
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
 	
@@ -194,10 +195,13 @@ void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
 
     for(i = 0; i < inst->dimension; i++){
-        int idx = sol->succ[i];
-        fprintf(gnuplotPipe, "%f %f\n", (inst->points[idx]).x, (inst->points[idx]).y);
+        p = &(inst->points[sol->succ[i]]);
+        fprintf(gnuplotPipe, "%f %f\n", p->x, p->y);
     }
-    fprintf(gnuplotPipe, "%f %f\n", (inst->points[0]).x, (inst->points[0]).y); /* connect last to first */
+    
+    p = &(inst->points[sol->succ[0]]);
+
+    fprintf(gnuplotPipe, "%f %f\n", p->x, p->y); /* connect last to first */
 
     fprintf(gnuplotPipe, "e\n");
 
@@ -329,4 +333,5 @@ bool isDistinct(int n, int* arr){
     free(counters);
 
     return distinct;
-}
+
+}/* isDistinct */

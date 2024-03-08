@@ -69,19 +69,15 @@ void NN_initSol(int sp, const TSPInstance* inst, TSPSolution* sol){
 */
 int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
     
-	int len=1;
+	int curr;
     clock_t start = clock();
 
     NN_initSol(sp, inst, sol);
     
-    while(len < inst->dimension){
+   for(curr=1; curr<inst->dimension; curr++)
+        visitNext(curr, inst, sol);
 
-        visitNext(len, inst, sol);
-
-        len++;
-    }
-
-    sol->val += getDist(sol->succ[0], sol->succ[len-1], inst); /* add cost of connection of last to first node */
+    sol->val += getDist(sol->succ[0], sol->succ[curr-1], inst); /* add cost of connection of last to first node */
 
     return getSeconds(start, clock());
 
