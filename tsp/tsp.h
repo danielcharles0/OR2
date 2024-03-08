@@ -43,8 +43,6 @@ void computeDistances(TSPInstance*);
 
 void printInst(const TSPInstance*);
 
-void plotSolution(const TSPSolution*, const TSPInstance*);
-
 void algorithmLegend(void);
 
 bool run(int, const TSPInstance*, TSPSolution*, const Settings*);

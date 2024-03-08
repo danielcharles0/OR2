@@ -12,6 +12,7 @@
 #include "tsp/input/reader/reader.h"
 #include "tsp/input/generator/generator.h"
 #include "tsp/utility/utility.h"
+#include "tsp/output/output.h"
 
 /*
 * IP inst tsp instance

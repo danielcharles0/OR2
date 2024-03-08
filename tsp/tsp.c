@@ -174,42 +174,6 @@ void printInst(const TSPInstance* inst){
 }/* printInst */
 
 /*
-* IP sol solution to plot
-* OV hamiltonian path
-*/
-void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
-    
-	int i;
-    Point2D* p;
-    
-    FILE *gnuplotPipe = popen("gnuplot -persist", "w");
-	
-    if (gnuplotPipe == NULL) {
-        fprintf(stderr, "Error opening Gnuplot pipe\n");
-        return;
-    }
-
-    fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
-    fprintf(gnuplotPipe, "set xlabel 'X'\n");
-    fprintf(gnuplotPipe, "set ylabel 'Y'\n");
-    fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
-
-    for(i = 0; i < inst->dimension; i++){
-        p = &(inst->points[sol->succ[i]]);
-        fprintf(gnuplotPipe, "%f %f\n", p->x, p->y);
-    }
-    
-    p = &(inst->points[sol->succ[0]]);
-
-    fprintf(gnuplotPipe, "%f %f\n", p->x, p->y); /* connect last to first */
-
-    fprintf(gnuplotPipe, "e\n");
-
-    pclose(gnuplotPipe);
-
-}/* plotSolution */
-
-/*
 * Print algorithm legend.
 */
 void algorithmLegend(void){
