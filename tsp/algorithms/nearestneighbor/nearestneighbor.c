@@ -47,32 +47,32 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
 }/* minDistNode */
 
 /*
+* IP sp starting point index
 * IP inst tsp instance
 * IOP sol tsp solution allocated and initialized with starting node in first position
 */
-void NN_initSol(const TSPInstance* inst, TSPSolution* sol){
-
-	int i;
+void NN_initSol(int sp, const TSPInstance* inst, TSPSolution* sol){
 
     ascendentSol(inst, sol);
 
     sol->val = 0;
-    
-	i = readIntRange(1, inst->dimension, "Insert starting node") - 1; 
 
-    swapInt(&(sol->succ[0]), &(sol->succ[i])); 
+    swapInt(&(sol->succ[0]), &(sol->succ[sp])); 
 
 }/* initSol */
 
 /*
+* IP sp starting point index
 * IP inst tsp instance to solve
 * IOP sol tsp solution
 * OR time at which solution was found
 */
-int NN_solver(const TSPInstance* inst, TSPSolution* sol){
+int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
     
 	int len=1;
     clock_t start = clock();
+
+    NN_initSol(sp, inst, sol);
     
     while(len < inst->dimension){
 
@@ -88,22 +88,6 @@ int NN_solver(const TSPInstance* inst, TSPSolution* sol){
 }/* NN_solver */
 
 /*
-* IP set settings
-* IP inst tsp instance
-* IOP sol solution
-* OR false if found a valid solution, true otherwise.
-*/
-void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-    
-	int time;
-
-    NN_initSol(inst, sol);
-
-    time = NN_solver(inst, sol);
-
-}/* nearestNeighbor */
-
-/*
 * IP sn starting node index
 * IP inst tsp instance
 * OP sol tsp solution initialized with starting node in first position
@@ -111,6 +95,8 @@ void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* 
 void initSolV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 
     ascendentSol(inst, sol);
+
+    (*sol).val = 0;
 
     swapInt((*sol).succ, &((*sol).succ[sn])); 
 
@@ -154,8 +140,6 @@ void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 
 	initSolV2(sn, inst, sol);
 
-	(*sol).val = 0;
-
 	for(i = 1; i < (*inst).dimension - 1; i++){
 		
 		int idx, curr = (*sol).succ[i - 1], *ps = &((*sol).succ[i]);
@@ -174,7 +158,7 @@ void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 /*
 * Print algorithm configurations.
 */
-void algorithmConfigurations(){
+void algorithmConfigurations(void){
     
     printf("Available nearest neighbor search configurations:\n");
     printf("Code: %d, Algorithm: Search starts from the first node\n", START_FIRST_NODE);
@@ -196,11 +180,11 @@ void best_start(const TSPInstance* inst, TSPSolution* sol){
 
 	allocSol((*inst).dimension, &temp);
 	
-	NN_solverV2(0, inst, sol);
+	NN_solver(0, inst, sol);
 
 	for(i = 1; i < (*inst).dimension; i++){
 		
-		NN_solverV2(i, inst, &temp);
+		NN_solver(i, inst, &temp);
 
 		if(temp.val < (*sol).val)
 			cpSol(inst, &temp, sol);
@@ -218,14 +202,14 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 
 	switch (conf){
 	    case START_FIRST_NODE:
-	        NN_solverV2(0, inst, sol);
+	        NN_solver(0, inst, sol);
 	        break;
 	    case START_RANDOM_NODE:
-	        NN_solverV2(rand0N((*inst).dimension), inst, sol);
+	        NN_solver(rand0N((*inst).dimension), inst, sol);
 	        break;
 		case SELECT_STARTING_NODE:
 						/* i-th node in position i - 1 */
-			NN_solverV2(readIntRange(1, inst->dimension, "Insert starting node: ") - 1, inst, sol);
+			NN_solver(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
 	        break;
 		case BEST_START:
 			best_start(inst, sol);
@@ -243,7 +227,7 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 * IOP sol solution
 * OP false if found a valid solution, true otherwise.
 */
-void nearestNeighborV2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	int conf;
 
@@ -253,4 +237,4 @@ void nearestNeighborV2(const Settings* set, const TSPInstance* inst, TSPSolution
 
 	runConfiguration(conf, inst, sol);
 
-}/* nearestNeighborV2 */
+}/* nearestNeighbor */
