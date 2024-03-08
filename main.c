@@ -49,6 +49,7 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 * OR boolean false if there was some error, true otherwise.
 */
 bool runConfig(CONF config, const Settings* set){
+	
 	int error;
     TSPInstance inst;
 
@@ -94,7 +95,8 @@ bool runConfig(CONF config, const Settings* set){
   ).
 */
 int main(int argc, char* const* argv){
-    Settings set;
+    
+	Settings set;
     CONF config; 
 
     printf("Program started...\n\n");

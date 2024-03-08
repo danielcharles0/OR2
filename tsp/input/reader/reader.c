@@ -55,9 +55,11 @@ int readInstance(const Settings* set, TSPInstance* inst){
             for(i=0; i<inst->dimension; i++)
                 fscanf(file, "%d %lf %lf", &dummy, &((inst->points[i]).x), &((inst->points[i]).y));
         }
-    }
+    }	
 
-    fclose(file); 
+    fclose(file);
+
+	computeDistances(inst);
 
     return 0;  
 

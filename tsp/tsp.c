@@ -155,6 +155,7 @@ void freeSol(TSPSolution* sol){
 * IP inst instance to print
 */
 void printInst(const TSPInstance* inst){
+	
 	int i;
 
     printf("Instance:\n");
