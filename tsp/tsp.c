@@ -238,6 +238,10 @@ bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set
 	        return true;
     }
 
+    if(set->v && !checkSol(inst, sol)){
+        printf("Error: invalid solution.\n");
+        error = true;
+    }
     return error;
 
 }/* run */

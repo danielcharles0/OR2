@@ -34,10 +34,9 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
     if(error)
         return;
 
-    if(set->v){
+    if(set->v)
         plotSolution(&sol, inst);
-        /* printSolutionTime(sol) */
-    }
+    
 
     freeSol(&sol);
 
