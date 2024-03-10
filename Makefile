@@ -1,5 +1,5 @@
 STD_FLAGS = -ansi -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -44,11 +44,14 @@ main: $(OBJS)
 ./obj/random.o: ./tsp/algorithms/random/random.h ./tsp/algorithms/random/random.c
 	gcc $(FLAGS) ./tsp/algorithms/random/random.c -o ./obj/random.o
 
+./obj/2opt.o: ./tsp/algorithms/refinement/2opt/2opt.h ./tsp/algorithms/refinement/2opt/2opt.c
+	gcc $(FLAGS) ./tsp/algorithms/refinement/2opt/2opt.c -o ./obj/2opt.o
+
 debug:
 	make DEBUG=1
 
 clean:
-	rm ./obj/*.o main
+	rm -f ./obj/*.o main
 
 rebuild:
 	make clean && make

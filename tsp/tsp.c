@@ -11,6 +11,7 @@
 
 #include "tsp.h"
 #include "./utility/utility.h"
+#include "algorithms/refinement/2opt/2opt.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 #include "utility/utility.h"
@@ -192,7 +193,7 @@ void algorithmLegend(void){
 * IP set settings
 * OP error true if an error occurred, false otherwise.
 */
-bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
+bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
 	bool error = false;
     
@@ -212,6 +213,9 @@ bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set
         printf("Error: invalid solution.\n");
         error = true;
     }
+
+	runRefinement();
+
     return error;
 
 }/* run */

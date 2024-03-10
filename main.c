@@ -31,14 +31,10 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 	allocSol(inst->dimension, &sol);
 
     error = run(alg, inst, &sol, set);
-    
-    if(error)
-        return;
 
-    if(set->v)
+    if(!error && set->v)
         plotSolution(&sol, inst);
     
-
     freeSol(&sol);
 
 }/* runAlgorithm */
@@ -55,7 +51,6 @@ bool runConfig(CONF config, const Settings* set){
 
     switch(config){
         case INPUT_FILE:
-			/* TO BE COMPLETED */
             error = readInstance(set, &inst);
             if(error){
                 if(error == -1)
@@ -75,7 +70,6 @@ bool runConfig(CONF config, const Settings* set){
             return 0;
     }
 
-	/* TO BE COMPLETED */
 	if((*set).v)
 		printInst(&inst);
 

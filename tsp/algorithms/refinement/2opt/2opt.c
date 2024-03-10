@@ -4,3 +4,7 @@
 * IDs      : 2060685, 2088626
 * File     : 2opt.c
 */
+
+void runRefinement(){
+
+}/* runRefinement */
