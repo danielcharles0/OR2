@@ -20,7 +20,7 @@
 */
 void runAlgorithm(const TSPInstance* inst, const Settings* set){
     
-	int alg;
+	ALGORITHM alg;
     bool error;
     TSPSolution sol;
 	
@@ -32,8 +32,11 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 
     error = run(alg, inst, &sol, set);
 
-    if(!error && set->v)
+	if(error || (set->v && !checkSol(inst, &sol))){
+		printf("Error: invalid solution.\n");
+	}else if (set->v){
         plotSolution(&sol, inst);
+	}/* if */
     
     freeSol(&sol);
 

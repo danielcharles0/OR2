@@ -187,9 +187,17 @@ void algorithmLegend(void){
 }/* algorithmLegend */
 
 /*
+* IP alg algorithm
+* OR true if it is an exact method, false otherwise
+*/
+bool isExactMethod(ALGORITHM alg){
+	return alg > __END_HEURISTIC;
+}/* isExactMethod */
+
+/*
 * IP alg algorithm to run
 * IP inst tsp instance
-* IOP sol solution 
+* IOP sol solution
 * IP set settings
 * OP error true if an error occurred, false otherwise.
 */
@@ -209,12 +217,8 @@ bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Setting
 	        return true;
     }
 
-    if(set->v && !checkSol(inst, sol)){
-        printf("Error: invalid solution.\n");
-        error = true;
-    }
-
-	runRefinement();
+	if(!isExactMethod(alg))
+		runRefinement(inst, sol);
 
     return error;
 

@@ -5,4 +5,10 @@
 * File     : 2opt.h
 */
 
-void runRefinement();
+#include "../../../tsp.h"
+
+typedef enum {
+    OPT2
+} REFINEMENT_ALGORITHM;
+
+void runRefinement(const TSPInstance* inst, TSPSolution* sol);
