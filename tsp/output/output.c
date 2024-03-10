@@ -27,10 +27,11 @@ void plotSettings(FILE* gnuplotPipe){
 * IP sol solution to bw plotted
 */
 void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* sol){
-
+	
+	int i;
     Point2D* p;
 
-    for(int i = 0; i < inst->dimension; i++){
+    for(i = 0; i < inst->dimension; i++){
         p = &(inst->points[sol->succ[i]]);
         fprintf(gnuplotPipe, "%f %f\n", p->x, p->y);
     }
