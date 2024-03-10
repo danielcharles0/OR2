@@ -106,8 +106,10 @@ void opt2(const TSPInstance* inst, TSPSolution* sol){
 bool runRefAlg(REFINEMENT_ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol){
     
     switch (alg){
+		case SKIP:
+			break;
 	    case OPT2:
-	        /*randomSol(inst, sol);*/
+	        opt2(inst, sol);
 	        break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
@@ -124,7 +126,8 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const TSPInstance* inst, TSPSolution* s
 void refinementaAlgorithmLegend(void){
 
 	printf("Available refinement algorithms:\n");
-    printf("Code: %d, Algorithm: Just a random solution\n", OPT2);
+	printf("Code: %d to skip refinement\n", SKIP);
+    printf("Code: %d, Algorithm: 2opt refinement method\n", OPT2);
     printf("\n");
 
 }/* refinementaAlgorithmLegend */

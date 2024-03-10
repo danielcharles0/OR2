@@ -8,6 +8,7 @@
 #include "../../../tsp.h"
 
 typedef enum {
+	SKIP,
     OPT2
 } REFINEMENT_ALGORITHM;
 
