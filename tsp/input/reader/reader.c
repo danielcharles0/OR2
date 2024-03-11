@@ -19,6 +19,7 @@
    0: success;
    1: error;
 )
+* resource: http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/
 */
 int readInstance(const Settings* set, TSPInstance* inst){
     
