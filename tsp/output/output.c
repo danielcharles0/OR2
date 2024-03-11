@@ -14,7 +14,8 @@
 */
 void plotSettings(FILE* gnuplotPipe){
 
-    fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
+    fprintf(gnuplotPipe, "set term qt font \"Arial\"\n");
+	fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
     fprintf(gnuplotPipe, "set xlabel 'X'\n");
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
@@ -27,10 +28,11 @@ void plotSettings(FILE* gnuplotPipe){
 * IP sol solution to bw plotted
 */
 void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* sol){
-
+	
+	int i;
     Point2D* p;
 
-    for(int i = 0; i < inst->dimension; i++){
+    for(i = 0; i < inst->dimension; i++){
         p = &(inst->points[sol->succ[i]]);
         fprintf(gnuplotPipe, "%f %f\n", p->x, p->y);
     }

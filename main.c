@@ -22,7 +22,7 @@
 */
 void runAlgorithm(const TSPInstance* inst, const Settings* set){
     
-	int alg;
+	ALGORITHM alg;
     bool error;
     TSPSolution sol;
 	
@@ -33,16 +33,15 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 	allocSol(inst->dimension, &sol);
 
     error = run(alg, inst, &sol, set);
+
+	if(error || (set->v && !checkSol(inst, &sol))){
+		printf("Error: invalid solution.\n");
+	}else if (set->v){
+        plotSolution(inst, &sol);
+        opt2_v2(inst, &sol); /* TEST */
+        plotSolution(inst, &sol);
+	}/* if */
     
-    if(error)
-        return;
-
-    if(set->v){
-        plotSolution(inst, &sol);
-        opt2(inst, &sol);
-        plotSolution(inst, &sol);
-    }
-
     freeSol(&sol);
 
 }/* runAlgorithm */
@@ -59,7 +58,6 @@ bool runConfig(CONF config, const Settings* set){
 
     switch(config){
         case INPUT_FILE:
-			/* TO BE COMPLETED */
             error = readInstance(set, &inst);
             if(error){
                 if(error == -1)
@@ -79,7 +77,6 @@ bool runConfig(CONF config, const Settings* set){
             return 0;
     }
 
-	/* TO BE COMPLETED */
 	if((*set).v)
 		printInst(&inst);
 

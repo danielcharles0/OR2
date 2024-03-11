@@ -51,7 +51,7 @@ debug:
 	make DEBUG=1
 
 clean:
-	rm ./obj/*.o main
+	rm -f ./obj/*.o main
 
 rebuild:
 	make clean && make

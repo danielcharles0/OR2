@@ -26,9 +26,12 @@ typedef struct {
     double val;	/* val  := value of the cost of the solution $succ */
 } TSPSolution;
 
-typedef enum{
+typedef enum {
     RANDOM,
-    NEAREST_NEIGHBOR
+    NEAREST_NEIGHBOR,
+	/* HERE MORE HEURISTIC */
+	__END_HEURISTIC
+	/* HERE EXACT METHODS */
 } ALGORITHM;
 
 void allocInst(int, TSPInstance*);
@@ -45,7 +48,7 @@ void printInst(const TSPInstance*);
 
 void algorithmLegend(void);
 
-bool run(int, const TSPInstance*, TSPSolution*, const Settings*);
+bool run(ALGORITHM, const TSPInstance*, TSPSolution*, const Settings*);
 
 double getDist(int, int, const TSPInstance*);
 

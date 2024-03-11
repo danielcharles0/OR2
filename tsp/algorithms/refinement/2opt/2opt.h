@@ -7,4 +7,11 @@
 
 #include "../../../tsp.h"
 
-void opt2(const TSPInstance*, TSPSolution*);
+typedef enum {
+	SKIP,
+    OPT2
+} REFINEMENT_ALGORITHM;
+
+void runRefinement(const TSPInstance* inst, TSPSolution* sol);
+
+void opt2_v2(const TSPInstance*, TSPSolution*);

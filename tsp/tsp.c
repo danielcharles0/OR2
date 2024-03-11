@@ -11,6 +11,7 @@
 
 #include "tsp.h"
 #include "./utility/utility.h"
+#include "algorithms/refinement/2opt/2opt.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 #include "utility/utility.h"
@@ -186,13 +187,21 @@ void algorithmLegend(void){
 }/* algorithmLegend */
 
 /*
+* IP alg algorithm
+* OR true if it is an exact method, false otherwise
+*/
+bool isExactMethod(ALGORITHM alg){
+	return alg > __END_HEURISTIC;
+}/* isExactMethod */
+
+/*
 * IP alg algorithm to run
 * IP inst tsp instance
-* IOP sol solution 
+* IOP sol solution
 * IP set settings
 * OP error true if an error occurred, false otherwise.
 */
-bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
+bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
 	bool error = false;
     
@@ -208,10 +217,9 @@ bool run(int alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set
 	        return true;
     }
 
-    if(set->v && !checkSol(inst, sol)){
-        printf("Error: invalid solution.\n");
-        error = true;
-    }
+	if(!isExactMethod(alg))
+		runRefinement(inst, sol);
+
     return error;
 
 }/* run */
