@@ -7,4 +7,4 @@
 
 #include "../tsp.h"
 
-void plotSolution(const TSPSolution*, const TSPInstance*);
+void plotSolution(const TSPInstance*, const TSPSolution*);

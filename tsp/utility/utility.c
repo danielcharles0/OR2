@@ -127,3 +127,22 @@ int getSeconds(clock_t start, clock_t end){
     return (end - start) / CLOCKS_PER_SEC;
 
 }/* getSeconds */
+
+/*
+* IP start starting point of arr's sublist to invert
+* IP end ending point of arr's sublist to invert
+* IOP arr list to be inverted
+*/
+void invertList(int start, int end, int* arr){
+    
+    int delta = end - start;
+
+    while(delta > 0){
+
+        swapInt(&(arr[start]), &(arr[end]));
+
+        delta = (--end) - (++start);
+
+    }
+    
+}/* invertList */

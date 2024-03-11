@@ -14,6 +14,8 @@
 #include "tsp/utility/utility.h"
 #include "tsp/output/output.h"
 
+#include "tsp/algorithms/refinement/2opt/2opt.h"
+
 /*
 * IP inst tsp instance
 * IP set settings
@@ -35,9 +37,11 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
     if(error)
         return;
 
-    if(set->v)
-        plotSolution(&sol, inst);
-    
+    if(set->v){
+        plotSolution(inst, &sol);
+        opt2(inst, &sol);
+        plotSolution(inst, &sol);
+    }
 
     freeSol(&sol);
 

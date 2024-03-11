@@ -44,10 +44,11 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 }/* plotNodes */
 
 /*
+* IP inst tsp instance
 * IP sol solution to plot
 * OV hamiltonian path
 */
-void plotSolution(const TSPSolution* sol, const TSPInstance* inst){
+void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
     
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
 	
