@@ -17,7 +17,7 @@
 * OR the cost of the move
 */
 double delta2OptMoveCost(int i, int j, const TSPInstance* inst, const TSPSolution* sol){
-	/* CHECK OVERFLOW OF INDEXES */
+	
 	int a = (*sol).succ[i], a1 = (*sol).succ[(i + 1) % (*inst).dimension], b = (*sol).succ[j], b1 = (*sol).succ[(j + 1) % (*inst).dimension];
 
 	return getDist(a, b, inst) + getDist(a1, b1, inst) - (getDist(a, a1, inst) + getDist(b, b1, inst));
@@ -29,10 +29,13 @@ double delta2OptMoveCost(int i, int j, const TSPInstance* inst, const TSPSolutio
 * IP j sol->succ second index of the move
 * IP inst tsp instance
 * IOP sol refined solution
+* NB: it assumes i < j
 */
 void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 	
 	int s = i + 1, t = j;
+
+	(*sol).val += delta2OptMoveCost(i, j, inst, sol);
 
 	/* Note that the number of swaps performed is equal to floor((j - i - 1) / 2) */
 	while(s < t){
@@ -40,8 +43,6 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 		s++;
 		t--;
 	}/* while */
-
-	(*sol).val += delta2OptMoveCost(i, j, inst, sol);
 
 }/* opt2move */
 
@@ -65,7 +66,6 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 	for(j = 3; j < (*inst).dimension - 1; j++)
 												/* j < (*inst).dimension - 1 avoids to take a = b1 */
 		if((temp = delta2OptMoveCost(i, j, inst, sol)) < optcost){
-			*opti = i;
 			*optj = j;
 			optcost = temp;
 		}/* if */
@@ -152,11 +152,6 @@ void runRefinement(const TSPInstance* inst, TSPSolution* sol){
     runRefAlg(getRefAlg(), inst, sol);
 
 }/* runRefinement */
-
-
-
-
-
 
 /*
 * IP inst tsp instance

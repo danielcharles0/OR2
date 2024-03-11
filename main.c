@@ -36,11 +36,11 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 
 	if(error || (set->v && !checkSol(inst, &sol))){
 		printf("Error: invalid solution.\n");
-	}else if (set->v){
+	}else if (set->v)/*{*/
         plotSolution(inst, &sol);
-        opt2_v2(inst, &sol); /* TEST */
+        /*opt2_v2(inst, &sol);
         plotSolution(inst, &sol);
-	}/* if */
+	}*//* if */
     
     freeSol(&sol);
 
