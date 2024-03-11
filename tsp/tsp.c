@@ -246,17 +246,11 @@ double getDist(int i, int j, const TSPInstance* inst){
 * OP valid true if valid solution, false otherwise.
 */
 bool checkSol(const TSPInstance* inst, const TSPSolution* sol){
-    bool distinct;
-    double cost;
 
-    distinct = isDistinct(inst->dimension, sol->succ);
-
-    if(!distinct)
+    if(!isDistinct(inst->dimension, sol->succ))
         return false;
-    
-    cost = getSolCost(inst, sol);
 
-    return isEqual(sol->val, cost);    
+    return isEqual(sol->val, getSolCost(inst, sol));    
 
 }/* checkSol */
 
@@ -283,27 +277,23 @@ void cpSol(const TSPInstance* inst, const TSPSolution* source, TSPSolution* dest
 * OP distinct true if each element appears once, false otherwise.
 */
 bool isDistinct(int n, int* arr){
-    int i;
-    bool distinct = true;
+    
+	int i;
 
     int* counters = malloc(n * sizeof(int));
     assert(counters != NULL);
 
-    for(i=0; i<n; i++){
-        if(arr[i] < 0 || arr[i] >= n){
-            free(counters);
-            return false;
-        }
-
-        ++counters[arr[i]];
-    }
-    for(i=0; i<n; i++){
-        if(counters[i] != 1)
-            distinct = false;
-    }
+	for(i = 0; i < n; i++)
+		counters[i] = 0;
+	
+	for(i = 0; i < n; i++)
+		if(arr[i] < 0 || arr[i] >= n || ++counters[arr[i]] > 1){
+			free(counters);
+			return false;
+		}/* if */
 
     free(counters);
 
-    return distinct;
+    return true;
 
 }/* isDistinct */
