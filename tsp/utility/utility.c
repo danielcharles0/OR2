@@ -146,3 +146,30 @@ void invertList(int start, int end, int* arr){
     }
     
 }/* invertList */
+
+/*
+* IP n dividend
+* IP d divisor
+* OP r = n % d
+* OR q = n / d
+* reference: https://stackoverflow.com/questions/63750121/is-it-possible-to-get-both-the-modulus-and-quotient-of-division-in-a-single-oper
+*/
+int division(int n, int d, int* r){
+	*r = n % d;
+	return n / d;
+}/* div */
+
+/*
+* IP lab label for the output
+* IP sec seconds to print
+* OV the label $lab concatenated with the formatted time stamp
+*/
+void printSeconds(const char lab[], int sec){
+
+	int fsec, fmin, fhour;
+
+	fhour = division(division(sec, 60, &fsec), 60, &fmin);
+
+	printf("%s%2dh %2dm %2ds\n", lab, fhour, fmin, fsec);
+
+}/* printSeconds */

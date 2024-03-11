@@ -24,6 +24,8 @@ bool isEqual(double, double);
 
 int getSeconds(clock_t, clock_t);
 
+void printSeconds(const char[], int);
+
 int readIntRange(int, int, const char[]);
 
 void invertList(int, int, int*);
