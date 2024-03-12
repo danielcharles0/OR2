@@ -47,7 +47,8 @@ void help(){
     printf("\tParameter <timelimit_value> accepts only strictly positive integer values\n");
     printf("\tParameter <seed_value> accepts only positive integer values\n");
     printf("\tParameter <number_of_nodes> accepts only integer values strictly greater than 2\n");
-    printf("\tOption help must be specified itself\n\n");
+    printf("\tIf you want to execute a refinement method you need first to compute a solution with one of the available approaches\n");
+	printf("\tOption help must be specified itself\n\n");
 
 }/* help */
 
@@ -166,13 +167,9 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
     if(optopt) /* if the library recognize an error stores the option character into the variable optopt */
         printf("\n");
 
-    if(curr <= __VALID_END_STATES){
+    if(!isFinal(curr)){
         help();
-
-        if(curr == H)
-            return HELP;
-        
-        return ERROR;
+        return (curr == H) ? HELP : ERROR;
     }/* if */
 
     if((*set).n == 0)
