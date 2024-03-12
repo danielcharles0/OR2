@@ -29,3 +29,7 @@ void printSeconds(const char[], int);
 int readIntRange(int, int, const char[]);
 
 void invertList(int, int, int*);
+
+bool isTimeOut(clock_t, int);
+
+bool isTimeOutWarning(const char[], clock_t, int);

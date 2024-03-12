@@ -24,11 +24,10 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
     
     bool error;
     TSPSolution sol;
-	
-    algorithmLegend();
 
 	allocSol(inst->dimension, &sol);
 
+	algorithmLegend();
     error = run(readInt("Insert the code of the algorithm you want to run: "), inst, &sol, set);
 
 	if(error || (set->v && !checkSol(inst, &sol))){
