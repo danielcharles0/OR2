@@ -22,17 +22,14 @@
 */
 void runAlgorithm(const TSPInstance* inst, const Settings* set){
     
-	ALGORITHM alg;
     bool error;
     TSPSolution sol;
 	
     algorithmLegend();
 
-    alg = readInt("Insert the code of the algorithm you want to run: ");
-
 	allocSol(inst->dimension, &sol);
 
-    error = run(alg, inst, &sol, set);
+    error = run(readInt("Insert the code of the algorithm you want to run: "), inst, &sol, set);
 
 	if(error || (set->v && !checkSol(inst, &sol))){
 		printf("Error: invalid solution.\n");

@@ -7,4 +7,4 @@
 
 #include "../../tsp.h"
 
-void randomSol(const TSPInstance*, TSPSolution*);
+int randomSol(const TSPInstance*, TSPSolution*);

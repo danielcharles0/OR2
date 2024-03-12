@@ -8,8 +8,14 @@
 #include "random.h"
 #include "../../utility/utility.h"
 
-void randomSol(const TSPInstance* inst, TSPSolution* sol){
+/*
+* IP inst tsp instance to solve
+* IOP sol random solution
+* OR int execution seconds 
+*/
+int randomSol(const TSPInstance* inst, TSPSolution* sol){
 	
+	clock_t start = clock();
 	int i;
 
 	ascendentSol(inst, sol);
@@ -23,5 +29,7 @@ void randomSol(const TSPInstance* inst, TSPSolution* sol){
 	}/* for */
 
 	(*sol).val = getSolCost(inst, sol);
+
+	return getSeconds(start, clock());
 
 }/* random */
