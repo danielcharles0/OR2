@@ -10,7 +10,7 @@
 #include <math.h>
 #include "utility.h"
 
-#define EPSILON 1e-9
+#define EPSILON 1e-7
 #define PROCESS_BAR_PRECISION 20
 #define PROCESS_BAR_COMPLETED_CHARACTER '#'
 #define PROCESS_BAR_TO_COMPLETE_CHARACTER '-'
