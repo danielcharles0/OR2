@@ -50,3 +50,11 @@ FSM_STATES delta(FSM_STATES curr, char symbol){
     return MACHINE[curr][(int)symbol];
 
 }/* delta */
+
+/*
+* IP s state
+* OR true if is a final state, false otherwise
+*/
+bool isFinal(FSM_STATES s){
+	return __VALID_END_STATES < s && s < __LAST_STATE;
+}/* isFinal */

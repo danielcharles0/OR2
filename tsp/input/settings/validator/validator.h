@@ -5,6 +5,8 @@
 * File     : validator.h
 */
 
+#include <stdbool.h>
+
 #define ALPHABET_CARDINALITY 7
 
 typedef enum {
@@ -39,3 +41,5 @@ typedef enum {
 } FSM_STATES;
 
 FSM_STATES delta(FSM_STATES, char);
+
+bool isFinal(FSM_STATES);
