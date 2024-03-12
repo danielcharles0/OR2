@@ -56,3 +56,5 @@ main
 .vscode
 TODO.md
 instance
+*.test
+trash

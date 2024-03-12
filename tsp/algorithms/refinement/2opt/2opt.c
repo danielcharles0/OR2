@@ -44,12 +44,6 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 		t--;
 	}/* while */
 
-	if(!isEqual(sol->val, getSolCost(inst, sol))){
-			printf("\nV1 INVALID SOLUTION:\n");
-			printf("\ti = %d, j = %d\n", i, j);
-			printf("\t%.9f == %.9f ? %s\n", sol->val, getSolCost(inst, sol), (isEqual(sol->val, getSolCost(inst, sol)) ? "true" : "false"));
-		}
-
 }/* opt2move */
 
 /*
@@ -63,7 +57,8 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 */
 double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti, int* optj){
 	
-	int i = 0, j = 2, optcost, temp;
+	int i = 0, j = 2;
+	double optcost, temp;
 
 	*opti = i;
 	*optj = j;
@@ -99,9 +94,8 @@ int opt2(const TSPInstance* inst, TSPSolution* sol){
 
 	clock_t start = clock();
 	int opti, optj; /* opti and optj are indexes in the sol->succ array */
-	double delta_cost;
 	
-	while((delta_cost = getOpt2OptMove(inst, sol, &opti, &optj)) < 0)
+	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0)
 		opt2move(opti, optj, inst, sol);
 	
 	return getSeconds(start, clock());
