@@ -150,6 +150,27 @@ void runRefinement(const TSPInstance* inst, TSPSolution* sol){
 }/* runRefinement */
 
 /*
+*
+*/
+double computeDelta(int i, int j, const TSPInstance* inst){
+	
+	int n = inst->dimension;
+
+	int k1 = ((i-1) + n) % n; /* at first iteration i = 0 */
+	int k2 = (j+1) % n; /* at last iteration j = n-1 */
+
+	double old1 = getDist(k1, i, inst);
+	double old2 = getDist(j, k2, inst);
+	double new1 = getDist(k1, j, inst);
+	double new2 = getDist(i, k2, inst);
+
+	double delta = (old1 + old2) - (new1 + new2);
+
+	return delta;
+
+}/* computeChangeCost */
+
+/*
 * IP inst tsp instance
 * IP sol solution to be improved
 * IOP start index of starting point of $(sol->succ)'s sublist to invert
@@ -165,11 +186,8 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
     for(i=0; i<inst->dimension; i++){
         
         for(j=i+1; j<inst->dimension; j++){
-            double delta;
-
-            invertList(i, j, sol->succ);
             
-            delta = getSolCost(inst, sol) - cost_before_change;
+			double delta = computeDelta(sol->succ[i], sol->succ[j], inst);
             
             if(delta < min_delta){
                 min_delta = delta;
@@ -177,7 +195,6 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
                 *end = j;
             }
 
-            invertList(i, j, sol->succ); /* list back to initial state */
         }
 
     }
@@ -218,7 +235,8 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
 * IOP sol solution to be refined
 */
 void opt2_v2(const TSPInstance* inst, TSPSolution* sol){
-    bool improvement;
+    
+	bool improvement;
 
     do{
         improvement = refinement(inst, sol);
