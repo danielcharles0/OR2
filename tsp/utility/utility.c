@@ -173,3 +173,30 @@ void printSeconds(const char lab[], int sec){
 	printf("%s%2dh %2dm %2ds\n", lab, fhour, fmin, fsec);
 
 }/* printSeconds */
+
+/*
+* IP start starting execution time
+* IP tl time limit in seconds
+* OR true if the execution time exceeded the time limit, false otherwise
+*/
+bool isTimeOut(clock_t start, int tl){
+
+    return getSeconds(start, clock()) > tl;
+
+}/* isTimeOut */
+
+/*
+* IP war warning to print if timelimit exceeded
+* IP start starting execution time
+* IP tl time limit in seconds
+* OR true if the execution time exceeded the time limit, false otherwise
+*/
+bool isTimeOutWarning(const char war[], clock_t start, int tl){
+
+	if(!isTimeOut(start, tl))
+		return false;
+
+	printf("%s", war);
+	return true;
+
+}/* isTimeOutWarning */

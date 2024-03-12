@@ -14,6 +14,8 @@
 #include "../../utility/utility.h"
 #include "../refinement/2opt/2opt.h"
 
+#define TIMEOUT_WARNING_MESSAGE "Warning: The method exceeded the time limit! the solution that will be returned is the best founded so far\n\n"
+
 /*
 * Finds index of next node to visit (nearest neighbor), puts next node to visit close to last visited and updates cost of the solution.
 * IP len current index we have to update in $sol->succ
@@ -21,7 +23,8 @@
 * IOP sol solution we want to update
 */
 void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
-    int i;
+    
+	int i;
 
     int last = sol->succ[len-1];
     int curr = sol->succ[len];
@@ -88,7 +91,7 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
 * IP sp starting point index
 * IP inst tsp instance to solve
 * IOP sol tsp NN solution + 2opt
-* OR int execution seconds 
+* OR int execution seconds
 */
 int NN_solver_2opt(int sp, const TSPInstance* inst, TSPSolution* sol){
 	
@@ -186,12 +189,14 @@ void algorithmConfigurations(void){
 
 /*
 * IP inst tsp instance
-* OP sol solution
+* OP sol solution, the best founded within the time limit
+* OR int execution seconds
 */
-void best_start(const TSPInstance* inst, TSPSolution* sol){
-
-	int i;
+int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+	
+	clock_t start = clock();
 	TSPSolution temp;
+	int i;
 
 	allocSol((*inst).dimension, &temp);
 	
@@ -201,6 +206,11 @@ void best_start(const TSPInstance* inst, TSPSolution* sol){
 
 	for(i = 1; i < (*inst).dimension; i++){
 		
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
+			freeSol(&temp);
+			return getSeconds(start, clock());
+		}/* if */
+
 		NN_solver_2opt(i, inst, &temp);
 
 		opt2(inst, sol);
@@ -211,13 +221,15 @@ void best_start(const TSPInstance* inst, TSPSolution* sol){
 	}/* for */
 
 	freeSol(&temp);
+	
+	return getSeconds(start, clock());
 
 }/* best_start */
 
 /*
 * IP conf configuration code
 */
-void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol){
+void runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	switch (conf){
 	    case START_FIRST_NODE:
@@ -231,7 +243,7 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 			NN_solver_2opt(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
 	        break;
 		case BEST_START:
-			best_start(inst, sol);
+			best_start(set, inst, sol);
 			break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
@@ -250,6 +262,6 @@ void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* 
 
 	algorithmConfigurations();
 
-	runConfiguration(readInt("Insert the configuration code you want to run: "), inst, sol);
+	runConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
 
 }/* nearestNeighbor */
