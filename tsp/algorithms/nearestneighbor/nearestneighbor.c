@@ -200,12 +200,16 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	allocSol((*inst).dimension, &temp);
 	
+	if((*set).v)
+		processBar(0, (*inst).dimension);
+
 	NN_solver_2opt(0, inst, sol);
 
-	opt2(inst, sol);
+	if((*set).v)
+		processBar(1, (*inst).dimension);
 
 	for(i = 1; i < (*inst).dimension; i++){
-		
+
 		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
 			freeSol(&temp);
 			return getSeconds(start, clock());
@@ -213,10 +217,11 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 		NN_solver_2opt(i, inst, &temp);
 
-		opt2(inst, sol);
-
 		if(temp.val < (*sol).val)
 			cpSol(inst, &temp, sol);
+
+		if((*set).v)
+			processBar(i + 1, (*inst).dimension);
 			
 	}/* for */
 

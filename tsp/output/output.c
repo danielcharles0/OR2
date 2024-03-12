@@ -18,7 +18,7 @@ void plotSettings(FILE* gnuplotPipe){
 	fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
     fprintf(gnuplotPipe, "set xlabel 'X'\n");
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
-    fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 2 linewidth 2 notitle\n");
+    fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");
 
 }/* plotSettings */
 
