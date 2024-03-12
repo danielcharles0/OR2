@@ -30,7 +30,7 @@ static struct option long_options[] = {
 /*
 * OV help section
 */
-void help(){
+void help(void){
 
     printf("Options:\n");
 	                                                            /* remember that the last character contains the special EOS value '\0' */

@@ -44,6 +44,12 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 		t--;
 	}/* while */
 
+	if(!isEqual(sol->val, getSolCost(inst, sol))){
+			printf("\nV1 INVALID SOLUTION:\n");
+			printf("\ti = %d, j = %d\n", i, j);
+			printf("\t%.9f == %.9f ? %s\n", sol->val, getSolCost(inst, sol), (isEqual(sol->val, getSolCost(inst, sol)) ? "true" : "false"));
+		}
+
 }/* opt2move */
 
 /*
@@ -150,25 +156,38 @@ void runRefinement(const TSPInstance* inst, TSPSolution* sol){
 }/* runRefinement */
 
 /*
-*
+* Computes delta between new 
+* IP start index of a node
+* IP end index of a node that can have a crossing with $start
+* IP inst tsp instance
+* IP sol solution to be improved
+* OP delta difference between current cost and cost without crossing
 */
-double computeDelta(int i, int j, const TSPInstance* inst){
+double computeDelta(int start, int end, const TSPInstance* inst, const TSPSolution* sol){
 	
 	int n = inst->dimension;
 
-	int k1 = ((i-1) + n) % n; /* at first iteration i = 0 */
-	int k2 = (j+1) % n; /* at last iteration j = n-1 */
+	int a = (start+1) % n; 
+	int b = (end+1) % n; 
 
-	double old1 = getDist(k1, i, inst);
+	int i = sol->succ[start];
+	int j = sol->succ[end];
+	int k1 = sol->succ[a];
+	int k2 = sol->succ[b];
+
+	if(k2 == i || k1 == j || k1 == k2)
+		return 0;
+
+	double old1 = getDist(i, k1, inst);
 	double old2 = getDist(j, k2, inst);
-	double new1 = getDist(k1, j, inst);
-	double new2 = getDist(i, k2, inst);
+	double new1 = getDist(i, j, inst);
+	double new2 = getDist(k1, k2, inst);
 
-	double delta = (old1 + old2) - (new1 + new2);
+	double delta = (new1 + new2) - (old1 + old2);
 
 	return delta;
 
-}/* computeChangeCost */
+}/* computeDelta */
 
 /*
 * IP inst tsp instance
@@ -181,27 +200,26 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
     
     int i, j;
     double min_delta = 0;
-    double cost_before_change = getSolCost(inst, sol);
 
     for(i=0; i<inst->dimension; i++){
-        
-        for(j=i+1; j<inst->dimension; j++){
-            
-			double delta = computeDelta(sol->succ[i], sol->succ[j], inst);
+
+        for(j=i+2; j<inst->dimension; j++){
+
+			double delta = computeDelta(i, j, inst, sol);
             
             if(delta < min_delta){
                 min_delta = delta;
-                *start = i;
+                *start = i+1;
                 *end = j;
             }
-
+			
         }
 
     }
 
     return min_delta;
 
-}
+}/* testAllChanges */
 
 
 /*
@@ -220,8 +238,15 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
         
         invertList(start, end, sol->succ); /* apply index choices that give the best improvement */
         
-        sol->val = getSolCost(inst, sol);
-        
+        sol->val += min_delta;
+
+		if(!isEqual(sol->val, getSolCost(inst, sol))){
+			printf("\nV2 INVALID SOLUTION:\n");
+			printf("\ti = %d, j = %d\n", start, end);
+			printf("\t%.9f == %.9f ? %s\n", sol->val, getSolCost(inst, sol), (isEqual(sol->val, getSolCost(inst, sol)) ? "true" : "false"));
+			
+		}
+
         return true;
     }
 
@@ -233,13 +258,17 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
 * Refines solution removing crossings or other bad connections.
 * IP inst tsp instance
 * IOP sol solution to be refined
+* OR e
 */
-void opt2_v2(const TSPInstance* inst, TSPSolution* sol){
+int opt2_v2(const TSPInstance* inst, TSPSolution* sol){
     
+	clock_t start = clock();
 	bool improvement;
 
     do{
         improvement = refinement(inst, sol);
     } while(improvement);
+
+	return getSeconds(start, clock());
         
-}/* opt2 */
+}/* opt2_v2 */

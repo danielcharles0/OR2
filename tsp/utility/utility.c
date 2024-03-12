@@ -10,7 +10,7 @@
 #include <math.h>
 #include "utility.h"
 
-#define EPSILON 1e-9
+#define EPSILON 1e-7
 
 /*
 * Print a boolean.

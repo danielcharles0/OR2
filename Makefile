@@ -1,4 +1,4 @@
-STD_FLAGS = -ansi -Wall -pedantic -c
+STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
 OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o
 
 ifdef DEBUG
