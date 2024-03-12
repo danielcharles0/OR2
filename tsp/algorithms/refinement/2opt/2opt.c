@@ -86,14 +86,19 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 /*
 * IP inst tsp instance
 * IOP sol refined solution
+* OR int execution seconds
+* NB: this method will perform the best move, not just the first one that improve the solution cost
 */
-void opt2(const TSPInstance* inst, TSPSolution* sol){
+int opt2(const TSPInstance* inst, TSPSolution* sol){
 
+	clock_t start = clock();
 	int opti, optj; /* opti and optj are indexes in the sol->succ array */
 	double delta_cost;
-
+	
 	while((delta_cost = getOpt2OptMove(inst, sol, &opti, &optj)) < 0)
 		opt2move(opti, optj, inst, sol);
+	
+	return getSeconds(start, clock());
 
 }/* opt2 */
 
@@ -133,23 +138,14 @@ void refinementaAlgorithmLegend(void){
 }/* refinementaAlgorithmLegend */
 
 /*
-* OR the selected algorithm
-*/
-REFINEMENT_ALGORITHM getRefAlg(void){
-	
-	refinementaAlgorithmLegend();
-
-    return readInt("Insert the code of the refinement algorithm you want to run: ");
-
-}/* getRefinementAlg */
-
-/*
 * IP inst tsp instance
 * IOP sol solution to optimize
 */
 void runRefinement(const TSPInstance* inst, TSPSolution* sol){
+	
+	refinementaAlgorithmLegend();
 
-    runRefAlg(getRefAlg(), inst, sol);
+    runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), inst, sol);
 
 }/* runRefinement */
 

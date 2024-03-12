@@ -70,8 +70,8 @@ void NN_initSol(int sp, const TSPInstance* inst, TSPSolution* sol){
 */
 int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
     
+	clock_t start = clock();
 	int curr;
-    clock_t start = clock();
 
     NN_initSol(sp, inst, sol);
     
@@ -88,13 +88,17 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
 * IP sp starting point index
 * IP inst tsp instance to solve
 * IOP sol tsp NN solution + 2opt
-* OR time at which solution was found
+* OR int execution seconds 
 */
-void NN_solver_2opt(int sp, const TSPInstance* inst, TSPSolution* sol){
+int NN_solver_2opt(int sp, const TSPInstance* inst, TSPSolution* sol){
+	
+	clock_t start = clock();
 	
 	NN_solver(sp, inst, sol);
 
 	opt2(inst, sol);
+
+	return getSeconds(start, clock());
 
 }/* NN_solver_2opt */
 
