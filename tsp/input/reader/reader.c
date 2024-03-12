@@ -12,6 +12,27 @@
 #include "reader.h"
 
 /*
+* Removes space before ':' to homogenize TSPLIB file reading.
+* IOP line line of input file to read
+*/
+void removeSpace(char* line){
+    
+    int i;
+    
+    for(i=0; i<strlen(line); i++){
+
+        if(line[i] == ':')
+            break;
+        else if(line[i] == ' '){
+            strcpy(&line[i], &line[i+1]);
+            i--;
+        }
+
+    }
+
+}/* removeSpace */
+
+/*
 * IP set settings
 * IF File $(set->input_file_name) to elaborate.
 * OP inst tsp instance
@@ -32,7 +53,10 @@ int readInstance(const Settings* set, TSPInstance* inst){
         return -1;
 
     while(fgets(line, MAX_LINE_LENGTH, file)){
+        
         int n;
+        
+        removeSpace(line);
 
         if(!strncmp(line, "EOF", 3)){
             break;
