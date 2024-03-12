@@ -181,7 +181,6 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
     
     int i, j;
     double min_delta = 0;
-    double cost_before_change = getSolCost(inst, sol);
 
     for(i=0; i<inst->dimension; i++){
         
