@@ -151,31 +151,31 @@ void runRefinement(const TSPInstance* inst, TSPSolution* sol){
 
 /*
 * Computes delta between new 
-* IP start index of a node
-* IP end index of a node that can have a crossing with $start
+* IP i index of a node
+* IP j index of a node that can have a crossing with $start
 * IP inst tsp instance
 * IP sol solution to be improved
 * OP delta difference between current cost and cost without crossing
 */
-double computeDelta(int start, int end, const TSPInstance* inst, const TSPSolution* sol){
+double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* sol){
 	
 	int n = inst->dimension;
 
-	int a = (start+1) % n; 
-	int b = (end+1) % n; 
+	int i_next = (i+1) % n; 
+	int j_next = (j+1) % n; 
 
-	int i = sol->succ[start];
-	int j = sol->succ[end];
-	int k1 = sol->succ[a];
-	int k2 = sol->succ[b];
+	int a = sol->succ[i];
+	int b = sol->succ[j];
+	int a_next = sol->succ[i_next];
+	int b_next = sol->succ[j_next];
 
-	if(k2 == i || k1 == j || k1 == k2)
+	if(b_next == a || a_next == b || a_next == b_next)
 		return 0;
 
-	double old1 = getDist(i, k1, inst);
-	double old2 = getDist(j, k2, inst);
-	double new1 = getDist(i, j, inst);
-	double new2 = getDist(k1, k2, inst);
+	double old1 = getDist(a, a_next, inst);
+	double old2 = getDist(b, b_next, inst);
+	double new1 = getDist(a, b, inst);
+	double new2 = getDist(a_next, b_next, inst);
 
 	double delta = (new1 + new2) - (old1 + old2);
 
@@ -203,7 +203,7 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
             
             if(delta < min_delta){
                 min_delta = delta;
-                *start = i+1;
+                *start = (i+1) % inst->dimension;
                 *end = j;
             }
 			
@@ -233,13 +233,6 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
         invertList(start, end, sol->succ); /* apply index choices that give the best improvement */
         
         sol->val += min_delta;
-
-		if(!isEqual(sol->val, getSolCost(inst, sol))){
-			printf("\nV2 INVALID SOLUTION:\n");
-			printf("\ti = %d, j = %d\n", start, end);
-			printf("\t%.9f == %.9f ? %s\n", sol->val, getSolCost(inst, sol), (isEqual(sol->val, getSolCost(inst, sol)) ? "true" : "false"));
-			
-		}
 
         return true;
     }
