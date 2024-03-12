@@ -12,6 +12,7 @@
 
 #include "nearestneighbor.h"
 #include "../../utility/utility.h"
+#include "../refinement/2opt/2opt.h"
 
 /*
 * Finds index of next node to visit (nearest neighbor), puts next node to visit close to last visited and updates cost of the solution.
@@ -178,9 +179,13 @@ void best_start(const TSPInstance* inst, TSPSolution* sol){
 	
 	NN_solver(0, inst, sol);
 
+	opt2(inst, sol);
+
 	for(i = 1; i < (*inst).dimension; i++){
 		
 		NN_solver(i, inst, &temp);
+
+		opt2(inst, sol);
 
 		if(temp.val < (*sol).val)
 			cpSol(inst, &temp, sol);
