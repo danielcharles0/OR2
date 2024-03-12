@@ -14,7 +14,7 @@
 #include "validator/validator.h"
 #include "../../utility/utility.h"
 
-#define DEFAULT_TIME_LIMIT 300 /* 60 s/m * 5 m */
+#define DEFAULT_TIME_LIMIT 300 /* 60 s/min * 5 min */
 #define DEFAULT_SEED 2060685 + 2088626
 
 static struct option long_options[] = {

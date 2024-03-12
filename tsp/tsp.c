@@ -167,7 +167,7 @@ void printInst(const TSPInstance* inst){
     printf("\tNodes:\n");
     for(i = 0; i < inst->dimension; i++)
         if(i < (POINTS_TO_PRINT/2) || i >= (inst->dimension - POINTS_TO_PRINT/2))
-            printf("\t\t%d %lf %lf\n", i + 1, inst->points[i].x, inst->points[i].y);
+            printf("\t\t%.3d %lf %lf\n", i + 1, inst->points[i].x, inst->points[i].y);
         else if ( i == (inst->dimension - POINTS_TO_PRINT/2 - 1))
             printf("\t\t\t...\n");
     printf("\n");
