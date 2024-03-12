@@ -10,7 +10,10 @@
 #include <math.h>
 #include "utility.h"
 
-#define EPSILON 1e-7
+#define EPSILON 1e-9
+#define PROCESS_BAR_PRECISION 20
+#define PROCESS_BAR_COMPLETED_CHARACTER '#'
+#define PROCESS_BAR_TO_COMPLETE_CHARACTER '-'
 
 /*
 * Print a boolean.
@@ -200,3 +203,44 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 	return true;
 
 }/* isTimeOutWarning */
+
+/*
+* IP n number of repetitions
+* IP c char to repeat
+* OV this function prints to the screen $n times the character $c
+*/
+void repeat(int n, char c){
+
+    int i;
+
+    for(i = 0; i < n; i++)
+        printf("%c", c);
+
+}/* repeat */
+
+/*
+* IP ni number of iteration processed
+* IP tni total number of iterations to process
+* OV prints a process bar with precision PROCESS_BAR_PRECISION
+*/
+void processBar(int ni, int tni){
+
+    int n;
+    double frac;
+
+    frac = (double) ni / tni;
+
+    n = (frac * PROCESS_BAR_PRECISION);
+
+    printf("\rProcess: [");
+    repeat(n, PROCESS_BAR_COMPLETED_CHARACTER);
+    repeat(PROCESS_BAR_PRECISION - n, PROCESS_BAR_TO_COMPLETE_CHARACTER);
+    printf("] %.2f%% ", frac * 100);
+
+    if(!(tni - ni))
+        printf("\n\n");
+
+	/* resource: https://www.educative.io/answers/what-is-fflush-in-c */
+    fflush(stdout);
+
+}/* processBar */
