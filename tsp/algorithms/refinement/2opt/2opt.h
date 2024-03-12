@@ -15,3 +15,5 @@ typedef enum {
 void runRefinement(const TSPInstance* inst, TSPSolution* sol);
 
 void opt2_v2(const TSPInstance*, TSPSolution*);
+
+void opt2(const TSPInstance*, TSPSolution*);

@@ -12,6 +12,7 @@
 
 #include "nearestneighbor.h"
 #include "../../utility/utility.h"
+#include "../refinement/2opt/2opt.h"
 
 /*
 * Finds index of next node to visit (nearest neighbor), puts next node to visit close to last visited and updates cost of the solution.
@@ -82,6 +83,20 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
     return getSeconds(start, clock());
 
 }/* NN_solver */
+
+/*
+* IP sp starting point index
+* IP inst tsp instance to solve
+* IOP sol tsp NN solution + 2opt
+* OR time at which solution was found
+*/
+void NN_solver_2opt(int sp, const TSPInstance* inst, TSPSolution* sol){
+	
+	NN_solver(sp, inst, sol);
+
+	opt2(inst, sol);
+
+}/* NN_solver_2opt */
 
 /*
 * IP sn starting node index
@@ -176,11 +191,11 @@ void best_start(const TSPInstance* inst, TSPSolution* sol){
 
 	allocSol((*inst).dimension, &temp);
 	
-	NN_solver(0, inst, sol);
+	NN_solver_2opt(0, inst, sol);
 
 	for(i = 1; i < (*inst).dimension; i++){
 		
-		NN_solver(i, inst, &temp);
+		NN_solver_2opt(i, inst, &temp);
 
 		if(temp.val < (*sol).val)
 			cpSol(inst, &temp, sol);
@@ -198,14 +213,14 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 
 	switch (conf){
 	    case START_FIRST_NODE:
-	        NN_solver(0, inst, sol);
+	        NN_solver_2opt(0, inst, sol);
 	        break;
 	    case START_RANDOM_NODE:
-	        NN_solver(rand0N((*inst).dimension), inst, sol);
+	        NN_solver_2opt(rand0N((*inst).dimension), inst, sol);
 	        break;
 		case SELECT_STARTING_NODE:
 						/* i-th node in position i - 1 */
-			NN_solver(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
+			NN_solver_2opt(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
 	        break;
 		case BEST_START:
 			best_start(inst, sol);
@@ -224,13 +239,9 @@ void runConfiguration(NN_CONFIG conf, const TSPInstance* inst, TSPSolution* sol)
 * OP false if found a valid solution, true otherwise.
 */
 void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-	
-	int conf;
 
 	algorithmConfigurations();
 
-	conf = readInt("Insert the configuration code you want to run: ");
-
-	runConfiguration(conf, inst, sol);
+	runConfiguration(readInt("Insert the configuration code you want to run: "), inst, sol);
 
 }/* nearestNeighbor */
