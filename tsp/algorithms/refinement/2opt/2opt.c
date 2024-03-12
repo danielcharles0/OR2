@@ -151,8 +151,8 @@ void runRefinement(const TSPInstance* inst, TSPSolution* sol){
 
 /*
 * Computes delta between new 
-* IP start index of a node
-* IP end index of a node that can have a crossing with $start
+* IP i index of a node
+* IP j index of a node that can have a crossing with $start
 * IP inst tsp instance
 * IP sol solution to be improved
 * OP delta difference between current cost and cost without crossing
