@@ -9,13 +9,15 @@
 
 #include "output.h"
 
+#define DEFAULT_TITLE "Hamiltonian Path"
+
 /*
 * IP gnuplotPipe pipe pointer
 */
-void plotSettings(FILE* gnuplotPipe){
+void plotSettings(FILE* gnuplotPipe, const char title[]){
 
     fprintf(gnuplotPipe, "set term qt font \"Arial\"\n");
-	fprintf(gnuplotPipe, "set title 'Hamiltonian Path'\n");
+	fprintf(gnuplotPipe, "set title '%s'\n", title);
     fprintf(gnuplotPipe, "set xlabel 'X'\n");
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");
@@ -48,9 +50,10 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 /*
 * IP inst tsp instance
 * IP sol solution to plot
+* IP title plot title
 * OV hamiltonian path
 */
-void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
+void plotSolutionTitle(const TSPInstance* inst, const TSPSolution* sol, const char title[]){
     
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
 	
@@ -59,10 +62,21 @@ void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
         return;
     }
 
-    plotSettings(gnuplotPipe);
+    plotSettings(gnuplotPipe, title);
 
     plotNodes(gnuplotPipe, inst, sol);
 
     pclose(gnuplotPipe);
+
+}/* plotSolutionTitle */
+
+/*
+* IP inst tsp instance
+* IP sol solution to plot
+* OV hamiltonian path
+*/
+void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
+    
+    plotSolutionTitle(inst, sol, DEFAULT_TITLE);
 
 }/* plotSolution */
