@@ -41,7 +41,8 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 
     fprintf(gnuplotPipe, "%f %f\n", p->x, p->y); /* connect last to first */
 
-    fprintf(gnuplotPipe, "e\n");
+    fprintf(gnuplotPipe, "e\n");/*?*/
+	/*fprintf(gnuplotPipe, "pause mouse close\n");*/
 
 }/* plotNodes */
 
