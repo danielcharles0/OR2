@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/array.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -49,6 +49,9 @@ main: $(OBJS)
 
 ./obj/tabu.o: ./tsp/algorithms/refinement/tabu/tabu.h ./tsp/algorithms/refinement/tabu/tabu.c
 	gcc $(FLAGS) ./tsp/algorithms/refinement/tabu/tabu.c -o ./obj/tabu.o
+
+./obj/array.o: ./tsp/array/array.h ./tsp/array/array.c
+	gcc $(FLAGS) ./tsp/array/array.c -o ./obj/array.o
 
 debug:
 	make DEBUG=1

@@ -83,7 +83,7 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
 
     sol->val += getDist(sol->succ[0], sol->succ[curr-1], inst); /* add cost of connection of last to first node */
 
-    return getSeconds(start, clock());
+    return getSeconds(start);
 
 }/* NN_solver */
 
@@ -101,7 +101,7 @@ int NN_solver_2opt(int sp, const TSPInstance* inst, TSPSolution* sol){
 
 	opt2(inst, sol);
 
-	return getSeconds(start, clock());
+	return getSeconds(start);
 
 }/* NN_solver_2opt */
 
@@ -192,7 +192,7 @@ void algorithmConfigurations(void){
 * OP sol solution, the best founded within the time limit
 * OR int execution seconds
 */
-int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+int best_start_2opt(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	clock_t start = clock();
 	TSPSolution temp;
@@ -212,7 +212,7 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
 			freeSol(&temp);
-			return getSeconds(start, clock());
+			return getSeconds(start);
 		}/* if */
 
 		NN_solver_2opt(i, inst, &temp);
@@ -227,7 +227,51 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	freeSol(&temp);
 	
-	return getSeconds(start, clock());
+	return getSeconds(start);
+
+}/* best_start_2opt */
+
+/*
+* IP inst tsp instance
+* OP sol solution, the best founded within the time limit
+* OR int execution seconds
+*/
+int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+	
+	clock_t start = clock();
+	TSPSolution temp;
+	int i;
+
+	allocSol((*inst).dimension, &temp);
+	
+	if((*set).v)
+		processBar(0, (*inst).dimension);
+
+	NN_solver(0, inst, sol);
+
+	if((*set).v)
+		processBar(1, (*inst).dimension);
+
+	for(i = 1; i < (*inst).dimension; i++){
+
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
+			freeSol(&temp);
+			return getSeconds(start);
+		}/* if */
+
+		NN_solver(i, inst, &temp);
+
+		if(temp.val < (*sol).val)
+			cpSol(inst, &temp, sol);
+
+		if((*set).v)
+			processBar(i + 1, (*inst).dimension);
+			
+	}/* for */
+
+	freeSol(&temp);
+	
+	return getSeconds(start);
 
 }/* best_start */
 
@@ -238,14 +282,14 @@ void runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* in
 
 	switch (conf){
 	    case START_FIRST_NODE:
-	        NN_solver_2opt(0, inst, sol);
+	        NN_solver(0, inst, sol);
 	        break;
 	    case START_RANDOM_NODE:
-	        NN_solver_2opt(rand0N((*inst).dimension), inst, sol);
+	        NN_solver(rand0N((*inst).dimension), inst, sol);
 	        break;
 		case SELECT_STARTING_NODE:
 						/* i-th node in position i - 1 */
-			NN_solver_2opt(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
+			NN_solver(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
 	        break;
 		case BEST_START:
 			best_start(set, inst, sol);

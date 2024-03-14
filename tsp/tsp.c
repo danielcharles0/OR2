@@ -215,10 +215,10 @@ bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Setting
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        return true;
-    }
+    }/* switch */
 
 	if(!isExactMethod(alg))
-		runRefinement(inst, sol);
+		runRefinement(set, inst, sol);
 
     return error;
 
