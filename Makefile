@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -46,6 +46,9 @@ main: $(OBJS)
 
 ./obj/2opt.o: ./tsp/algorithms/refinement/2opt/2opt.h ./tsp/algorithms/refinement/2opt/2opt.c
 	gcc $(FLAGS) ./tsp/algorithms/refinement/2opt/2opt.c -o ./obj/2opt.o
+
+./obj/tabu.o: ./tsp/algorithms/refinement/tabu/tabu.h ./tsp/algorithms/refinement/tabu/tabu.c
+	gcc $(FLAGS) ./tsp/algorithms/refinement/tabu/tabu.c -o ./obj/tabu.o
 
 debug:
 	make DEBUG=1
