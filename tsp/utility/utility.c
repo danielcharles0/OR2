@@ -173,7 +173,7 @@ void printSeconds(const char lab[], int sec){
 
 	fhour = division(division(sec, 60, &fsec), 60, &fmin);
 
-	printf("%s%2dh %2dm %2ds\n", lab, fhour, fmin, fsec);
+	printf("%s%2dh %2dm %2ds", lab, fhour, fmin, fsec);
 
 }/* printSeconds */
 

@@ -13,7 +13,7 @@
 #define MIN_TENURE 10
 #define TENURE_DENOMINATOR 10
 #define TIMEOUT_WARNING_MESSAGE "Warning: The method exceeded the time limit! the solution that will be returned is the best founded so far\n\n"
-
+#define PRINT_FREQUENCY 1 /* seconds between one print and another */
 /*
 * IP iteration index
 * IP n size of the instance
@@ -33,14 +33,15 @@ int defaulttenure(int it, int n){
 */
 void initTabuList(const TSPInstance* inst, TABU_LIST* tl, tenurefunc tf){
 	
-	int i;
+	int i, val;
 
 	initArrayDinaInt((*inst).dimension, &((*tl).list));
 
 	(*tl).tf = tf;
+	val = -(*tl).tf(0, (*inst).dimension);
 
 	for(i = 0; i < (*tl).list.n; i++)
-		(*tl).list.v[i] = 0;
+		(*tl).list.v[i] = val;
 
 }/* initTabuList */
 
@@ -124,20 +125,53 @@ bool getOptNotTabu2OptMove(int it, const TSPInstance* inst, const TSPSolution* s
 }/* getOptNotTabu2OptMove */
 
 /*
-* IP i iteration id
+* IP it iteration id
 * IP inst tsp instance
 * IP sol solution
 * IP opti sol->succ first optimal index of the move
 * IP optj sol->succ second optimal index of the move
 * OP tl tabu list to be updated
 */
-void updateTabuList(int i, const TSPInstance* inst, const TSPSolution* sol, int opti, int optj, TABU_LIST* tl){
+void updateTabuList(int it, const TSPInstance* inst, const TSPSolution* sol, int opti, int optj, TABU_LIST* tl){
 
 	int a = (*sol).succ[opti], a1 = (*sol).succ[(opti + 1) % (*inst).dimension], b = (*sol).succ[optj], b1 = (*sol).succ[(optj + 1) % (*inst).dimension];
 
-	(*tl).list.v[a] = (*tl).list.v[a1] = (*tl).list.v[b] = (*tl).list.v[b1] = i;
+	(*tl).list.v[a] = (*tl).list.v[a1] = (*tl).list.v[b] = (*tl).list.v[b1] = it;
 
 }/* updateTabuList */
+
+/*
+* IP start executing time start
+* IP tl time limit
+* IOP ls last stamp second from the execution time start
+*/
+void tabuBar(clock_t start, int tl, int* ls){
+	
+	int s = getSeconds(start);
+	
+	if(s - *ls >= PRINT_FREQUENCY){
+		processBar(s, tl);
+		printSeconds(" Running time: ", s);
+		*ls = s;
+	}/* if */
+
+}/* tabuBar */
+
+/*
+* IP inst tsp instance
+* IP it iteration id
+* OP i sol->succ first index of the move
+* OP j sol->succ second index of the move
+* OP tl tabu list to be updated
+* IOP sol refined solution
+*/
+void tabuMove(const TSPInstance* inst, int it, int i, int j, TABU_LIST* tl, TSPSolution* sol){
+
+	opt2move(i, j, inst, sol);
+
+	updateTabuList(it, inst, sol, i, j, tl);
+
+}/* tabuMove */
 
 /*
 * IP set settings
@@ -148,27 +182,35 @@ void updateTabuList(int i, const TSPInstance* inst, const TSPSolution* sol, int 
 void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenurefunc tf){
 
 	clock_t start = clock();
-	int i = 0;
-	int opti, optj; /* opti and optj are indexes in the sol->succ array */
 	TSPSolution temp;
 	TABU_LIST tl; /* TABU list */
+	int it = 0, ls = -1; /* ls := last stamp, seconds from the start to the last stamp */
+	int opti, optj; /* opti and optj are indexes in the sol->succ array */
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);
 
+	cpSol(inst, sol, &temp);
+
 	while(true){
 
-		processBar(getSeconds(start), (*set).tl);
+		if(getOptNotTabu2OptMove(it, inst, &temp, &tl, &opti, &optj)){
+			
+			tabuMove(inst, it, opti, optj, &tl, &temp);
 
-		if(getOptNotTabu2OptMove(i, inst, sol, &tl, &opti, &optj)){
-			opt2move(opti, optj, inst, sol);
-			updateTabuList(i, inst, sol, opti, optj, &tl);
+			if(temp.val < (*sol).val)
+				cpSol(inst, &temp, sol);
 		}/* if */
+
+		if((it + 1) % 10 == 0)
+			break;
 
 		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
 			break;
+		else if((*set).v)
+			tabuBar(start, (*set).tl, &ls);
 
-		i++;
+		it++;
 
 	}/* while */
 
