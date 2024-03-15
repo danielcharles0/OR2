@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "2opt.h"
 #include "../../../utility/utility.h"
+#include "../tabu/tabu.h"
 
 /*
 * IP i sol->succ first index of the move
@@ -98,17 +99,18 @@ int opt2(const TSPInstance* inst, TSPSolution* sol){
 	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0)
 		opt2move(opti, optj, inst, sol);
 	
-	return getSeconds(start, clock());
+	return getSeconds(start);
 
 }/* opt2 */
 
 /*
 * IP alg refinement algorithm to run
+* IP set settings
 * IP inst tsp instance
 * IOP sol refined solution
 * OP error true if an error occurred, false otherwise.
 */
-bool runRefAlg(REFINEMENT_ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol){
+bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     
     switch (alg){
 		case SKIP:
@@ -116,6 +118,9 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const TSPInstance* inst, TSPSolution* s
 	    case OPT2:
 	        opt2(inst, sol);
 	        break;
+		case TABU:
+			tabu(set, inst, sol, (tenurefunc)defaulttenure);
+			break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 			return true;
@@ -133,19 +138,21 @@ void refinementaAlgorithmLegend(void){
 	printf("Available refinement algorithms:\n");
 	printf("Code: %d to skip refinement\n", SKIP);
     printf("Code: %d, Algorithm: 2opt refinement method\n", OPT2);
+	printf("Code: %d, Algorithm: TABU refinement method\n", TABU);
     printf("\n");
 
 }/* refinementaAlgorithmLegend */
 
 /*
+* IP set settings
 * IP inst tsp instance
 * IOP sol solution to optimize
 */
-void runRefinement(const TSPInstance* inst, TSPSolution* sol){
+void runRefinement(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	refinementaAlgorithmLegend();
 
-    runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), inst, sol);
+    runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), set, inst, sol);
 
 }/* runRefinement */
 
@@ -253,6 +260,6 @@ int opt2_v2(const TSPInstance* inst, TSPSolution* sol){
         improvement = refinement(inst, sol);
     } while(improvement);
 
-	return getSeconds(start, clock());
+	return getSeconds(start);
         
 }/* opt2_v2 */

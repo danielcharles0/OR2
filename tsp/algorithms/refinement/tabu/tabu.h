@@ -6,5 +6,24 @@
 */
 
 #include "../../../tsp.h"
+#include "../../../array/array.h"
 
-int tabu(const TSPInstance*, TSPSolution*);
+/*
+* IP iteration index
+* IP n size of the instance
+* OR tenure value for the current iteration
+*/
+typedef int (*tenurefunc)(int, int);
+
+typedef struct{
+    
+	tenurefunc tf;
+	ArrayDinaInt list;
+
+} TABU_LIST;
+
+void tabu(const Settings*, const TSPInstance*, TSPSolution*, tenurefunc);
+
+int defaulttenure(int, int);
+
+int tabu_v2(const TSPInstance*, TSPSolution*);

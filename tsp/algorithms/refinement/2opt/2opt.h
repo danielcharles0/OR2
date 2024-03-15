@@ -9,11 +9,14 @@
 
 typedef enum {
 	SKIP,
-    OPT2
+    OPT2,
+	TABU
 } REFINEMENT_ALGORITHM;
 
-void runRefinement(const TSPInstance* inst, TSPSolution* sol);
-
-int opt2_v2(const TSPInstance*, TSPSolution*);
+void runRefinement(const Settings*, const TSPInstance*, TSPSolution*);
 
 int opt2(const TSPInstance*, TSPSolution*);
+
+void opt2move(int, int, const TSPInstance*, TSPSolution*);
+
+double delta2OptMoveCost(int, int, const TSPInstance*, const TSPSolution*);

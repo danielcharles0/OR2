@@ -22,7 +22,7 @@ bool isEqualPrecision(double, double, double);
 
 bool isEqual(double, double);
 
-int getSeconds(clock_t, clock_t);
+int getSeconds(clock_t);
 
 void printSeconds(const char[], int);
 

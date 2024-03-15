@@ -125,9 +125,9 @@ bool isEqual(double a, double b){
 * IP end ending execution time
 * OR execution time in seconds
 */
-int getSeconds(clock_t start, clock_t end){
+int getSeconds(clock_t start){
 
-    return (end - start) / CLOCKS_PER_SEC;
+    return (clock() - start) / CLOCKS_PER_SEC;
 
 }/* getSeconds */
 
@@ -173,7 +173,7 @@ void printSeconds(const char lab[], int sec){
 
 	fhour = division(division(sec, 60, &fsec), 60, &fmin);
 
-	printf("%s%2dh %2dm %2ds\n", lab, fhour, fmin, fsec);
+	printf("%s%2dh %2dm %2ds", lab, fhour, fmin, fsec);
 
 }/* printSeconds */
 
@@ -184,7 +184,7 @@ void printSeconds(const char lab[], int sec){
 */
 bool isTimeOut(clock_t start, int tl){
 
-    return getSeconds(start, clock()) > tl;
+    return getSeconds(start) > tl;
 
 }/* isTimeOut */
 

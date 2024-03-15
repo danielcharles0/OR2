@@ -30,6 +30,6 @@ int randomSol(const TSPInstance* inst, TSPSolution* sol){
 
 	(*sol).val = getSolCost(inst, sol);
 
-	return getSeconds(start, clock());
+	return getSeconds(start);
 
 }/* random */
