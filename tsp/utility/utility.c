@@ -244,3 +244,17 @@ void processBar(int ni, int tni){
     fflush(stdout);
 
 }/* processBar */
+
+/*
+* IP a first integer 
+* IP b second integer to be compared with $a
+* OP max between $a and $b
+*/
+int max(int a, int b){
+    
+    if(a > b)
+        return a;
+    
+    return b;
+
+}/* max */

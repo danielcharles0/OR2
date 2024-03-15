@@ -35,3 +35,5 @@ bool isTimeOut(clock_t, int);
 bool isTimeOutWarning(const char[], clock_t, int);
 
 void processBar(int ni, int tni);
+
+int max(int, int);
