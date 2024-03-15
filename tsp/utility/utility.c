@@ -237,7 +237,7 @@ void processBar(int ni, int tni){
     repeat(PROCESS_BAR_PRECISION - n, PROCESS_BAR_TO_COMPLETE_CHARACTER);
     printf("] %.2f%% ", frac * 100);
 
-    if(!(tni - ni))
+    if(tni <= ni)
         printf("\n\n");
 
 	/* resource: https://www.educative.io/answers/what-is-fflush-in-c */
