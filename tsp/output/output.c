@@ -43,8 +43,8 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 
     fprintf(gnuplotPipe, "%f %f\n", p->x, p->y); /* connect last to first */
 
-    fprintf(gnuplotPipe, "e\n");/*?*/
-	/*fprintf(gnuplotPipe, "pause mouse close\n");*/
+    fprintf(gnuplotPipe, "e\n");/* To close the list of nodes for gnuplot */
+	fprintf(gnuplotPipe, "pause mouse close\n");
 
 }/* plotNodes */
 
@@ -56,7 +56,7 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 */
 void plotSolutionTitle(const TSPInstance* inst, const TSPSolution* sol, const char title[]){
     
-    FILE *gnuplotPipe = popen("gnuplot -persist", "w");
+    FILE *gnuplotPipe = popen("gnuplot -persist > gnuplot.out 2> gnuplot_err.out", "w");
 	
     if (gnuplotPipe == NULL) {
         fprintf(stderr, "Error opening Gnuplot pipe\n");

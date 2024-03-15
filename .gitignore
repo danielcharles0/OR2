@@ -58,3 +58,6 @@ TODO.md
 instance
 *.test
 trash
+
+gnuplot.out
+gnuplot_err.out

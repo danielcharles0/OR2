@@ -91,34 +91,22 @@ bool isNotTabuMove(int it, const TSPInstance* inst, const TSPSolution* sol, cons
 */
 bool getOptNotTabu2OptMove(int it, const TSPInstance* inst, const TSPSolution* sol, const TABU_LIST* tl, int* opti, int* optj){
 
-	int i = 0, j = 2;
-	double optcost, temp;
+	int i, j;
+	double optdelta;
 	bool notTabu = false;
 
-	if(isNotTabuMove(it, inst, sol, tl, i, j)){
-		notTabu = true;
-		*opti = i;
-		*optj = j;
-		optcost = delta2OptMoveCost(i, j, inst, sol);
-	}/* if */
-	
-	for(j = 3; j < (*inst).dimension - 1; j++)
-												/* j < (*inst).dimension - 1 avoids to take a = b1 */
-		if((temp = delta2OptMoveCost(i, j, inst, sol)) < optcost && isNotTabuMove(it, inst, sol, tl, i, j)){
-			notTabu = true;
-			*optj = j;
-			optcost = temp;
-		}/* if */
-
-	for(i = 1; i < (*inst).dimension - 2; i++)	/* Note that j = i + 2 avoids to take b = a1 */
+	for(i = 0; i < (*inst).dimension - 2; i++)	/* Note that j = i + 2 avoids to take b = a1 */
 												/* Note that j < (*inst).dimension => i < (*inst).dimension - 2 */
 		for(j = i + 2; j < (*inst).dimension; j++)
-			if((temp = delta2OptMoveCost(i, j, inst, sol)) < optcost && isNotTabuMove(it, inst, sol, tl, i, j)){
-				notTabu = true;
-				*opti = i;
-				*optj = j;
-				optcost = temp;
-			}
+			if(i != 0 || j < (*inst).dimension - 1){
+				double temp = delta2OptMoveCost(i, j, inst, sol);
+				if((!notTabu || temp < optdelta) && isNotTabuMove(it, inst, sol, tl, i, j)){
+					notTabu = true;
+					*opti = i;
+					*optj = j;
+					optdelta = temp;
+				}/* if */
+			}/* if */
 	
 	return notTabu;
 
@@ -134,9 +122,10 @@ bool getOptNotTabu2OptMove(int it, const TSPInstance* inst, const TSPSolution* s
 */
 void updateTabuList(int it, const TSPInstance* inst, const TSPSolution* sol, int opti, int optj, TABU_LIST* tl){
 
-	int a = (*sol).succ[opti], a1 = (*sol).succ[(opti + 1) % (*inst).dimension], b = (*sol).succ[optj], b1 = (*sol).succ[(optj + 1) % (*inst).dimension];
+	int a = (*sol).succ[opti];/*, a1 = (*sol).succ[(opti + 1) % (*inst).dimension], b = (*sol).succ[optj], b1 = (*sol).succ[(optj + 1) % (*inst).dimension];*/
 
-	(*tl).list.v[a] = (*tl).list.v[a1] = (*tl).list.v[b] = (*tl).list.v[b1] = it;
+	/*(*tl).list.v[a] = (*tl).list.v[a1] = (*tl).list.v[b] = (*tl).list.v[b1] = it;*/
+	(*tl).list.v[a] = it;
 
 }/* updateTabuList */
 
@@ -201,9 +190,6 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 			if(temp.val < (*sol).val)
 				cpSol(inst, &temp, sol);
 		}/* if */
-
-		if((it + 1) % 10 == 0)
-			break;
 
 		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
 			break;
