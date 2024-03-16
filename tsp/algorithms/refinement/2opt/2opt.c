@@ -168,13 +168,10 @@ double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* so
 	
 	int n = inst->dimension;
 
-	int i_next = (i+1) % n; 
-	int j_next = (j+1) % n; 
-
 	int a = sol->succ[i];
 	int b = sol->succ[j];
-	int a_next = sol->succ[i_next];
-	int b_next = sol->succ[j_next];
+	int a_next = sol->succ[(i+1) % n];
+	int b_next = sol->succ[(j+1) % n];
 
 	if(b_next == a || a_next == b || a_next == b_next)
 		return 0;
@@ -252,7 +249,7 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
 * Refines solution removing crossings or other bad connections.
 * IP inst tsp instance
 * IOP sol solution to be refined
-* OR e
+* OR int execution in seconds
 */
 int opt2_v2(const TSPInstance* inst, TSPSolution* sol){
     
