@@ -214,7 +214,7 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 * IOP tabuList list of lists to be allocated
 * IOP tenure dimension of the tabuList
 */
-void allocTabuList(int n, int* tabuList, int* tenure){
+/*void allocTabuList(int n, int* tabuList, int* tenure){
 
     *tenure = max(MIN_TENURE, n/100);
 
@@ -223,17 +223,17 @@ void allocTabuList(int n, int* tabuList, int* tenure){
     for(int i=0; i<(*tenure); i++)
         tabuList[i] = -1;
 
-}/* allocTabuList */
+}*//* allocTabuList */
 
 /*
 * IP tabuList list to be freed
 * IP tenure dimension of the list
 */
-void freeTabuList_v2(int* tabuList, int tenure){
+/*void freeTabuList_v2(int* tabuList, int tenure){
 
     free(tabuList);
 
-}/* freeTabuList */
+}*//* freeTabuList */
 
 /*
 * IOP tenure value to be modified
@@ -384,7 +384,7 @@ double move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure
 * IOP sol solution to be improved
 * OR int execution in seconds
 */
-int tabu_v2(const TSPInstance* inst, TSPSolution* sol){
+/*int tabu_v2(const TSPInstance* inst, TSPSolution* sol){
     
     clock_t start = clock();
     int tenure, current_tenure;
@@ -404,6 +404,6 @@ int tabu_v2(const TSPInstance* inst, TSPSolution* sol){
 
     freeTabuList_v2(tabuList, tenure);
 
-    return getSeconds(start, clock());
+    return getSeconds(start);
 
-}/* tabu */
+}*//* tabu */

@@ -78,6 +78,7 @@ void plotSolutionTitle(const TSPInstance* inst, const TSPSolution* sol, const ch
 */
 void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
     
+	printf("Solution cost: %lf\n\n", (*sol).val);
     plotSolutionTitle(inst, sol, DEFAULT_TITLE);
 
 }/* plotSolution */
