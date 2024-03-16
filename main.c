@@ -31,7 +31,7 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
     error = run(readInt("Insert the code of the algorithm you want to run: "), inst, &sol, set);
 
 	if(error || (set->v && !checkSol(inst, &sol))){
-		printf("Error: invalid solution.\n");
+		printf("Error: invalid solution.\n\n");
 	}else if (set->v)
         plotSolution(inst, &sol);
     

@@ -180,8 +180,8 @@ void printInst(const TSPInstance* inst){
 void algorithmLegend(void){
     
     printf("Available algorithms:\n");
-    printf("Code: %d, Algorithm: Just a random solution\n", RANDOM);
-    printf("Code: %d, Algorithm: Nearest neighbor search\n", NEAREST_NEIGHBOR);
+    printf("\t- Code: %d, Algorithm: Just a random solution\n", RANDOM);
+    printf("\t- Code: %d, Algorithm: Nearest neighbor search\n", NEAREST_NEIGHBOR);
     printf("\n");
     
 }/* algorithmLegend */
@@ -203,24 +203,29 @@ bool isExactMethod(ALGORITHM alg){
 */
 bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
-	bool error = false;
+	int et; /* execution time in seconds */
     
     switch (alg){
 	    case RANDOM:
-	        randomSol(inst, sol);
+	        et = randomSol(inst, sol);
 	        break;
 	    case NEAREST_NEIGHBOR:
-	        nearestNeighbor(set, inst, sol);
+	        if((et = nearestNeighbor(set, inst, sol)) == -1)
+				return true;
 	        break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        return true;
     }/* switch */
 
-	if(!isExactMethod(alg))
-		runRefinement(set, inst, sol);
+	if(et >= 0 && !isExactMethod(alg)){
+		Settings s;
+		cpSet(set, &s);
+		s.tl = (*set).tl > et ? (*set).tl - et : 0;
+		return runRefinement(&s, inst, sol);
+	}/* if */
 
-    return error;
+    return false;
 
 }/* run */
 

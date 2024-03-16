@@ -32,3 +32,5 @@ typedef enum {
 void printSettings(const Settings*);
 
 CONF parseCMDLine(int, char* const*, Settings*);
+
+void cpSet(const Settings*, Settings*);

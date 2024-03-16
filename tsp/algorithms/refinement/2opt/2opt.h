@@ -13,7 +13,7 @@ typedef enum {
 	TABU
 } REFINEMENT_ALGORITHM;
 
-void runRefinement(const Settings*, const TSPInstance*, TSPSolution*);
+bool runRefinement(const Settings*, const TSPInstance*, TSPSolution*);
 
 int opt2(const TSPInstance*, TSPSolution*);
 
