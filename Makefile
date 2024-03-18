@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/array.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/array.o ./obj/refinement.o
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -52,6 +52,9 @@ main: $(OBJS)
 
 ./obj/array.o: ./tsp/array/array.h ./tsp/array/array.c
 	gcc $(FLAGS) ./tsp/array/array.c -o ./obj/array.o
+
+./obj/refinement.o: ./tsp/algorithms/refinement/refinement.h ./tsp/algorithms/refinement/refinement.c
+	gcc $(FLAGS) ./tsp/algorithms/refinement/refinement.c -o ./obj/refinement.o
 
 debug:
 	make DEBUG=1

@@ -59,29 +59,25 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti, int* optj){
 	
 	int i = 0, j = 2;
-	double optcost, temp;
+	double optdelta;
 
 	*opti = i;
 	*optj = j;
-	optcost = delta2OptMoveCost(i, j, inst, sol);
+	optdelta = delta2OptMoveCost(i, j, inst, sol);
 
-	for(j = 3; j < (*inst).dimension - 1; j++)
-												/* j < (*inst).dimension - 1 avoids to take a = b1 */
-		if((temp = delta2OptMoveCost(i, j, inst, sol)) < optcost){
-			*optj = j;
-			optcost = temp;
-		}/* if */
-
-	for(i = 1; i < (*inst).dimension - 2; i++)	/* Note that j = i + 2 avoids to take b = a1 */
+	for(i = 0; i < (*inst).dimension - 2; i++)	/* Note that j = i + 2 avoids to take b = a1 */
 												/* Note that j < (*inst).dimension => i < (*inst).dimension - 2 */
 		for(j = i + 2; j < (*inst).dimension; j++)
-			if((temp = delta2OptMoveCost(i, j, inst, sol)) < optcost){
-				*opti = i;
-				*optj = j;
-				optcost = temp;
-			}
+			if(i != 0 || j < (*inst).dimension - 1){
+				double temp = delta2OptMoveCost(i, j, inst, sol);
+				if(temp < optdelta){
+					*opti = i;
+					*optj = j;
+					optdelta = temp;
+				}/* if */
+			}/* if */
 	
-	return optcost;
+	return optdelta;
 
 }/* getOpt2OptMove */
 
@@ -102,59 +98,6 @@ int opt2(const TSPInstance* inst, TSPSolution* sol){
 	return getSeconds(start);
 
 }/* opt2 */
-
-/*
-* IP alg refinement algorithm to run
-* IP set settings
-* IP inst tsp instance
-* IOP sol refined solution
-* OP error true if an error occurred, false otherwise.
-*/
-bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-    
-    switch (alg){
-		case SKIP:
-			break;
-	    case OPT2:
-	        opt2(inst, sol);
-	        break;
-		case TABU:
-			tabu(set, inst, sol, (tenurefunc)defaulttenure);
-			break;
-	    default:
-	        printf("Error: Algorithm code not found.\n\n");
-			return true;
-    }/* switch */
-
-	return false;
-
-}/* run */
-
-/*
-* Print refinement algorithm legend.
-*/
-void refinementaAlgorithmLegend(void){
-
-	printf("Available refinement algorithms:\n");
-	printf("\t- Code: %d to skip refinement\n", SKIP);
-    printf("\t- Code: %d, Algorithm: 2opt refinement method\n", OPT2);
-	printf("\t- Code: %d, Algorithm: TABU refinement method\n", TABU);
-    printf("\n");
-
-}/* refinementaAlgorithmLegend */
-
-/*
-* IP set settings
-* IP inst tsp instance
-* IOP sol solution to optimize
-*/
-bool runRefinement(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-	
-	refinementaAlgorithmLegend();
-
-    return runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), set, inst, sol);
-
-}/* runRefinement */
 
 /*
 * Computes delta between new 
@@ -192,9 +135,9 @@ double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* so
 * IP sol solution to be improved
 * IOP start index of starting point of $(sol->succ)'s sublist to invert
 * IOP end index of ending point of $(sol->succ)'s sublist to invert
-* OP min_delta minimum delta between initial cost of $sol and its cost after changes.
+* OP min_delta minimum delta between initial cost of $sol and its cost after the move.
 */
-double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int* end){
+double bestMove(const TSPInstance* inst, TSPSolution* sol, int* start, int* end){
     
     int i, j;
     double min_delta = 0;
@@ -217,8 +160,7 @@ double testAllChanges(const TSPInstance* inst, TSPSolution* sol, int* start, int
 
     return min_delta;
 
-}/* testAllChanges */
-
+}/* bestMove */
 
 /*
 * IP inst tsp instance
@@ -230,7 +172,7 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
     double min_delta;
     int start, end;
 
-    min_delta = testAllChanges(inst, sol, &start, &end);
+    min_delta = bestMove(inst, sol, &start, &end);
 
     if(min_delta < 0){  /* if there is at least a change that improves the solution */
         

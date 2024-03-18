@@ -13,8 +13,8 @@
 #include "tsp/input/generator/generator.h"
 #include "tsp/utility/utility.h"
 #include "tsp/output/output.h"
+#include "tsp/algorithms/refinement/refinement.h"
 
-#include "tsp/algorithms/refinement/2opt/2opt.h"
 #include "tsp/algorithms/refinement/tabu/tabu.h"
 
 /*
@@ -39,13 +39,17 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
         allocSol(inst->dimension, &temp);
         cpSol(inst, &sol, &temp);
 
-        plotSolution(inst, &sol);
+        /*plotSolution(inst, &sol);*/
+        printf("Solution Cost (init): %lf\n", sol.val);
 
         tabu(set, inst, &temp, defaulttenure);
         tabu_v2(set, inst, &sol);
 
-        plotSolution(inst, &temp);
-        plotSolution(inst, &sol);
+        /*plotSolution(inst, &temp);
+        plotSolution(inst, &sol);*/
+
+        printf("Solution Cost (V1): %lf\n", temp.val);
+        printf("Solution Cost (V2): %lf\n", sol.val);
 
     }
     freeSol(&sol);

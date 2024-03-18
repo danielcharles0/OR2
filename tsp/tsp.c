@@ -11,7 +11,7 @@
 
 #include "tsp.h"
 #include "./utility/utility.h"
-#include "algorithms/refinement/2opt/2opt.h"
+#include "algorithms/refinement/refinement.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 #include "utility/utility.h"

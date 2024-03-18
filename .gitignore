@@ -58,6 +58,7 @@ TODO.md
 instance
 *.test
 trash
+.DS_Store
 
 gnuplot.out
 gnuplot_err.out

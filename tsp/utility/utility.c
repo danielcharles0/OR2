@@ -201,7 +201,7 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 	if(!isTimeOut(start, tl))
 		return false;
 
-	printf("%s", war);
+	printf("\n%s", war);
 	return true;
 
 }/* isTimeOutWarning */

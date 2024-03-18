@@ -214,7 +214,13 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 
 
 
-/* VERSION 2 */
+/* VERSION 2 
+      |
+      |
+      |
+     \ /
+      V
+*/
 
 /*
 * IP n tsp instance dimension
@@ -252,14 +258,21 @@ void freeTabuList_v2(int* tabuList, int tenure){
 void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList){
 
     int rand = rand0N(4);
-
-    if(rand == 3) /* upper 0.25-th quantile */
-        *current_tenure = (*current_tenure) / 2;
-    else
-        *current_tenure = (tenure < ((*current_tenure) * 2) ? tenure : ((*current_tenure) * 2));
+    bool enlarged;
     
+    if(rand == 3){  /* upper 0.25-th quantile */
+        *current_tenure = (*current_tenure) / 2;
+        enlarged = false;
+    }
+    else{
+        *current_tenure = (tenure < ((*current_tenure) * 2) ? tenure : ((*current_tenure) * 2));
+        enlarged = true;
+    }
+
     if(*next_tabu > *current_tenure)
         *next_tabu = 0;
+    else if (enlarged)
+        *next_tabu = *current_tenure / 2;
     
     /* forget about other tabus if list become again of tenure size */
     for(int i=(*current_tenure); i<tenure; i++)
@@ -287,7 +300,6 @@ bool isTabu(int i, int j, const TSPInstance* inst, const TSPSolution* sol, int t
     for(int k=0; k<tenure; k++){
         
         if(a == tabuList[k]){
-            /*if(iter - tenure < tabuList[k][1])*/
             return true;
         }
         else if(b == tabuList[k]){
@@ -316,7 +328,7 @@ void setTabu(int i, int* tabuList, int* next_tabu, int tenure){
 
     tabuList[(*next_tabu) % tenure] = i;
 
-    *next_tabu = (*next_tabu) + 1;
+    *next_tabu = ((*next_tabu) + 1) % tenure;
 
 }/* setTabu */
 
@@ -357,7 +369,7 @@ double T_computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* 
 * IP tabuList list of tabu moves
 * IP tenure dimension available of $tabuList
 */
-void move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure, int* next_tabu){
+void bestNotTabuMove(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure, int* next_tabu){
     
     int i, j, start, end;
     double min_delta = 0;
@@ -387,7 +399,7 @@ void move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure, 
 
     setTabu(sol->succ[end], tabuList, next_tabu, tenure); 
 
-}/* move */
+}/* bestNotTabuMove */
 
 /*
 * IP inst tsp instance
@@ -398,28 +410,32 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     
     clock_t start = clock();
     TSPSolution temp;
-    int tenure, current_tenure;
-    int* tabuList = NULL;
+    int tenure;
     int next_tabu = 0;
     int iter = 0;
+    int ls = -1;
+
+    int* tabuList = allocTabuList(inst->dimension, &tenure);
+
+    int current_tenure = tenure;
 
     allocSol(inst->dimension, &temp);
 
     cpSol(inst, sol, &temp);
 
-    tabuList = allocTabuList(inst->dimension, &tenure);
-
-    current_tenure = tenure;
-
     do{
-        if((iter % tenure) == 0)    
+
+        if((iter % tenure) == 0 && iter != 0)  
             changeTenure(&current_tenure, &next_tabu, tenure, tabuList);
-        move(inst, &temp, tabuList, current_tenure, &next_tabu);
-        next_tabu = next_tabu % tenure;
-        iter++;
+        
+        bestNotTabuMove(inst, &temp, tabuList, current_tenure, &next_tabu);
 
         if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
 			break;
+        else if((*set).v)
+			tabuBar(start, (*set).tl, &ls);
+        
+        iter++;
 
     }while(true);
 
@@ -428,7 +444,6 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     freeTabuList_v2(tabuList, tenure);
 
-    return getSeconds(start);
     return getSeconds(start);
 
 }/* tabu_v2 */
