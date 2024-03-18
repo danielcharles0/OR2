@@ -12,3 +12,5 @@ int opt2(const TSPInstance*, TSPSolution*);
 void opt2move(int, int, const TSPInstance*, TSPSolution*);
 
 double delta2OptMoveCost(int, int, const TSPInstance*, const TSPSolution*);
+
+double computeDelta(int, int, const TSPInstance*, const TSPSolution*);

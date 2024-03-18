@@ -334,37 +334,6 @@ void setTabu(int i, int* tabuList, int* next_tabu, int tenure){
 }/* setTabu */
 
 /*
-* Computes delta between new edges and old edges.
-* IP i index of a node
-* IP j index of a node that can have a crossing with $start
-* IP inst tsp instance
-* IP sol solution to be improved
-* OP delta difference between current cost and cost without crossing
-*/
-double T_computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* sol){
-	
-	int n = inst->dimension;
-
-	int a = sol->succ[i];
-	int b = sol->succ[j];
-	int a_next = sol->succ[(i+1) % n];
-	int b_next = sol->succ[(j+1) % n];
-
-	if(b_next == a || a_next == b || a_next == b_next)
-		return 0;
-
-	double old1 = getDist(a, a_next, inst);
-	double old2 = getDist(b, b_next, inst);
-	double new1 = getDist(a, b, inst);
-	double new2 = getDist(a_next, b_next, inst);
-
-	double delta = (new1 + new2) - (old1 + old2);
-
-	return delta;
-
-}/* T_computeDelta */
-
-/*
 * IP inst tsp instance
 * IP sol solution to be modified
 * IP tabuList list of tabu moves
@@ -380,7 +349,7 @@ void bestNotTabuMove(const TSPInstance* inst, TSPSolution* sol, int* tabuList, i
 
         for(j=i+2; j<inst->dimension; j++){
             
-			double delta = T_computeDelta(i, j, inst, sol);
+			double delta = computeDelta(i, j, inst, sol);
 
             if((delta < min_delta || first_valid) && !isTabu(i, j, inst, sol, tenure, tabuList)){ 
                 min_delta = delta;
