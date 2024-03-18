@@ -243,16 +243,6 @@ int* allocTabuList(int n, int* tenure){
 }/* allocTabuList */
 
 /*
-* IP tabuList list to be freed
-* IP tenure dimension of the list
-*/
-void freeTabuList_v2(int* tabuList, int tenure){
-
-    free(tabuList);
-
-}/* freeTabuList */
-
-/*
 * IOP tenure value to be modified
 * IOP next_tabu index to be adapted to $tenure
 */
@@ -412,7 +402,7 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     }
 
-    freeTabuList_v2(tabuList, tenure);
+    free(tabuList);
 
     return getSeconds(start);
 
