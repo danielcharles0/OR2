@@ -16,6 +16,7 @@
 #define MIN_TENURE 10
 #define TENURE_DENOMINATOR 10
 #define TIMEOUT_WARNING_MESSAGE "The method exceeded the time limit! The returned solution is the best found so far\n\n"
+#define TIMEOUT_WARNING_MESSAGE "The method exceeded the time limit! The returned solution is the best found so far\n\n"
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
 
 /*
@@ -142,8 +143,10 @@ void tabuBar(clock_t start, int tl, int* ls){
 	
 	int s = getSeconds(start);
 
+
 	if(s - *ls >= PRINT_FREQUENCY){
 		processBar(s, tl);
+		printSeconds("Running time: ", s);
 		printSeconds("Running time: ", s);
 		*ls = s;
 	}/* if */
