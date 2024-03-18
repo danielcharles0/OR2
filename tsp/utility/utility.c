@@ -66,7 +66,7 @@ int readInt(const char lab[]){
 
     printf("%s", lab);
     scanf("%d", &num);
-    printf("\n\n");
+    printf("\n");
 
     return num;
 
@@ -175,6 +175,8 @@ void printSeconds(const char lab[], int sec){
 
 	printf("%s%2dh %2dm %2ds", lab, fhour, fmin, fsec);
 
+	fflush(stdout);
+
 }/* printSeconds */
 
 /*
@@ -237,8 +239,8 @@ void processBar(int ni, int tni){
     repeat(PROCESS_BAR_PRECISION - n, PROCESS_BAR_TO_COMPLETE_CHARACTER);
     printf("] %.2f%% ", frac * 100);
 
-    if(tni <= ni)
-        printf("\n\n");
+    /*if(tni <= ni)
+        printf("\n\n");*/
 
 	/* resource: https://www.educative.io/answers/what-is-fflush-in-c */
     fflush(stdout);

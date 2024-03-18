@@ -136,9 +136,9 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance*
 void refinementaAlgorithmLegend(void){
 
 	printf("Available refinement algorithms:\n");
-	printf("Code: %d to skip refinement\n", SKIP);
-    printf("Code: %d, Algorithm: 2opt refinement method\n", OPT2);
-	printf("Code: %d, Algorithm: TABU refinement method\n", TABU);
+	printf("\t- Code: %d to skip refinement\n", SKIP);
+    printf("\t- Code: %d, Algorithm: 2opt refinement method\n", OPT2);
+	printf("\t- Code: %d, Algorithm: TABU refinement method\n", TABU);
     printf("\n");
 
 }/* refinementaAlgorithmLegend */
@@ -148,11 +148,11 @@ void refinementaAlgorithmLegend(void){
 * IP inst tsp instance
 * IOP sol solution to optimize
 */
-void runRefinement(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+bool runRefinement(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	refinementaAlgorithmLegend();
 
-    runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), set, inst, sol);
+    return runRefAlg(readInt("Insert the code of the refinement algorithm you want to run: "), set, inst, sol);
 
 }/* runRefinement */
 

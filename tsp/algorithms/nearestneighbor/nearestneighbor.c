@@ -179,13 +179,26 @@ void NN_solverV2(int sn, const TSPInstance* inst, TSPSolution* sol){
 void algorithmConfigurations(void){
     
     printf("Available nearest neighbor search configurations:\n");
-    printf("Code: %d, Algorithm: Search starts from the first node\n", START_FIRST_NODE);
-    printf("Code: %d, Algorithm: Search starts from a random node\n", START_RANDOM_NODE);
-	printf("Code: %d, Algorithm: Search starts from a node you select\n", SELECT_STARTING_NODE);
-	printf("Code: %d, Algorithm: Search will be performed starting from any node, the best solution is returned\n", BEST_START);
+    printf("\t- Code: %d, Algorithm: Search starts from the first node\n", START_FIRST_NODE);
+    printf("\t- Code: %d, Algorithm: Search starts from a random node\n", START_RANDOM_NODE);
+	printf("\t- Code: %d, Algorithm: Search starts from a node you select\n", SELECT_STARTING_NODE);
+	printf("\t- Code: %d, Algorithm: Search will be performed starting from any node, the best solution is returned\n", BEST_START);
     printf("\n");
     
 }/* algorithmLegend */
+
+/*
+* IP start time
+* IP it current iteration
+* IP n total number of iterations
+* OV process bar
+*/
+void NNBar(clock_t start, int it, int n){
+
+	processBar(it, n);
+	printSeconds("Running time: ", getSeconds(start));
+
+}/* NNBar */
 
 /*
 * IP inst tsp instance
@@ -199,21 +212,16 @@ int best_start_2opt(const Settings* set, const TSPInstance* inst, TSPSolution* s
 	int i;
 
 	allocSol((*inst).dimension, &temp);
-	
-	if((*set).v)
-		processBar(0, (*inst).dimension);
 
 	NN_solver_2opt(0, inst, sol);
 
 	if((*set).v)
-		processBar(1, (*inst).dimension);
+		NNBar(start, 1, (*inst).dimension);
 
 	for(i = 1; i < (*inst).dimension; i++){
 
-		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
-			freeSol(&temp);
-			return getSeconds(start);
-		}/* if */
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+			break;
 
 		NN_solver_2opt(i, inst, &temp);
 
@@ -221,9 +229,12 @@ int best_start_2opt(const Settings* set, const TSPInstance* inst, TSPSolution* s
 			cpSol(inst, &temp, sol);
 
 		if((*set).v)
-			processBar(i + 1, (*inst).dimension);
+			NNBar(start, i + 1, (*inst).dimension);
 			
 	}/* for */
+
+	if((*set).v)
+		printf("\n\n");
 
 	freeSol(&temp);
 	
@@ -243,21 +254,16 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	int i;
 
 	allocSol((*inst).dimension, &temp);
-	
-	if((*set).v)
-		processBar(0, (*inst).dimension);
 
 	NN_solver(0, inst, sol);
 
 	if((*set).v)
-		processBar(1, (*inst).dimension);
+		NNBar(start, 1, (*inst).dimension);
 
 	for(i = 1; i < (*inst).dimension; i++){
 
-		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl)){
-			freeSol(&temp);
-			return getSeconds(start);
-		}/* if */
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+			break;
 
 		NN_solver(i, inst, &temp);
 
@@ -265,9 +271,12 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 			cpSol(inst, &temp, sol);
 
 		if((*set).v)
-			processBar(i + 1, (*inst).dimension);
+			NNBar(start, i + 1, (*inst).dimension);
 			
 	}/* for */
+
+	if((*set).v)
+		printf("\n\n");
 
 	freeSol(&temp);
 	
@@ -277,27 +286,30 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 /*
 * IP conf configuration code
+* OR int execution seconds, -1 if error
 */
-void runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+int runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	switch (conf){
 	    case START_FIRST_NODE:
-	        NN_solver(0, inst, sol);
+	        return NN_solver(0, inst, sol);
 	        break;
 	    case START_RANDOM_NODE:
-	        NN_solver(rand0N((*inst).dimension), inst, sol);
+	        return NN_solver(rand0N((*inst).dimension), inst, sol);
 	        break;
 		case SELECT_STARTING_NODE:
 						/* i-th node in position i - 1 */
-			NN_solver(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
+			return NN_solver(readIntRange(1, inst->dimension, "Insert starting node") - 1, inst, sol);
 	        break;
 		case BEST_START:
-			best_start(set, inst, sol);
+			return best_start(set, inst, sol);
 			break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        break;
     }
+	
+	return -1;
 
 }/* runConfiguration */
 
@@ -306,11 +318,12 @@ void runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* in
 * IP inst tsp instance
 * IOP sol solution
 * OP false if found a valid solution, true otherwise.
+* OR int execution seconds, -1 if error
 */
-void nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+int nearestNeighbor(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	algorithmConfigurations();
 
-	runConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
+	return runConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
 
 }/* nearestNeighbor */

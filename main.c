@@ -15,6 +15,7 @@
 #include "tsp/output/output.h"
 
 #include "tsp/algorithms/refinement/2opt/2opt.h"
+#include "tsp/algorithms/refinement/tabu/tabu.h"
 
 /*
 * IP inst tsp instance
@@ -31,10 +32,22 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
     error = run(readInt("Insert the code of the algorithm you want to run: "), inst, &sol, set);
 
 	if(error || (set->v && !checkSol(inst, &sol))){
-		printf("Error: invalid solution.\n");
-	}else if (set->v)
+		printf("Error: invalid solution.\n\n");
+	}else if (set->v){
+        TSPSolution temp;
+
+        allocSol(inst->dimension, &temp);
+        cpSol(inst, &sol, &temp);
+
         plotSolution(inst, &sol);
-    
+
+        tabu(set, inst, &temp, defaulttenure);
+        tabu_v2(set, inst, &sol);
+
+        plotSolution(inst, &temp);
+        plotSolution(inst, &sol);
+
+    }
     freeSol(&sol);
 
 }/* runAlgorithm */

@@ -15,4 +15,4 @@ typedef enum{
     BEST_START
 } NN_CONFIG;
 
-void nearestNeighbor(const Settings*, const TSPInstance*, TSPSolution*);
+int nearestNeighbor(const Settings*, const TSPInstance*, TSPSolution*);

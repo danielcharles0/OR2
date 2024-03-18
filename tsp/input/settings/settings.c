@@ -178,3 +178,17 @@ CONF parseCMDLine(int argc, char* const* argv, Settings* set){
     return RANDOM_GENERATION;
 
 }/* parseCMDLine */
+
+/*
+* IP source settings
+* OP destination settings
+*/
+void cpSet(const Settings* source, Settings* destination){
+	
+	strcpy((*destination).input_file_name, (*source).input_file_name);
+    (*destination).n = (*source).n;
+    (*destination).seed = (*source).seed;
+    (*destination).tl = (*source).tl;
+    (*destination).v = (*source).v;
+
+}/* cpSet */
