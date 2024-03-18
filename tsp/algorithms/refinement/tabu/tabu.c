@@ -5,7 +5,10 @@
 * File     : tabu.c
 */
 
-#include "time.h"
+#include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "tabu.h"
 #include "../2opt/2opt.h"
 #include "../../../utility/utility.h"
@@ -14,6 +17,7 @@
 #define TENURE_DENOMINATOR 10
 #define TIMEOUT_WARNING_MESSAGE "Warning: The method exceeded the time limit! the solution that will be returned is the best founded so far\n\n"
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
+
 /*
 * IP iteration index
 * IP n size of the instance
@@ -218,7 +222,7 @@ void allocTabuList(int n, int* tabuList, int* tenure){
 
     *tenure = max(MIN_TENURE, n/100);
 
-    tabuList = (int*) malloc((*tenure) * sizeof(int*));
+    tabuList = (int*) malloc((*tenure) * sizeof(int));
 
     for(int i=0; i<(*tenure); i++)
         tabuList[i] = -1;
@@ -242,18 +246,24 @@ void freeTabuList_v2(int* tabuList, int tenure){
 void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList){
 
     int rand = rand0N(4);
+    printf("%d\n", rand);
 
     if(rand == 3) /* upper 0.25-th quantile */
         *current_tenure = (*current_tenure) / 2;
     else
-        *current_tenure = max(MIN_TENURE, (*current_tenure) * 2);
-
+        *current_tenure = (tenure < ((*current_tenure) * 2) ? tenure : ((*current_tenure) * 2));
+    
+    printf("%d\n", *current_tenure);
     if(*next_tabu > *current_tenure)
         *next_tabu = 0;
     
+    printf("%d\n", *current_tenure);
     /* forget about other tabus if list become again of tenure size */
-    for(int i=(*current_tenure); i<tenure; i++)
+    for(int i=(*current_tenure); i<tenure; i++){
         tabuList[i] = -1;
+        printf("%d %d\n", i, tabuList[i]);
+    }
+    printf("%d\n", *current_tenure);
 
 }/* changeTenure */
 
@@ -267,14 +277,21 @@ void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList
 * IP iter current iteration
 * OR bool true if tabu move, false otherwise.
 */
-bool isTabu(int i, int j, const TSPInstance* inst, const TSPSolution* sol, int* tabuList, int tenure){
+bool isTabu(int i, int j, const TSPInstance* inst, const TSPSolution* sol, int tenure, int* tabuList){
 
     int a = sol->succ[i];
     int b = sol->succ[j];
     int c = sol->succ[(i+1) % inst->dimension];
     int d = sol->succ[(j+1) % inst->dimension];
     
+    printf("sizeof(tabuList): %lu == %d\n", sizeof(tabuList), tenure);
+    
+    /* problem accessing tabuList */
+    printf("%d\n", *tabuList);
+
     for(int k=0; k<tenure; k++){
+        
+        printf("tabuList[%d] = %d\n", k, tabuList[k]);
 
         if(a == tabuList[k]){
             /*if(iter - tenure < tabuList[k][1])*/
@@ -347,7 +364,7 @@ double T_computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* 
 * IP tabuList list of tabu moves
 * IP tenure dimension available of $tabuList
 */
-double move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure, int* next_tabu){
+void move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure, int* next_tabu){
     
     int i, j, start, end;
     double min_delta = 0;
@@ -356,10 +373,12 @@ double move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure
     for(i=0; i<inst->dimension; i++){
 
         for(j=i+2; j<inst->dimension; j++){
-
-			double delta = T_computeDelta(i, j, inst, sol);
             
-            if((delta < min_delta || first_valid) && !isTabu(i, j, inst, sol, tabuList, tenure)){ 
+            printf("%.2d %.2d ", i, j);
+			double delta = T_computeDelta(i, j, inst, sol);
+            printf("%lf\n", delta);
+
+            if((delta < min_delta || first_valid) && !isTabu(i, j, inst, sol, tenure, tabuList)){ 
                 min_delta = delta;
                 start = (i+1) % inst->dimension;
                 end = j;
@@ -371,11 +390,13 @@ double move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure
 
     }
 
+    printf("MIN_DELTA: %lf\n", min_delta);
+
     invertList(start, end, sol->succ);
     
-    setTabu(sol->succ[end], tabuList, next_tabu, tenure); 
+    sol->val += min_delta;
 
-    return min_delta;
+    setTabu(sol->succ[end], tabuList, next_tabu, tenure); 
 
 }/* move */
 
@@ -387,23 +408,34 @@ double move(const TSPInstance* inst, TSPSolution* sol, int* tabuList, int tenure
 int tabu_v2(const TSPInstance* inst, TSPSolution* sol){
     
     clock_t start = clock();
+    TSPSolution temp;
     int tenure, current_tenure;
     int* tabuList = NULL;
-    int iter = 0;
     int next_tabu = 0;
+    int iter = 0;
+
+    allocSol(inst->dimension, &temp);
+
+    cpSol(inst, sol, &temp);
 
     allocTabuList(inst->dimension, tabuList, &tenure);
+
+    current_tenure = tenure;
+    printf("%d %d\n", tenure, current_tenure);
 
     do{
         if((iter % tenure) == 0)    
             changeTenure(&current_tenure, &next_tabu, tenure, tabuList);
-        sol->val += move(inst, sol, tabuList, current_tenure, &next_tabu);
+        move(inst, &temp, tabuList, current_tenure, &next_tabu);
         next_tabu = next_tabu % tenure;
         iter++;
-    }while(iter<200);
+    }while(true);
+
+    if(temp.val < sol->val)
+        cpSol(inst, &temp, sol);
 
     freeTabuList_v2(tabuList, tenure);
 
-    return getSeconds(start, clock());
+    return getSeconds(start);
 
-}/* tabu */
+}/* tabu_v2 */
