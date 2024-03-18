@@ -224,10 +224,11 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 
 /*
 * IP n tsp instance dimension
-* IOP tabuList list of lists to be allocated
 * IOP tenure dimension of the tabuList
+* OP tabuList list of lists to be allocated
 */
 int* allocTabuList(int n, int* tenure){
+    
     int* temp;
 
     *tenure = max(MIN_TENURE, n/100);
@@ -333,7 +334,7 @@ void setTabu(int i, int* tabuList, int* next_tabu, int tenure){
 }/* setTabu */
 
 /*
-* Computes delta between new 
+* Computes delta between new edges and old edges.
 * IP i index of a node
 * IP j index of a node that can have a crossing with $start
 * IP inst tsp instance
@@ -361,7 +362,7 @@ double T_computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* 
 
 	return delta;
 
-}/* computeDelta */
+}/* T_computeDelta */
 
 /*
 * IP inst tsp instance
@@ -423,24 +424,24 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     cpSol(inst, sol, &temp);
 
-    do{
+    while(true){
 
         if((iter % tenure) == 0 && iter != 0)  
             changeTenure(&current_tenure, &next_tabu, tenure, tabuList);
         
         bestNotTabuMove(inst, &temp, tabuList, current_tenure, &next_tabu);
 
+        if(temp.val < sol->val)
+            cpSol(inst, &temp, sol);
+
         if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
 			break;
         else if((*set).v)
 			tabuBar(start, (*set).tl, &ls);
-        
+
         iter++;
 
-    }while(true);
-
-    if(temp.val < sol->val)
-        cpSol(inst, &temp, sol);
+    }
 
     freeTabuList_v2(tabuList, tenure);
 

@@ -100,7 +100,7 @@ int opt2(const TSPInstance* inst, TSPSolution* sol){
 }/* opt2 */
 
 /*
-* Computes delta between new 
+* Computes delta between new edges and old edges.
 * IP i index of a node
 * IP j index of a node that can have a crossing with $start
 * IP inst tsp instance
