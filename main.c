@@ -33,25 +33,9 @@ void runAlgorithm(const TSPInstance* inst, const Settings* set){
 
 	if(error || (set->v && !checkSol(inst, &sol))){
 		printf("Error: invalid solution.\n\n");
-	}else if (set->v){
-        TSPSolution temp;
-
-        allocSol(inst->dimension, &temp);
-        cpSol(inst, &sol, &temp);
-
-        /*plotSolution(inst, &sol);*/
-        printf("Solution Cost (init): %lf\n", sol.val);
-
-        tabu(set, inst, &temp, defaulttenure);
-        tabu_v2(set, inst, &sol);
-
-        /*plotSolution(inst, &temp);
-        plotSolution(inst, &sol);*/
-
-        printf("Solution Cost (V1): %lf\n", temp.val);
-        printf("Solution Cost (V2): %lf\n", sol.val);
-
-    }
+	}else if (set->v)
+        plotSolution(inst, &sol);
+		
     freeSol(&sol);
 
 }/* runAlgorithm */
