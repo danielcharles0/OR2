@@ -79,6 +79,24 @@ void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSol
 } /* updateIncumbentSol */
 
 /*
+* IP start executing time start
+* IP tl time limit
+* IOP ls last stamp second from the execution time start
+*/
+void tabuBar(clock_t start, int tl, int* ls){
+	
+	int s = getSeconds(start);
+
+
+	if(s - *ls >= PRINT_FREQUENCY){
+		processBar(s, tl);
+		printSeconds("Running time: ", s);
+		*ls = s;
+	}/* if */
+
+}/* tabuBar */
+
+/*
 * IP set settings
 * IP start starting time of processing
 * IOP ls last stamp second from the execution start
@@ -99,24 +117,24 @@ bool checkTimeLimit(const Settings* set, int start, int* ls){
 * IP inst tsp instance
 * IP sol solution
 * IP tl tabu list
-* OP i sol->succ first index of the move
-* OP j sol->succ second index of the move
+* OP i sol->path first index of the move
+* OP j sol->path second index of the move
 * OR bool true if the move is not a tabu, false otherwise
 */
 bool isNotTabuMove(int it, const TSPInstance* inst, const TSPSolution* sol, const TABU_LIST* tl, int i, int j){
 
-	int a = (*sol).succ[i], a1 = (*sol).succ[(i + 1) % (*inst).dimension], b = (*sol).succ[j], b1 = (*sol).succ[(j + 1) % (*inst).dimension];	
+	int a = (*sol).path[i], a1 = (*sol).path[(i + 1) % (*inst).dimension], b = (*sol).path[j], b1 = (*sol).path[(j + 1) % (*inst).dimension];	
 
 	return isNotTabu(it, a, tl) && isNotTabu(it, a1, tl) && isNotTabu(it, b, tl) && isNotTabu(it, b1, tl);
 
-}/* isTabu */
+}/* isNotTabuMove */
 
 /*
 * IP it current iteration
 * IP inst tsp instance
 * IP sol solution
-* OP i sol->succ first optimal index of the move
-* OP j sol->succ second optimal index of the move
+* OP i sol->path first optimal index of the move
+* OP j sol->path second optimal index of the move
 * OR bool true if a not tabu move is founded, false otherwise
 * NB: we have to avoid two cases, the ones when one of the two selected nodes is the successor of the other. In this case when we
 * 		break the cycle we are no longer able to reconstruct it.
@@ -151,13 +169,13 @@ bool getOptNotTabu2OptMove(int it, const TSPInstance* inst, const TSPSolution* s
 * IP it iteration id
 * IP inst tsp instance
 * IP sol solution
-* IP opti sol->succ first optimal index of the move
-* IP optj sol->succ second optimal index of the move
+* IP opti sol->path first optimal index of the move
+* IP optj sol->path second optimal index of the move
 * OP tl tabu list to be updated
 */
 void updateTabuList(int it, const TSPInstance* inst, const TSPSolution* sol, int opti, int optj, TABU_LIST* tl){
 
-	int a = (*sol).succ[opti];/*, a1 = (*sol).succ[(opti + 1) % (*inst).dimension], b = (*sol).succ[optj], b1 = (*sol).succ[(optj + 1) % (*inst).dimension];*/
+	int a = (*sol).path[opti];/*, a1 = (*sol).path[(opti + 1) % (*inst).dimension], b = (*sol).path[optj], b1 = (*sol).path[(optj + 1) % (*inst).dimension];*/
 
 	/*(*tl).list.v[a] = (*tl).list.v[a1] = (*tl).list.v[b] = (*tl).list.v[b1] = it;*/
 	(*tl).list.v[a] = it;
@@ -165,28 +183,10 @@ void updateTabuList(int it, const TSPInstance* inst, const TSPSolution* sol, int
 }/* updateTabuList */
 
 /*
-* IP start executing time start
-* IP tl time limit
-* IOP ls last stamp second from the execution time start
-*/
-void tabuBar(clock_t start, int tl, int* ls){
-	
-	int s = getSeconds(start);
-
-
-	if(s - *ls >= PRINT_FREQUENCY){
-		processBar(s, tl);
-		printSeconds("Running time: ", s);
-		*ls = s;
-	}/* if */
-
-}/* tabuBar */
-
-/*
 * IP inst tsp instance
 * IP it iteration id
-* OP i sol->succ first index of the move
-* OP j sol->succ second index of the move
+* OP i sol->path first index of the move
+* OP j sol->path second index of the move
 * OP tl tabu list to be updated
 * IOP sol refined solution
 */
@@ -210,7 +210,7 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 	TSPSolution temp;
 	TABU_LIST tl; /* TABU list */
 	int it = 0, ls = -1; /* ls := last stamp, seconds from the start to the last stamp */
-	int opti, optj; /* opti and optj are indexes in the sol->succ array */
+	int opti, optj; /* opti and optj are indexes in the sol->path array */
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);
@@ -310,10 +310,10 @@ void changeTenure(int* current_tenure, int* next_tabu, int max_tenure, int* tabu
 */
 bool isTabu(int i, int j, const TSPInstance* inst, const TSPSolution* sol, int tenure, int* tabuList){
 
-    int a = sol->succ[i];
-    int b = sol->succ[j];
-    int c = sol->succ[(i+1) % inst->dimension];
-    int d = sol->succ[(j+1) % inst->dimension];
+    int a = sol->path[i];
+    int b = sol->path[j];
+    int c = sol->path[(i+1) % inst->dimension];
+    int d = sol->path[(j+1) % inst->dimension];
         
     for(int k=0; k<tenure; k++){
         
@@ -384,11 +384,11 @@ void bestNotTabuMove(const TSPInstance* inst, TSPSolution* sol, int* tabuList, i
 
     }
 
-    invertList(start, end, sol->succ);
+    invertList(start, end, sol->path);
     
     sol->val += min_delta;
 
-    setTabu(sol->succ[end], tabuList, next_tabu, tenure); 
+    setTabu(sol->path[end], tabuList, next_tabu, tenure); 
 
 }/* bestNotTabuMove */
 

@@ -11,23 +11,23 @@
 #include "../tabu/tabu.h"
 
 /*
-* IP i sol->succ first index of the move
-* IP j sol->succ second index of the move
+* IP i sol->path first index of the move
+* IP j sol->path second index of the move
 * IP inst tsp instance
 * IP sol refined solution
 * OR the cost of the move
 */
 double delta2OptMoveCost(int i, int j, const TSPInstance* inst, const TSPSolution* sol){
 	
-	int a = (*sol).succ[i], a1 = (*sol).succ[(i + 1) % (*inst).dimension], b = (*sol).succ[j], b1 = (*sol).succ[(j + 1) % (*inst).dimension];
+	int a = (*sol).path[i], a1 = (*sol).path[(i + 1) % (*inst).dimension], b = (*sol).path[j], b1 = (*sol).path[(j + 1) % (*inst).dimension];
 
 	return getDist(a, b, inst) + getDist(a1, b1, inst) - (getDist(a, a1, inst) + getDist(b, b1, inst));
 
 }/* delta2OptMoveCost */
 
 /*
-* IP i sol->succ first index of the move
-* IP j sol->succ second index of the move
+* IP i sol->path first index of the move
+* IP j sol->path second index of the move
 * IP inst tsp instance
 * IOP sol refined solution
 * NB: it assumes i < j
@@ -40,7 +40,7 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 
 	/* Note that the number of swaps performed is equal to floor((j - i - 1) / 2) */
 	while(s < t){
-		swapInt(&((*sol).succ[s]), &((*sol).succ[t]));
+		swapInt(&((*sol).path[s]), &((*sol).path[t]));
 		s++;
 		t--;
 	}/* while */
@@ -50,8 +50,8 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 /*
 * IP inst tsp instance
 * IP sol solution
-* OP i sol->succ first optimal index of the move
-* OP j sol->succ second optimal index of the move
+* OP i sol->path first optimal index of the move
+* OP j sol->path second optimal index of the move
 * OR the cost of the move
 * NB: we have to avoid two cases, the ones when one of the two selected nodes is the successor of the other. In this case when we
 * 		break the cycle we are no longer able to reconstruct it.
@@ -90,7 +90,7 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 int opt2(const TSPInstance* inst, TSPSolution* sol){
 
 	clock_t start = clock();
-	int opti, optj; /* opti and optj are indexes in the sol->succ array */
+	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	
 	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0)
 		opt2move(opti, optj, inst, sol);
@@ -111,10 +111,10 @@ double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* so
 	
 	int n = inst->dimension;
 
-	int a = sol->succ[i];
-	int b = sol->succ[j];
-	int a_next = sol->succ[(i+1) % n];
-	int b_next = sol->succ[(j+1) % n];
+	int a = sol->path[i];
+	int b = sol->path[j];
+	int a_next = sol->path[(i+1) % n];
+	int b_next = sol->path[(j+1) % n];
 
 	if(b_next == a || a_next == b || a_next == b_next)
 		return 0;
@@ -133,8 +133,8 @@ double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* so
 /*
 * IP inst tsp instance
 * IP sol solution to be improved
-* IOP start index of starting point of $(sol->succ)'s sublist to invert
-* IOP end index of ending point of $(sol->succ)'s sublist to invert
+* IOP start index of starting point of $(sol->path)'s sublist to invert
+* IOP end index of ending point of $(sol->path)'s sublist to invert
 * OP min_delta minimum delta between initial cost of $sol and its cost after the move.
 */
 double bestMove(const TSPInstance* inst, TSPSolution* sol, int* start, int* end){
@@ -176,7 +176,7 @@ bool refinement(const TSPInstance* inst, TSPSolution* sol){
 
     if(min_delta < 0){  /* if there is at least a change that improves the solution */
         
-        invertList(start, end, sol->succ); /* apply index choices that give the best improvement */
+        invertList(start, end, sol->path); /* apply index choices that give the best improvement */
         
         sol->val += min_delta;
 

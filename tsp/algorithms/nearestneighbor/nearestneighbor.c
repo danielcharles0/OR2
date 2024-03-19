@@ -18,7 +18,7 @@
 
 /*
 * Finds index of next node to visit (nearest neighbor), puts next node to visit close to last visited and updates cost of the solution.
-* IP len current index we have to update in $sol->succ
+* IP len current index we have to update in $sol->path
 * IP inst tsp instance
 * IOP sol solution we want to update
 */
@@ -26,8 +26,8 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
     
 	int i;
 
-    int last = sol->succ[len-1];
-    int curr = sol->succ[len];
+    int last = sol->path[len-1];
+    int curr = sol->path[len];
     int next = len;
 
     double min_dist = getDist(last, curr, inst);
@@ -35,9 +35,9 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
     
     for(i=len+1; i<inst->dimension; i++){
         
-        curr = sol->succ[i]; /* index in inst->points of next unvisited node */
+        curr = sol->path[i]; /* index in inst->points of next unvisited node */
 
-        curr_dist = getDist(last, curr, inst); /* get distance between last visited node and the current unvisited node in succ */
+        curr_dist = getDist(last, curr, inst); /* get distance between last visited node and the current unvisited node in path */
 
         if(curr_dist < min_dist){
             min_dist = curr_dist;
@@ -45,7 +45,7 @@ void visitNext(int len, const TSPInstance* inst, TSPSolution* sol){
         }
     }
 
-    swapInt(&(sol->succ[len]), &(sol->succ[next]));
+    swapInt(&(sol->path[len]), &(sol->path[next]));
     sol->val += min_dist;
 
 }/* minDistNode */
@@ -61,7 +61,7 @@ void NN_initSol(int sp, const TSPInstance* inst, TSPSolution* sol){
 
     sol->val = 0;
 
-    swapInt(&(sol->succ[0]), &(sol->succ[sp])); 
+    swapInt(&(sol->path[0]), &(sol->path[sp])); 
 
 }/* initSol */
 
@@ -81,7 +81,7 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
    for(curr=1; curr<inst->dimension; curr++)
         visitNext(curr, inst, sol);
 
-    sol->val += getDist(sol->succ[0], sol->succ[curr-1], inst); /* add cost of connection of last to first node */
+    sol->val += getDist(sol->path[0], sol->path[curr-1], inst); /* add cost of connection of last to first node */
 
     return getSeconds(start);
 

@@ -40,7 +40,7 @@ double getSolCost(const TSPInstance* inst, const TSPSolution* sol){
 	double cost = 0;
 
 	for(i = 0; i < inst->dimension; i++){
-		int s = (*sol).succ[i], t = (*sol).succ[(i + 1) % inst->dimension];
+		int s = (*sol).path[i], t = (*sol).path[(i + 1) % inst->dimension];
         cost += getDist(s, t, inst);
 	}/* for */
 
@@ -57,7 +57,7 @@ void ascendentSol(const TSPInstance* inst, TSPSolution* sol){
 	int i;
 
 	for(i = 0; i < inst->dimension; i++)
-        (*sol).succ[i] = i;
+        (*sol).path[i] = i;
 
 	(*sol).val = getSolCost(inst, sol);
 
@@ -142,8 +142,8 @@ void freeInst(TSPInstance* inst){
 */
 void allocSol(int n, TSPSolution* sol){
 
-    sol->succ = malloc(n * sizeof(int));
-	assert(sol->succ != NULL);
+    sol->path = malloc(n * sizeof(int));
+	assert(sol->path != NULL);
 
 }/* allocSol */
 
@@ -151,7 +151,7 @@ void allocSol(int n, TSPSolution* sol){
 * IOP sol solution to free memory
 */
 void freeSol(TSPSolution* sol){
-    free(sol->succ);
+    free(sol->path);
 }/* freeSol */
 
 /*
@@ -252,7 +252,7 @@ double getDist(int i, int j, const TSPInstance* inst){
 */
 bool checkSol(const TSPInstance* inst, const TSPSolution* sol){
 
-    if(!isDistinct(inst->dimension, sol->succ))
+    if(!isDistinct(inst->dimension, sol->path))
         return false;
 
     return isEqual(sol->val, getSolCost(inst, sol));    
@@ -269,7 +269,7 @@ void cpSol(const TSPInstance* inst, const TSPSolution* source, TSPSolution* dest
 	int i;
 
 	for(i = 0; i < (*inst).dimension; i++)
-		(*destination).succ[i] = (*source).succ[i];
+		(*destination).path[i] = (*source).path[i];
 	
 	(*destination).val = (*source).val;
 

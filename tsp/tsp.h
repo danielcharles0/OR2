@@ -22,8 +22,8 @@ typedef struct {
 } TSPInstance;
 
 typedef struct {
-    int* succ;	/* succ := array containing the indexes of the nodes of the instance in the order they have to be visited */
-    double val;	/* val  := value of the cost of the solution $succ */
+    int* path;	/* path := array containing the indexes of the nodes of the instance in the order they have to be visited */
+    double val;	/* val  := value of the cost of the solution $path */
 } TSPSolution;
 
 typedef enum {

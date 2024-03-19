@@ -35,11 +35,11 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
     Point2D* p;
 
     for(i = 0; i < inst->dimension; i++){
-        p = &(inst->points[sol->succ[i]]);
+        p = &(inst->points[sol->path[i]]);
         fprintf(gnuplotPipe, "%f %f\n", p->x, p->y);
     }
     
-    p = &(inst->points[sol->succ[0]]);
+    p = &(inst->points[sol->path[0]]);
 
     fprintf(gnuplotPipe, "%f %f\n", p->x, p->y); /* connect last to first */
 

@@ -24,7 +24,7 @@ int randomSol(const TSPInstance* inst, TSPSolution* sol){
 		
 		int nn = i + rand0N((*inst).dimension - i);
 
-		swapInt(&((*sol).succ[i]), &((*sol).succ[nn]));
+		swapInt(&((*sol).path[i]), &((*sol).path[nn]));
 
 	}/* for */
 
