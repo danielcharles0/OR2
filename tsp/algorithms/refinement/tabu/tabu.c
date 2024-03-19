@@ -15,8 +15,8 @@
 
 #define MIN_TENURE 10
 #define TENURE_DENOMINATOR 10
-#define TIMEOUT_WARNING_MESSAGE "The method exceeded the time limit! The returned solution is the best found so far\n\n"
-#define TIMEOUT_WARNING_MESSAGE "The method exceeded the time limit! The returned solution is the best found so far\n\n"
+/*#define TIMEOUT_WARNING_MESSAGE "The method exceeded the time limit! The returned solution is the best found so far\n\n"*/
+#define TIMEOUT_WARNING_MESSAGE "Time limit reached! Returning the best solution.\n\n"
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
 
 /*
@@ -67,6 +67,34 @@ bool isNotTabu(int it, int node, const TABU_LIST* tl){
 }/* isNotTabu */
 
 /*
+* IP inst tsp instance
+* IP temp current solution found
+* IOP sol best solution 
+*/
+void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSolution* sol){
+
+    if((*temp).val < (*sol).val && checkSol(inst, temp))
+        cpSol(inst, temp, sol);
+
+} /* updateIncumbentSol */
+
+/*
+* IP set settings
+* IP start starting time of processing
+* IOP ls last stamp second from the execution start
+*/
+bool checkTimeLimit(const Settings* set, int start, int* ls){
+
+    if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+        return true;
+    else if((*set).v)
+        tabuBar(start, (*set).tl, ls);
+    
+    return false;
+
+}/* checkTimeLimit */
+
+/*
 * IP it current iteration
 * IP inst tsp instance
 * IP sol solution
@@ -104,13 +132,15 @@ bool getOptNotTabu2OptMove(int it, const TSPInstance* inst, const TSPSolution* s
 												/* Note that j < (*inst).dimension => i < (*inst).dimension - 2 */
 		for(j = i + 2; j < (*inst).dimension; j++)
 			if(i != 0 || j < (*inst).dimension - 1){
-				double temp = delta2OptMoveCost(i, j, inst, sol);
-				if((!notTabu || temp < optdelta) && isNotTabuMove(it, inst, sol, tl, i, j)){
-					notTabu = true;
-					*opti = i;
-					*optj = j;
-					optdelta = temp;
-				}/* if */
+				if(isNotTabuMove(it, inst, sol, tl, i, j)){
+                    double temp = delta2OptMoveCost(i, j, inst, sol);
+                    if(!notTabu || temp < optdelta){
+                        notTabu = true;
+                        *opti = i;
+                        *optj = j;
+                        optdelta = temp;
+                    }/* if */
+                }
 			}/* if */
 	
 	return notTabu;
@@ -193,14 +223,12 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 			
 			tabuMove(inst, it, opti, optj, &tl, &temp);
 
-			if(temp.val < (*sol).val)
-				cpSol(inst, &temp, sol);
+			updateIncumbentSol(inst, &temp, sol);
+            
 		}/* if */
 
-		if(isTimeOutWarning("", start, (*set).tl))
-			break;
-		else if((*set).v)
-			tabuBar(start, (*set).tl, &ls);
+		if(checkTimeLimit(set, start, &ls))
+            break;
 
 		it++;
 
@@ -338,16 +366,20 @@ void bestNotTabuMove(const TSPInstance* inst, TSPSolution* sol, int* tabuList, i
 
         for(j=i+2; j<inst->dimension; j++){
             
-			double delta = computeDelta(i, j, inst, sol);
+            if(!isTabu(i, j, inst, sol, tenure, tabuList)){
+                
+                double delta = computeDelta(i, j, inst, sol);
 
-            if((delta < min_delta || first_valid) && !isTabu(i, j, inst, sol, tenure, tabuList)){ 
-                min_delta = delta;
-                start = (i+1) % inst->dimension;
-                end = j;
+                if(delta < min_delta || first_valid){ 
+                    min_delta = delta;
+                    start = (i+1) % inst->dimension;
+                    end = j;
 
-                first_valid = false;
+                    first_valid = false;
+                }
+
             }
-			
+
         }
 
     }
@@ -389,13 +421,10 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
         
         bestNotTabuMove(inst, &temp, tabuList, current_tenure, &next_tabu);
 
-        if(temp.val < sol->val)
-            cpSol(inst, &temp, sol);
+        updateIncumbentSol(inst, &temp, sol);
 
-        if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
-			break;
-        else if((*set).v)
-			tabuBar(start, (*set).tl, &ls);
+        if(checkTimeLimit(set, start, &ls))
+            break;
 
         iter++;
 

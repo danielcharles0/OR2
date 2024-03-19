@@ -82,3 +82,10 @@ void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
     plotSolutionTitle(inst, sol, DEFAULT_TITLE);
 
 }/* plotSolution */
+
+/*
+* Adds current sol cost in real time plot.
+*/
+void plotCost(void){
+
+}

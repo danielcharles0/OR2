@@ -284,6 +284,7 @@ void cpSol(const TSPInstance* inst, const TSPSolution* source, TSPSolution* dest
 bool isDistinct(int n, int* arr){
     
 	int i;
+	bool status = true;
 
     int* counters = malloc(n * sizeof(int));
     assert(counters != NULL);
@@ -293,12 +294,12 @@ bool isDistinct(int n, int* arr){
 	
 	for(i = 0; i < n; i++)
 		if(arr[i] < 0 || arr[i] >= n || ++counters[arr[i]] > 1){
-			free(counters);
-			return false;
+			status = false;
+			break;
 		}/* if */
 
     free(counters);
 
-    return true;
+    return status;
 
 }/* isDistinct */
