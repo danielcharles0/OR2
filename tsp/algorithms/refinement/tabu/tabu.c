@@ -246,7 +246,7 @@ int* allocTabuList(int n, int* tenure){
 * IOP tenure value to be modified
 * IOP next_tabu index to be adapted to $tenure
 */
-void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList){
+void changeTenure(int* current_tenure, int* next_tabu, int max_tenure, int* tabuList){
 
     int rand = rand0N(4);
     bool enlarged;
@@ -256,7 +256,7 @@ void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList
         enlarged = false;
     }
     else{
-        *current_tenure = (tenure < ((*current_tenure) * 2) ? tenure : ((*current_tenure) * 2));
+        *current_tenure = (max_tenure < ((*current_tenure) * 2) ? max_tenure : ((*current_tenure) * 2));
         enlarged = true;
     }
 
@@ -266,7 +266,7 @@ void changeTenure(int* current_tenure, int* next_tabu, int tenure, int* tabuList
         *next_tabu = *current_tenure / 2;
     
     /* forget about other tabus if list become again of tenure size */
-    for(int i=(*current_tenure); i<tenure; i++)
+    for(int i=(*current_tenure); i<max_tenure; i++)
         tabuList[i] = -1;
 
 }/* changeTenure */
@@ -370,14 +370,14 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     
     clock_t start = clock();
     TSPSolution temp;
-    int tenure;
+    int max_tenure;
     int next_tabu = 0;
     int iter = 0;
     int ls = -1;
 
-    int* tabuList = allocTabuList(inst->dimension, &tenure);
+    int* tabuList = allocTabuList(inst->dimension, &max_tenure);
 
-    int current_tenure = tenure;
+    int current_tenure = max_tenure;
 
     allocSol(inst->dimension, &temp);
 
@@ -385,8 +385,8 @@ int tabu_v2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     while(true){
 
-        if((iter % tenure) == 0 && iter != 0)  
-            changeTenure(&current_tenure, &next_tabu, tenure, tabuList);
+        if((iter % max_tenure) == 0 && iter != 0)  
+            changeTenure(&current_tenure, &next_tabu, max_tenure, tabuList);
         
         bestNotTabuMove(inst, &temp, tabuList, current_tenure, &next_tabu);
 
