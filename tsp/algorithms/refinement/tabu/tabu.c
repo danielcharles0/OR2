@@ -147,7 +147,6 @@ void tabuBar(clock_t start, int tl, int* ls){
 	if(s - *ls >= PRINT_FREQUENCY){
 		processBar(s, tl);
 		printSeconds("Running time: ", s);
-		printSeconds("Running time: ", s);
 		*ls = s;
 	}/* if */
 
@@ -198,7 +197,7 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 				cpSol(inst, &temp, sol);
 		}/* if */
 
-		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+		if(isTimeOutWarning("", start, (*set).tl))
 			break;
 		else if((*set).v)
 			tabuBar(start, (*set).tl, &ls);
