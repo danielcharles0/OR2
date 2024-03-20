@@ -11,6 +11,7 @@
 #include "refinement.h"
 #include "2opt/2opt.h"
 #include "tabu/tabu.h"
+#include "vns/vns.h"
 
 /*
 * IP alg refinement algorithm to run
@@ -30,6 +31,9 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance*
 		case TABU:
 			tabu(set, inst, sol, (tenurefunc)defaulttenure);
 			break;
+		case VNS:
+	        vns(set, inst, sol);
+	        break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 			return true;
@@ -48,6 +52,7 @@ void refinementaAlgorithmLegend(void){
 	printf("\t- Code: %d to skip refinement\n", SKIP);
     printf("\t- Code: %d, Algorithm: 2opt refinement method\n", OPT2);
 	printf("\t- Code: %d, Algorithm: TABU refinement method\n", TABU);
+	printf("\t- Code: %d, Algorithm: VNS refinement method\n", VNS);
     printf("\n");
 
 }/* refinementaAlgorithmLegend */

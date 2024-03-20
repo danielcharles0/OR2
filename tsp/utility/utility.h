@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "../input/settings/settings.h"
+
 #define MAX_STRING_LENGTH 65
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
 
@@ -35,8 +37,12 @@ bool isTimeOut(clock_t, int);
 
 bool isTimeOutWarning(const char[], clock_t, int);
 
+bool checkTimeLimit(const Settings*, int, int*);
+
 void processBar(int ni, int tni);
 
 void timeBar(clock_t, int, int*);
 
 int max(int, int);
+
+void sortInt(int*, int*, int*);

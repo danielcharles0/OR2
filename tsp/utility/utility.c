@@ -8,12 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "utility.h"
 
 #define EPSILON 1e-7
 #define PROCESS_BAR_PRECISION 20
 #define PROCESS_BAR_COMPLETED_CHARACTER '#'
 #define PROCESS_BAR_TO_COMPLETE_CHARACTER '-'
+#define TIMEOUT_WARNING_MESSAGE "Time limit reached! Returning the best solution.\n\n"
 
 /*
 * Print a boolean.
@@ -207,6 +209,22 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 }/* isTimeOutWarning */
 
 /*
+* IP set settings
+* IP start starting time of processing
+* IOP ls last stamp second from the execution start
+*/
+bool checkTimeLimit(const Settings* set, int start, int* ls){
+
+    if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+        return true;
+    else if((*set).v)
+        timeBar(start, (*set).tl, ls);
+    
+    return false;
+
+}/* checkTimeLimit */
+
+/*
 * IP n number of repetitions
 * IP c char to repeat
 * OV this function prints to the screen $n times the character $c
@@ -289,3 +307,34 @@ int max(int a, int b){
     return b;
 
 }/* max */
+
+/*
+* IOP a pointer to int
+* IOP b pointer to int
+* IOP c pointer to int
+*/
+void sortInt(int* a, int* b, int* c){
+
+    if(*a > *b){
+        swapInt(a, b);
+
+        if(*b > *c){
+            swapInt(b, c);
+
+            if(*a > *b)
+                swapInt(a, b);
+
+        }
+    }
+    else{
+
+        if(*b > *c){
+            swapInt(b, c);
+        
+            if(*a > *b)
+                swapInt(a,b);
+        }
+
+    }
+
+}/* sortInt */

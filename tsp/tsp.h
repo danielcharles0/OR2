@@ -29,9 +29,8 @@ typedef struct {
 typedef enum {
     RANDOM,
     NEAREST_NEIGHBOR,
-	/* HERE MORE HEURISTIC */
+	/* HERE MORE HEURISTICS */
 	__END_HEURISTIC
-	/* HERE EXACT METHODS */
 } ALGORITHM;
 
 void allocInst(int, TSPInstance*);

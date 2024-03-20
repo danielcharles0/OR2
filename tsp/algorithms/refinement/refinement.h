@@ -10,7 +10,8 @@
 typedef enum {
 	SKIP,
     OPT2,
-	TABU
+	TABU,
+	VNS
 } REFINEMENT_ALGORITHM;
 
 bool runRefinement(const Settings*, const TSPInstance*, TSPSolution*);

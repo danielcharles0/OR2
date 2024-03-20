@@ -16,7 +16,6 @@
 
 #define MIN_TENURE 10
 #define TENURE_DENOMINATOR 10
-#define TIMEOUT_WARNING_MESSAGE "Time limit reached! Returning the best solution.\n\n"
 
 /*
 * IP iteration index
@@ -76,22 +75,6 @@ void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSol
         cpSol(inst, temp, sol);
 
 } /* updateIncumbentSol */
-
-/*
-* IP set settings
-* IP start starting time of processing
-* IOP ls last stamp second from the execution start
-*/
-bool checkTimeLimit(const Settings* set, int start, int* ls){
-
-    if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
-        return true;
-    else if((*set).v)
-        timeBar(start, (*set).tl, ls);
-    
-    return false;
-
-}/* checkTimeLimit */
 
 /*
 * IP it current iteration
