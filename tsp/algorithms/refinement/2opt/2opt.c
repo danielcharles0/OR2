@@ -38,13 +38,8 @@ void opt2move(int i, int j, const TSPInstance* inst, TSPSolution* sol){
 
 	(*sol).val += delta2OptMoveCost(i, j, inst, sol);
 
-	/* Note that the number of swaps performed is equal to floor((j - i - 1) / 2) */
-	while(s < t){
-		swapInt(&((*sol).path[s]), &((*sol).path[t]));
-		s++;
-		t--;
-	}/* while */
-
+	invertArray(s, t, sol->path);
+	
 }/* opt2move */
 
 /*
@@ -67,15 +62,21 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 
 	for(i = 0; i < (*inst).dimension - 2; i++)	/* Note that j = i + 2 avoids to take b = a1 */
 												/* Note that j < (*inst).dimension => i < (*inst).dimension - 2 */
-		for(j = i + 2; j < (*inst).dimension; j++)
+		for(j = i + 2; j < (*inst).dimension; j++){
+
 			if(i != 0 || j < (*inst).dimension - 1){
+
 				double temp = delta2OptMoveCost(i, j, inst, sol);
+
 				if(temp < optdelta){
 					*opti = i;
 					*optj = j;
 					optdelta = temp;
 				}/* if */
+
 			}/* if */
+			
+		}
 	
 	return optdelta;
 
@@ -98,110 +99,3 @@ int opt2(const TSPInstance* inst, TSPSolution* sol){
 	return getSeconds(start);
 
 }/* opt2 */
-
-/*
-* Computes delta between new edges and old edges.
-* IP i index of a node
-* IP j index of a node that can have a crossing with $start
-* IP inst tsp instance
-* IP sol solution to be improved
-* OP delta difference between current cost and cost without crossing
-*/
-double computeDelta(int i, int j, const TSPInstance* inst, const TSPSolution* sol){
-	
-	int n = inst->dimension;
-
-	int a = sol->path[i];
-	int b = sol->path[j];
-	int a_next = sol->path[(i+1) % n];
-	int b_next = sol->path[(j+1) % n];
-
-	if(b_next == a || a_next == b || a_next == b_next)
-		return 0;
-
-	double old1 = getDist(a, a_next, inst);
-	double old2 = getDist(b, b_next, inst);
-	double new1 = getDist(a, b, inst);
-	double new2 = getDist(a_next, b_next, inst);
-
-	double delta = (new1 + new2) - (old1 + old2);
-
-	return delta;
-
-}/* computeDelta */
-
-/*
-* IP inst tsp instance
-* IP sol solution to be improved
-* IOP start index of starting point of $(sol->path)'s sublist to invert
-* IOP end index of ending point of $(sol->path)'s sublist to invert
-* OP min_delta minimum delta between initial cost of $sol and its cost after the move.
-*/
-double bestMove(const TSPInstance* inst, TSPSolution* sol, int* start, int* end){
-    
-    int i, j;
-    double min_delta = 0;
-
-    for(i=0; i<inst->dimension; i++){
-
-        for(j=i+2; j<inst->dimension; j++){
-
-			double delta = computeDelta(i, j, inst, sol);
-            
-            if(delta < min_delta){
-                min_delta = delta;
-                *start = (i+1) % inst->dimension;
-                *end = j;
-            }
-			
-        }
-
-    }
-
-    return min_delta;
-
-}/* bestMove */
-
-/*
-* IP inst tsp instance
-* IOP sol solution to be improved
-* OR true if $sol has been improved, false otherwise.
-*/
-bool refinement(const TSPInstance* inst, TSPSolution* sol){
-    
-    double min_delta;
-    int start, end;
-
-    min_delta = bestMove(inst, sol, &start, &end);
-
-    if(min_delta < 0){  /* if there is at least a change that improves the solution */
-        
-        invertList(start, end, sol->path); /* apply index choices that give the best improvement */
-        
-        sol->val += min_delta;
-
-        return true;
-    }
-
-    return false;
-
-}/* refinement */
-
-/*
-* Refines solution removing crossings or other bad connections.
-* IP inst tsp instance
-* IOP sol solution to be refined
-* OR int execution in seconds
-*/
-int opt2_v2(const TSPInstance* inst, TSPSolution* sol){
-    
-	clock_t start = clock();
-	bool improvement;
-
-    do{
-        improvement = refinement(inst, sol);
-    } while(improvement);
-
-	return getSeconds(start);
-        
-}/* opt2_v2 */

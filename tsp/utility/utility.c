@@ -136,7 +136,7 @@ int getSeconds(clock_t start){
 * IP end ending point of arr's sublist to invert
 * IOP arr list to be inverted
 */
-void invertList(int start, int end, int* arr){
+void invertArray(int start, int end, int* arr){
     
     int delta = end - start;
 
@@ -148,7 +148,7 @@ void invertList(int start, int end, int* arr){
 
     }
     
-}/* invertList */
+}/* invertArray */
 
 /*
 * IP n dividend
@@ -246,6 +246,35 @@ void processBar(int ni, int tni){
     fflush(stdout);
 
 }/* processBar */
+
+/*
+* IP start executing time start
+* IP tl time limit
+* IP freq printing frequency
+* IOP ls last stamp second from the execution time start
+*/
+void timeBarPrecision(clock_t start, int tl, int freq, int* ls){
+	
+	int s = getSeconds(start);
+
+	if(s - *ls >= freq){
+		processBar(s, tl);
+		printSeconds("Running time: ", s);
+		*ls = s;
+	}/* if */
+
+}/* timeBarPrecision */
+
+/*
+* IP start executing time start
+* IP tl time limit
+* IOP ls last stamp second from the execution time start
+*/
+void timeBar(clock_t start, int tl, int* ls){
+	
+    timeBarPrecision(start, tl, PRINT_FREQUENCY, ls);
+
+}/* timeBar */
 
 /*
 * IP a first integer 

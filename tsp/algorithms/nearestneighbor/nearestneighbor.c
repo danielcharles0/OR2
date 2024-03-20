@@ -107,10 +107,15 @@ void algorithmConfigurations(void){
 * IP n total number of iterations
 * OV process bar
 */
-void NNBar(clock_t start, int it, int n){
+void NNBar(clock_t start, int it, int n, int* ls){
+	
+	int s = getSeconds(start);
 
-	processBar(it, n);
-	printSeconds("Running time: ", getSeconds(start));
+	if(s - *ls >= PRINT_FREQUENCY || it == n){
+		processBar(it, n);
+		printSeconds("Running time: ", s);
+		*ls = s;
+	}/* if */
 
 }/* NNBar */
 
@@ -123,14 +128,14 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	clock_t start = clock();
 	TSPSolution temp;
-	int i;
+	int i, ls = -1;
 
 	allocSol((*inst).dimension, &temp);
 
 	NN_solver(0, inst, sol);
 
 	if((*set).v)
-		NNBar(start, 1, (*inst).dimension);
+		NNBar(start, 1, (*inst).dimension, &ls);
 
 	for(i = 1; i < (*inst).dimension; i++){
 
@@ -143,7 +148,7 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 			cpSol(inst, &temp, sol);
 
 		if((*set).v)
-			NNBar(start, i + 1, (*inst).dimension);
+			NNBar(start, i + 1, (*inst).dimension, &ls);
 			
 	}/* for */
 
