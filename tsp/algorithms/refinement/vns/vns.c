@@ -48,7 +48,7 @@ void selectRandomIndexes(int n, int* i, int* j, int* k){
 /*
 * IP n integers selected in [0, n-1] 
 * OP i minimum index of the three selected
-* OP j inintermediate index of the three selected
+* OP j intermediate index of the three selected
 * OP k maximum index of the three selected
 */
 void selectRandomIndexes_v2(int n, int* i, int* j, int* k){
