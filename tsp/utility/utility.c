@@ -338,3 +338,23 @@ void sortInt(int* a, int* b, int* c){
     }
 
 }/* sortInt */
+
+/*
+* IP a first value 
+* IP b second value
+*/
+int compareInt(const void* a, const void* b){
+
+    return ( *(int*)a - *(int*)b );
+
+}/* compareInt */
+
+/*
+* IP n array dimension
+* IOP arr array to be sorted
+*/
+void sortIntArray(int n, int* arr){
+
+    qsort(arr, n, sizeof(int), compareInt);
+
+}/* sortIntArray */

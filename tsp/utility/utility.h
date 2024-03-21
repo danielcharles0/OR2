@@ -46,3 +46,5 @@ void timeBar(clock_t, int, int*);
 int max(int, int);
 
 void sortInt(int*, int*, int*);
+
+void sortIntArray(int, int*);

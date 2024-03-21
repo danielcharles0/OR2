@@ -46,6 +46,35 @@ void selectRandomIndexes(int n, int* i, int* j, int* k){
 }/* selectRandomIndexes */
 
 /*
+* IP n integers selected in [0, n-1] 
+* OP i minimum index of the three selected
+* OP j inintermediate index of the three selected
+* OP k maximum index of the three selected
+*/
+void selectRandomIndexes_v2(int n, int* i, int* j, int* k){
+
+    int arr[3];
+    bool notValidTriplet = true;
+
+    while(notValidTriplet){
+
+        for(int l=0; l<3; l++)
+            arr[l] = rand0N(n);
+
+        if(abs(arr[0]-arr[1]) > 1 && abs(arr[0]-arr[2]) > 1 && abs(arr[1]-arr[2]) > 1)
+            notValidTriplet = false;
+
+    }
+
+    sortIntArray(3, arr);
+
+    *i = arr[0];
+    *j = arr[1];
+    *k = arr[2];
+
+}/* selectRandomIndexes_v2 */
+
+/*
 * IP inst tsp instance
 * IOP sol solution to be modified
 */
@@ -53,7 +82,7 @@ void randomized3Opt(const TSPInstance* inst, TSPSolution* sol){
     
     int i, j, k;
 
-    selectRandomIndexes(inst->dimension, &i, &j, &k);
+    selectRandomIndexes_v2(inst->dimension, &i, &j, &k);
 
     invertArray(i+1, j, sol->path);
 
