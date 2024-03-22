@@ -104,12 +104,12 @@ int main(int argc, char* const* argv){
 
         printSettings(&set);
 
-    }/* if */
+    }
 
     runConfig(config, &set);
 
     printf("Progran ended.\n");
-
+    
     return 0;
 
 }/* main */
