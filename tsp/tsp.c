@@ -303,3 +303,15 @@ bool isDistinct(int n, int* arr){
     return status;
 
 }/* isDistinct */
+
+/*
+* IP inst tsp instance
+* IP temp current solution found
+* IOP sol best solution 
+*/
+void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSolution* sol){
+
+    if((*temp).val < (*sol).val && checkSol(inst, temp))
+        cpSol(inst, temp, sol);
+
+} /* updateIncumbentSol */

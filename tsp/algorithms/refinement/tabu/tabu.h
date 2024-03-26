@@ -25,5 +25,3 @@ typedef struct{
 void tabu(const Settings*, const TSPInstance*, TSPSolution*, tenurefunc);
 
 int defaulttenure(int, int);
-
-void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);

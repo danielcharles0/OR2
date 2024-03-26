@@ -60,3 +60,5 @@ bool checkSol(const TSPInstance*, const TSPSolution*);
 bool isDistinct(int, int*);
 
 void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
+
+void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
