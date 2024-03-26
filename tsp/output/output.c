@@ -124,7 +124,7 @@ void initCostPlotPipe(const char title[], FILE** gnuplotPipe){
 */
 void addCost(FILE* gnuplotPipe, int iter, double cost){
 
-    fprintf(gnuplotPipe, "%d %f\n", iter, cost);
+    fprintf(gnuplotPipe, "%d %lf\n", iter, cost);
 
 }/* plotCost */
 

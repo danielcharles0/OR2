@@ -132,11 +132,13 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
         updateIncumbentSol(inst, &temp, sol);
 
+		iter++;
+		
         if(checkTimeLimit(set, start, &ls))
             break;
 
         if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
-        	addCost(pipe, iter++, temp.val);
+        	addCost(pipe, iter, temp.val);
 
         kickSol(inst, &temp);
 
