@@ -219,20 +219,6 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 }/* isTimeOutWarning */
 
 /*
-* IP set settings
-* IP start starting time of processing
-* IOP ls last stamp second from the execution start
-*/
-bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
-	
-	if((*set).v)
-    	timeBar(start, (*set).tl, ls);
-    
-	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl);
-
-}/* checkTimeLimit */
-
-/*
 * IP n number of repetitions
 * IP c char to repeat
 * OV this function prints to the screen $n times the character $c
@@ -283,7 +269,7 @@ void timeBarPrecision(clock_t start, int tl, double freq, double* ls){
 	
 	double s = getSeconds(start);
 
-	if(s - *ls >= freq){
+	if(s - *ls >= freq || s + freq > tl ){
 		processBar((int)cutfunc(s, tl), tl);
 		printSeconds("Running time: ", s);
 		*ls = s;
@@ -301,6 +287,20 @@ void timeBar(clock_t start, int tl, double* ls){
     timeBarPrecision(start, tl, PRINT_FREQUENCY, ls);
 
 }/* timeBar */
+
+/*
+* IP set settings
+* IP start starting time of processing
+* IOP ls last stamp second from the execution start
+*/
+bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
+	
+	if((*set).v)
+    	timeBar(start, (*set).tl, ls);
+    
+	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl);
+
+}/* checkTimeLimit */
 
 /*
 * IP a first integer 
