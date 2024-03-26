@@ -13,6 +13,7 @@
 #include "tabu.h"
 #include "../2opt/2opt.h"
 #include "../../../utility/utility.h"
+#include "../../../output/output.h"
 
 #define MIN_TENURE 10
 #define TENURE_DENOMINATOR 10
@@ -167,9 +168,12 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 	clock_t start = clock();
 	TSPSolution temp;
 	TABU_LIST tl; /* TABU list */
+	FILE* cost_pipe;
 	int it = 0;
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
-	double ls = -1; /* ls := last stamp, seconds from the start to the last stamp */
+	double ls = -1, lp = -1; /* ls := last stamp, seconds from the start to the last stamp */
+
+	initCostPlotPipe("TABU - Solutions Costs", &cost_pipe);
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);
@@ -186,6 +190,9 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
             
 		}/* if */
 
+		if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
+        	addCost(cost_pipe, it, temp.val);
+
 		if(checkTimeLimit(set, start, &ls))
             break;
 
@@ -195,5 +202,6 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 
 	freeTabuList(&tl);
 	freeSol(&temp);
+	closeGnuplotPipe(cost_pipe);
 
 }/* tabu */
