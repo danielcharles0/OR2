@@ -89,11 +89,11 @@ void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
 */
 void costPlotSettings(FILE* gnuplotPipe, const char title[]){
     
-    fprintf(gnuplotPipe, "plot '-' using 1:2 with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");
     fprintf(gnuplotPipe, "set term qt font \"Arial\"\n");
 	fprintf(gnuplotPipe, "set title '%s'\n", title);
     fprintf(gnuplotPipe, "set xlabel 'Iteration'\n");
     fprintf(gnuplotPipe, "set ylabel 'Cost'\n");
+	fprintf(gnuplotPipe, "plot '-' using 1:2 with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");
 
 }/* costPlotSettings */
 
