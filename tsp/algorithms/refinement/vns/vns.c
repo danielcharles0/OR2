@@ -80,7 +80,7 @@ void selectRandomIndexes_v2(int n, int* i, int* j, int* k){
 * IP inst tsp instance
 * IOP sol solution to be modified
 */
-void randomized3Opt(const TSPInstance* inst, TSPSolution* sol){
+void randomized3Kick(const TSPInstance* inst, TSPSolution* sol){
     
     int i, j, k;
 
@@ -103,7 +103,7 @@ void kickSol(const TSPInstance* inst, TSPSolution* sol){
     int kicks = rand0N(MAX_KICKS) + 1;
     
     for(int i=0; i<kicks; i++)
-        randomized3Opt(inst, sol);
+        randomized3Kick(inst, sol);
 
 }/* kickSol */
 
@@ -116,10 +116,11 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     clock_t start = clock();
     TSPSolution temp;
-    int ls = -1;
+    FILE* pipe;
+	int ls = -1;
     int iter = 0;
 
-    FILE* pipe = initCostPlotPipe("VNS - Solutions Costs");
+    initCostPlotPipe("VNS - Solutions Costs", &pipe);
 
     allocSol(inst->dimension, &temp);
 
@@ -133,8 +134,6 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
         if(checkTimeLimit(set, start, &ls))
             break;
-        
-        /*printf("%.4d %lf\n", iter, temp.val);*/
 
         /*if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &ls))*/
         addCost(pipe, iter++, temp.val);
@@ -143,8 +142,7 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     }
 
-    closePipe(pipe);
-
     freeSol(&temp);
+	closeGnuplotPipe(pipe);
 
 }/* vns */
