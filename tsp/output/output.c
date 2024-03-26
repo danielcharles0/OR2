@@ -85,33 +85,17 @@ void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
 
 /*
 * IP gnuplotPipe pipe pointer
+* IP title plot title
 */
 void costPlotSettings(FILE* gnuplotPipe, const char title[]){
-
+    
+    fprintf(gnuplotPipe, "plot '-' using 1:2 with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");
     fprintf(gnuplotPipe, "set term qt font \"Arial\"\n");
 	fprintf(gnuplotPipe, "set title '%s'\n", title);
     fprintf(gnuplotPipe, "set xlabel 'Iteration'\n");
     fprintf(gnuplotPipe, "set ylabel 'Cost'\n");
 
 }/* costPlotSettings */
-
-/*
-* Initializes file in which to write solutions costs.
-* IP filename name of the file of costs
-* OP costFile file in which costs are stored
-*/
-FILE* initCostFile(const char filename[]){
-	
-    FILE* costFile = fopen(filename, "w");
-
-    if (costFile == NULL) {
-        fprintf(stderr, "Error opening file %s\n", filename);
-        return NULL;
-    }
-
-    return costFile;
-
-}/* initCostFile*/
 
 /*
 * Initializes pipe which plots solutions costs in real time.
@@ -136,46 +120,22 @@ FILE* initCostPlotPipe(const char title[]){
 }/* initCostPlotPipe */
 
 /*
-* Reads costs from specified filename.
-* IP gnuplotPipe gnuplot pipe that plots costs
-* IP filename name of the file of costs
-*/
-void readCosts(FILE* gnuplotPipe, const char filename[]){
-
-    fprintf(gnuplotPipe, "plot '%s' using 1:2 with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n", filename);
-
-    fflush(gnuplotPipe);
-
-}/* readCosts */
-
-/*
 * Adds current sol cost in real time plot.
-* IP costFile file to read costs from
 * IP pipe gnuplot pipe that reads costs from $costFile
-* IP filename name of the file of costs
 * IP iter iteration at which cost is found
 * IP cost cost of current solution
 */
-void plotCost(FILE* costFile, FILE* gnuplotPipe, const char filename[], int iter, double cost){
+void addCost(FILE* gnuplotPipe, int iter, double cost){
 
-    fprintf(costFile, "%d %f\n", iter, cost);
-    
-    fflush(costFile);  
-
-    readCosts(gnuplotPipe, filename);
+    fprintf(gnuplotPipe, "%d %f\n", iter, cost);
 
 }/* plotCost */
-
-/*
-* IP costFile file to be closed
-*/
-void closeCostFile(FILE* costFile){
-    fclose(costFile);
-}/* closeCostFile*/
 
 /*
 * IP gnuplotPipe pipe to be closed
 */
 void closePipe(FILE* gnuplotPipe){
+    fprintf(gnuplotPipe, "e\n");
+    fflush(gnuplotPipe);
     pclose(gnuplotPipe);
 }/* closePipe */

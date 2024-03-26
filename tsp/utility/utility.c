@@ -358,3 +358,21 @@ void sortIntArray(int n, int* arr){
     qsort(arr, n, sizeof(int), compareInt);
 
 }/* sortIntArray */
+
+/*
+* IP start process starting time
+* IP freq frequency to plot 
+* IOP ls last stamp second from the execution time start
+*/
+bool timeToPlot(clock_t start, double freq, double* ls){
+
+    double s = getSeconds(start);
+
+	if(s - *ls >= freq){
+		*ls = s;
+        return true;
+    }
+
+    return false;
+
+}/* timeToPlot */

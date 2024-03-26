@@ -7,13 +7,15 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "vns.h"
 #include "../2opt/2opt.h"
 #include "../tabu/tabu.h"
 #include "../../../utility/utility.h"
+#include "../../../output/output.h"
 
-#define MAX_KICKS 10
+#define MAX_KICKS 7
 
 /*
 * IP n integers selected in [0, n-1] 
@@ -88,6 +90,8 @@ void randomized3Opt(const TSPInstance* inst, TSPSolution* sol){
 
     invertArray(j+1, k, sol->path);
 
+    sol->val = getSolCost(inst, sol);
+
 }/* randomized3Opt */
 
 /*
@@ -113,6 +117,9 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     clock_t start = clock();
     TSPSolution temp;
     int ls = -1;
+    int iter = 0;
+
+    FILE* pipe = initCostPlotPipe("VNS - Solutions Costs");
 
     allocSol(inst->dimension, &temp);
 
@@ -127,9 +134,16 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
         if(checkTimeLimit(set, start, &ls))
             break;
         
+        /*printf("%.4d %lf\n", iter, temp.val);*/
+
+        /*if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &ls))*/
+        addCost(pipe, iter++, temp.val);
+
         kickSol(inst, &temp);
 
     }
+
+    closePipe(pipe);
 
     freeSol(&temp);
 

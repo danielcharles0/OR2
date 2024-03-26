@@ -12,6 +12,7 @@
 
 #define MAX_STRING_LENGTH 65
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
+#define COST_SAMPLING_FREQUENCY 0.1
 
 void printBool(const char[], bool);
 
@@ -48,3 +49,5 @@ int max(int, int);
 void sortInt(int*, int*, int*);
 
 void sortIntArray(int, int*);
+
+bool timeToPlot(clock_t, double, double*);

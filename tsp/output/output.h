@@ -11,12 +11,8 @@ void plotSolutionTitle(const TSPInstance*, const TSPSolution*, const char[]);
 
 void plotSolution(const TSPInstance*, const TSPSolution*);
 
-FILE* initCostFile(const char[]);
-
 FILE* initCostPlotPipe(const char[]);
 
-void plotCost(FILE*, FILE*, const char[], int, double);
-
-void closeCostFile(FILE*);
+void addCost(FILE*, int, double);
 
 void closePipe(FILE*);
