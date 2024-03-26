@@ -11,8 +11,8 @@ void plotSolutionTitle(const TSPInstance*, const TSPSolution*, const char[]);
 
 void plotSolution(const TSPInstance*, const TSPSolution*);
 
-FILE* initCostPlotPipe(const char[]);
+void initCostPlotPipe(const char[], FILE**);
 
 void addCost(FILE*, int, double);
 
-void closePipe(FILE*);
+void closeGnuplotPipe(FILE*);

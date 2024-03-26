@@ -13,6 +13,7 @@ main: $(OBJS)
 ./obj/main.o: main.c
 	mkdir -p ./obj
 	gcc $(FLAGS) main.c -o ./obj/main.o
+	mkdir -p ./gnuplot_out
 
 ./obj/settings.o: ./tsp/input/settings/settings.h ./tsp/input/settings/settings.c
 	gcc $(FLAGS) ./tsp/input/settings/settings.c -o ./obj/settings.o

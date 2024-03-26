@@ -60,5 +60,4 @@ instance
 trash
 .DS_Store
 
-gnuplot.out
-gnuplot_err.out
+gnuplot_out

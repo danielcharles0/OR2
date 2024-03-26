@@ -56,7 +56,7 @@ void plotNodes(FILE* gnuplotPipe, const TSPInstance* inst, const TSPSolution* so
 */
 void plotSolutionTitle(const TSPInstance* inst, const TSPSolution* sol, const char title[]){
     
-    FILE *gnuplotPipe = popen("gnuplot -persist > gnuplot.out 2> gnuplot_err.out", "w");
+    FILE *gnuplotPipe = popen("gnuplot -persist > ./gnuplot_out/gnuplot.out 2> ./gnuplot_out/gnuplot_err.out", "w");
 	
     if (gnuplotPipe == NULL) {
         fprintf(stderr, "Error opening Gnuplot pipe\n");
@@ -84,7 +84,7 @@ void plotSolution(const TSPInstance* inst, const TSPSolution* sol){
 }/* plotSolution */
 
 /*
-* IP gnuplotPipe pipe pointer
+* OP gnuplotPipe pipe pointer
 * IP title plot title
 */
 void costPlotSettings(FILE* gnuplotPipe, const char title[]){
@@ -100,22 +100,19 @@ void costPlotSettings(FILE* gnuplotPipe, const char title[]){
 /*
 * Initializes pipe which plots solutions costs in real time.
 * IP title title of the plot
+* OP gnuplotPipe pipe pointer
 * OP gnuplotPipe gnuplot pipe opened
 */
-FILE* initCostPlotPipe(const char title[]){
+void initCostPlotPipe(const char title[], FILE** gnuplotPipe){
 
-    FILE* gnuplotPipe = popen("gnuplot -persist > gnuplot.out 2> gnuplot_err.out", "w");
+    *gnuplotPipe = popen("gnuplot -persist > ./gnuplot_out/gnuplot_cost.out 2> ./gnuplot_out/gnuplot_cost_err.out", "w");
 
-    if (gnuplotPipe == NULL) {
+    if (gnuplotPipe == NULL){
         fprintf(stderr, "Error opening gnuplot pipe\n");
-        return NULL;
-    }
+		return;
+	}
 
-    costPlotSettings(gnuplotPipe, title);
-
-    fflush(gnuplotPipe);
-
-    return gnuplotPipe;
+    costPlotSettings(*gnuplotPipe, title);
 
 }/* initCostPlotPipe */
 
@@ -134,7 +131,7 @@ void addCost(FILE* gnuplotPipe, int iter, double cost){
 /*
 * IP gnuplotPipe pipe to be closed
 */
-void closePipe(FILE* gnuplotPipe){
+void closeGnuplotPipe(FILE* gnuplotPipe){
     fprintf(gnuplotPipe, "e\n");
     fflush(gnuplotPipe);
     pclose(gnuplotPipe);
