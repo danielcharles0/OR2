@@ -127,9 +127,9 @@ bool isEqual(double a, double b){
 * IP end ending execution time
 * OR execution time in seconds
 */
-int getSeconds(clock_t start){
+double getSeconds(clock_t start){
 
-    return (clock() - start) / CLOCKS_PER_SEC;
+    return (double)(clock() - start) / CLOCKS_PER_SEC;
 
 }/* getSeconds */
 
