@@ -167,8 +167,9 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 	clock_t start = clock();
 	TSPSolution temp;
 	TABU_LIST tl; /* TABU list */
-	int it = 0, ls = -1; /* ls := last stamp, seconds from the start to the last stamp */
+	int it = 0;
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
+	double ls = -1; /* ls := last stamp, seconds from the start to the last stamp */
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);

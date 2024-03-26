@@ -18,6 +18,16 @@
 #define TIMEOUT_WARNING_MESSAGE "Time limit reached! Returning the best solution.\n\n"
 
 /*
+* This function will return the value x up to a threshold
+* IP x value
+* IP th threshold
+* OR corresponding y value
+*/
+double cutfunc(double x, double th){
+	return (x > th) ? th : x;
+}/* step */
+
+/*
 * Print a boolean.
 * IP lab label for the output
 * IP b boolean to print
@@ -213,14 +223,12 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 * IP start starting time of processing
 * IOP ls last stamp second from the execution start
 */
-bool checkTimeLimit(const Settings* set, int start, int* ls){
-
-    if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
-        return true;
-    else if((*set).v)
-        timeBar(start, (*set).tl, ls);
+bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
+	
+	if((*set).v)
+    	timeBar(start, (*set).tl, ls);
     
-    return false;
+	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl);
 
 }/* checkTimeLimit */
 
@@ -255,7 +263,7 @@ void processBar(int ni, int tni){
     printf("\rProcess: [");
     repeat(n, PROCESS_BAR_COMPLETED_CHARACTER);
     repeat(PROCESS_BAR_PRECISION - n, PROCESS_BAR_TO_COMPLETE_CHARACTER);
-    printf("] %.2f%% ", frac * 100);
+    printf("] %6.2f%% ", frac * 100);
 
     /*if(tni <= ni)
         printf("\n\n");*/
@@ -271,12 +279,12 @@ void processBar(int ni, int tni){
 * IP freq printing frequency
 * IOP ls last stamp second from the execution time start
 */
-void timeBarPrecision(clock_t start, int tl, int freq, int* ls){
+void timeBarPrecision(clock_t start, int tl, double freq, double* ls){
 	
-	int s = getSeconds(start);
+	double s = getSeconds(start);
 
 	if(s - *ls >= freq){
-		processBar(s, tl);
+		processBar((int)cutfunc(s, tl), tl);
 		printSeconds("Running time: ", s);
 		*ls = s;
 	}/* if */
@@ -288,7 +296,7 @@ void timeBarPrecision(clock_t start, int tl, int freq, int* ls){
 * IP tl time limit
 * IOP ls last stamp second from the execution time start
 */
-void timeBar(clock_t start, int tl, int* ls){
+void timeBar(clock_t start, int tl, double* ls){
 	
     timeBarPrecision(start, tl, PRINT_FREQUENCY, ls);
 
@@ -368,11 +376,10 @@ bool timeToPlot(clock_t start, double freq, double* ls){
 
     double s = getSeconds(start);
 
-	if(s - *ls >= freq){
-		*ls = s;
-        return true;
-    }
+	if(s - *ls < freq)
+		return false;
 
-    return false;
+	*ls = s;
+    return true;
 
 }/* timeToPlot */

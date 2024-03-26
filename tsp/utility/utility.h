@@ -38,11 +38,11 @@ bool isTimeOut(clock_t, int);
 
 bool isTimeOutWarning(const char[], clock_t, int);
 
-bool checkTimeLimit(const Settings*, int, int*);
+bool checkTimeLimit(const Settings*, clock_t, double*);
 
 void processBar(int ni, int tni);
 
-void timeBar(clock_t, int, int*);
+void timeBar(clock_t, int, double*);
 
 int max(int, int);
 
