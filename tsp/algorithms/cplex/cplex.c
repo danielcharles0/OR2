@@ -6,16 +6,9 @@
 */
 
 #include <stdio.h>
-#include <iloc/cplex.h>  
+#include <ilcplex/cplex.h>  
 
-#include "cplex.h"
-
-void print_error(const char *err) 
-{ 
-	printf("\n\n ERROR: %s \n\n", err); 
-	fflush(NULL); 
-	exit(1); 
-}   
+#include "cplex.h"  
 
 int cplex(TSPInstance* inst, TSPSolution* sol){  
 
