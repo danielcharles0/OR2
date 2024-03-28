@@ -383,3 +383,14 @@ bool timeToPlot(clock_t start, double freq, double* ls){
     return true;
 
 }/* timeToPlot */
+
+/*
+* IP err string to be printed
+*/
+void printError(const char err[]){
+
+	printf("\n\n ERROR: %s \n\n", err); 
+	fflush(NULL); 
+	exit(1);
+
+} /* printError */

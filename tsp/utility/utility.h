@@ -51,3 +51,5 @@ void sortInt(int*, int*, int*);
 void sortIntArray(int, int*);
 
 bool timeToPlot(clock_t, double, double*);
+
+void printError(const char[]);

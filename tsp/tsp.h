@@ -62,3 +62,7 @@ bool isDistinct(int, int*);
 void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
+
+int xpos(int, int, const TSPInstance*);
+
+void createPath(const TSPInstance*, const double*, TSPSolution*);
