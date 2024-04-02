@@ -13,9 +13,6 @@
 #include "tsp/input/generator/generator.h"
 #include "tsp/utility/utility.h"
 #include "tsp/output/output.h"
-#include "tsp/algorithms/refinement/refinement.h"
-
-#include "tsp/algorithms/refinement/tabu/tabu.h"
 
 /*
 * IP inst tsp instance
