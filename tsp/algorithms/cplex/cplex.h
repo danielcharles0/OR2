@@ -7,4 +7,4 @@
 
 #include "../../tsp.h"
 
-int xpos(int, int, const TSPInstance*);
+int optimize(const Settings*, const TSPInstance*, TSPSolution*);

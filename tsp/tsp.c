@@ -14,6 +14,7 @@
 #include "algorithms/refinement/refinement.h"
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
+#include "algorithms/cplex/cplex.h"
 #include "utility/utility.h"
 
 /*
@@ -182,6 +183,7 @@ void algorithmLegend(void){
     printf("Available algorithms:\n");
     printf("\t- Code: %d, Algorithm: Just a random solution\n", RANDOM);
     printf("\t- Code: %d, Algorithm: Nearest neighbor search\n", NEAREST_NEIGHBOR);
+	printf("\t- Code: %d, Algorithm: CPLEX exact method\n", CPLEX);
     printf("\n");
     
 }/* algorithmLegend */
@@ -213,6 +215,8 @@ bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Setting
 	        if((et = nearestNeighbor(set, inst, sol)) == -1)
 				return true;
 	        break;
+		case CPLEX:
+			return optimize(set, inst, sol);
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        return true;
@@ -315,61 +319,3 @@ void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSol
         cpSol(inst, temp, sol);
 
 } /* updateIncumbentSol */
-
-/*
-* IP i index of a node
-* IP j index of a node
-* IP inst tsp instance
-* OP int position of the variable associated to edge (i,j) in the cplex matrix
-*/
-int xpos(int i, int j, const TSPInstance* inst){ 
-
-	if ( i == j ) 
-        printError(" i == j in xpos" );
-
-	if ( i > j ) 
-        return xpos(j,i,inst);
-
-	return (i * inst->dimension + j - (( i + 1 ) * ( i + 2 )) / 2);
-
-}/* xpos */
-
-/*
-* Performs a Depth First Search to create the path.
-* IP inst tsp instance
-* IP adj adjacency matrix stored as an array
-* IOP sol tsp solution to be modified s.t. edge (i,j) has been selected in the hamiltonian path
-*/
-void createPath(const TSPInstance* inst, const double* adj, TSPSolution* sol){
-
-	int curr = 0, pos = 0;
-
-	int* visited = (int*) calloc(inst->dimension, sizeof(int)); 	/* calloc initializes all values to 0 */
-
-	sol->path[pos] = curr;
-
-	visited[curr] = 1;
-
-	for(pos = 1; pos < inst->dimension; pos++){
-
-		for(int j = 0; j < inst->dimension; j++){
-			
-			if(curr == j)
-				continue;
-
-			if(adj[xpos(curr, j, inst)] > 0.5 && !visited[j]){
-				
-				sol->path[pos] = j;
-				curr = j;
-				visited[curr] = 1;
-				break;
-
-			}
-
-		}
-
-	}
-
-	free(visited);
-
-}/* createPath */

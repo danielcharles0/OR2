@@ -61,3 +61,4 @@ trash
 .DS_Store
 
 gnuplot_out
+tsp/output/cplex/model.lp

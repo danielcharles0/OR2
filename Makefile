@@ -1,5 +1,11 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o
+# OBJS = $(find ./obj -exec printf '%s ' {} +)
+
+CPLEX_LINK_PATH = "/Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/lib/arch/static_pic"
+CPLEX_LIB_PATH = "/Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include"
+
+LIBS = -L $(CPLEX_LINK_PATH) -lcplex
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -8,12 +14,12 @@ else
 endif
 
 main: $(OBJS)
-	gcc -o main $(OBJS)
+	rm -f ./tsp/output/cplex/model.lp
+	gcc -o main $(OBJS) $(LIBS)
 
 ./obj/main.o: main.c
-	mkdir -p ./obj
+	mkdir -p ./obj ./gnuplot_out ./tsp/output/cplex
 	gcc $(FLAGS) main.c -o ./obj/main.o
-	mkdir -p ./gnuplot_out
 
 ./obj/settings.o: ./tsp/input/settings/settings.h ./tsp/input/settings/settings.c
 	gcc $(FLAGS) ./tsp/input/settings/settings.c -o ./obj/settings.o
@@ -59,6 +65,9 @@ main: $(OBJS)
 
 ./obj/refinement.o: ./tsp/algorithms/refinement/refinement.h ./tsp/algorithms/refinement/refinement.c
 	gcc $(FLAGS) ./tsp/algorithms/refinement/refinement.c -o ./obj/refinement.o
+
+./obj/cplex.o: ./tsp/algorithms/cplex/cplex.h ./tsp/algorithms/cplex/cplex.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/cplex.c -o ./obj/cplex.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1
