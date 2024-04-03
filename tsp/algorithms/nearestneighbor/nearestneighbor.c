@@ -120,6 +120,7 @@ void NNBar(clock_t start, int it, int n, int* ls){
 }/* NNBar */
 
 /*
+* IP set settings
 * IP inst tsp instance
 * OP sol solution, the best founded within the time limit
 * OR int execution seconds

@@ -1,6 +1,7 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
 OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
+# OBJS = $(wildcard ./obj/*.o)
 
 CPLEX_LINK_PATH = "/Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/lib/arch/static_pic"
 CPLEX_LIB_PATH = "/Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include"

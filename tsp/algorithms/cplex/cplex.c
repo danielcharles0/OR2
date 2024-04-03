@@ -5,11 +5,15 @@
 * File     : cplex.c
 */
 
-#include "cplex.h"
-#include "../../tsp.h"
 #include <string.h>
 #include <assert.h>
 #include <ilcplex/cplex.h>
+
+#include "cplex.h"
+#include "../../tsp.h"
+#include "../../utility/utility.h"
+#include "../nearestneighbor/nearestneighbor.h"
+#include "../refinement/2opt/2opt.h"
 
 #define MODEL_NAME "TSP model version 1"
 #define UNKNOWN_ERROR_MESSAGE "Unknown error code."
@@ -60,7 +64,7 @@ int getStatus(CPXENVptr env, CPXLPptr lp, char *buffer)
 /*
  * IP stre string containing the error informations
  * IP ec error code
- * IP env CPX environment, can be NULL to be able to translate CPXopenCPLEX routine errors
+ * IP env CPLEX environment, can be NULL to be able to translate CPXopenCPLEX routine errors
  * IP lp CPLEX linear program
  * OV Error details
  */
@@ -266,6 +270,162 @@ int build_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPX
 } /* build_model */
 
 /*
+ * IP inst input instance
+ * IP env CPLEX environment
+ * IP lp CPLEX linear program
+ * IP ncomp number of connected components
+ * IP comp array storing connected component each node belongs to
+ * OR 0 if no error, error code otherwise
+ * OV error message if any
+ */
+int add_SEC(const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, int ncomp, int* comp){
+
+	int* idxs = malloc(((*inst).dimension - 1) * sizeof(int));
+	assert(idxs != NULL);
+
+	double* vls = malloc(((*inst).dimension - 1) * sizeof(double));
+	assert(vls != NULL);
+
+	char** en = malloc(sizeof(char *));
+	assert(en != NULL);
+
+	*en = malloc(MAX_LINE_LENGTH * sizeof(char));
+	assert(*en != NULL);
+
+	sprintf(*en, "SEC");
+	
+	for(int k = 1; k <= ncomp; k++){
+
+		const int zero = 0;
+		const char sense = 'L';
+		int err, nnz = 0;
+		double rhs = -1.0;
+
+		for(int i = 0; i < inst->dimension - 1; i++){
+
+			if(comp[i] != k)
+				continue;
+			
+			rhs += 1.0;
+
+			for(int j = i+1; j < inst->dimension; j++){
+				
+				if(comp[j] == k){
+					idxs[nnz] = xpos(i, j, inst);
+					vls[nnz] = 1.0;
+					nnz++;
+				}
+
+			}
+
+		}
+		
+		if((err = CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &zero, idxs, vls, NULL, en))){
+			print_error("Wrong CPXaddrows(..)", err, env, lp);
+			return err;
+		} /* if */
+
+	}
+
+	free(vls);
+	free(idxs);
+	free(*en);
+	free(en);
+
+	return 0;
+
+}/* add_SEC */
+
+/*
+* Prints exact algorithms legend.
+*/
+void exactAlgorithmLegend(void){
+
+	printf("Available exact algorithms:\n");
+    printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
+    printf("\n");
+
+}/* exactAlgorithmLegend */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* IOP sol solution to be updated
+*/
+int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
+	
+	int ncomp=0, err;
+	double lb, ls = -1;
+	clock_t start = clock();
+	TSPSolution temp;
+	int* comp = (int*) malloc(inst->dimension * sizeof(int));
+
+	allocSol(inst->dimension, &temp);
+
+	best_start(set, inst, sol);
+	opt2(inst, sol);
+
+	while(true){
+		
+		err = CPXmipopt(env, lp);
+
+		if(err){
+			print_error("CPXmipopt failed.", err, env, lp);
+			break;
+		}
+		
+		CPXgetbestobjval(env, lp, &lb);
+
+		/*build_sol(&ncomp, comp);*/
+
+		if(ncomp == 1)
+			break;
+
+		add_SEC(inst, env, lp, ncomp, comp);
+
+		if(checkTimeLimit(set, start, &ls))
+			break;
+		
+	}
+
+	if(ncomp != 1)
+		printf("Benders algorithm exceeded the time limit\nLower Bound: %lf\nBest Solution found: %lf\n\n", lb, sol->val);
+	else
+		updateIncumbentSol(inst, &temp, sol);
+	
+	free(comp);
+
+	return 0;
+
+}/* benders */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* IOP sol solution to be updated
+*/
+int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
+
+	exactAlgorithmLegend();
+	
+	switch (readInt("Insert the code of the exact algorithm you want to run: ")){
+	    case BENDERS:
+	        benders(set, inst, env, lp, sol);
+	        break;
+	    default:
+	        printf("Error: Exact algorithm code not found.\n\n");
+	        return 1;
+    }/* switch */
+
+	return 0;
+
+}/* run_exact */
+
+/*
  * IP set settings
  * IP inst input instance
  * OP sol solution to evaluate ( assume that the solution was already initialized )
@@ -298,8 +458,7 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 		else
 		{
 			if (!(err = build_model(set, inst, env, lp)))
-				return 0;
-				// err = run_exact(set, inst, env, lp, sol);
+				err = run_exact(set, inst, env, lp, sol);
 
 			CPXfreeprob(env, &lp);
 			CPXcloseCPLEX(&env);

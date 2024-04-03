@@ -7,4 +7,8 @@
 
 #include "../../tsp.h"
 
+typedef enum{
+    BENDERS
+} EXACTS;
+
 int optimize(const Settings*, const TSPInstance*, TSPSolution*);
