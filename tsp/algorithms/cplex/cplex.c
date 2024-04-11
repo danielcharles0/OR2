@@ -7,18 +7,17 @@
 
 #include <string.h>
 #include <assert.h>
-#include <ilcplex/cplex.h>
-
 #include "cplex.h"
 #include "../../tsp.h"
+#include "benders/benders.h"
 #include "../../utility/utility.h"
-#include "../nearestneighbor/nearestneighbor.h"
-#include "../refinement/2opt/2opt.h"
+#include "../../lib/fischetti/fischetti.h"
 
 #define MODEL_NAME "TSP model version 1"
 #define UNKNOWN_ERROR_MESSAGE "Unknown error code."
 #define UNKNOWN_STATUS_MESSAGE "Unknown status code."
 #define OUTPUT_MODEL_FILE "./tsp/output/cplex/model.lp"
+#define OUTPUT_LOG_FILE "./cplex_out/cplex.log"
 #define BUFFER_SIZE 4096
 #define PARAM_NODELIM 1000
 #define MAX_LINE_LENGTH 133 /* 132 characters + '\n' */
@@ -112,7 +111,8 @@ void setCPXParameters(const Settings *set, CPXENVptr env)
 	CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_OFF);
 
 	if ((*set).v)
-		CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON); /* CPLEX output on screen */
+		CPXsetlogfilename(env, OUTPUT_LOG_FILE, "w");
+		/*CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON);*/ /* CPLEX output on screen */
 
 	CPXsetintparam(env, CPX_PARAM_RANDOMSEED, (*set).seed);
 	CPXsetintparam(env, CPX_PARAM_NODELIM, PARAM_NODELIM);
@@ -270,73 +270,6 @@ int build_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPX
 } /* build_model */
 
 /*
- * IP inst input instance
- * IP env CPLEX environment
- * IP lp CPLEX linear program
- * IP ncomp number of connected components
- * IP comp array storing connected component each node belongs to
- * OR 0 if no error, error code otherwise
- * OV error message if any
- */
-int add_SEC(const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, int ncomp, int* comp){
-
-	int* idxs = malloc(((*inst).dimension - 1) * sizeof(int));
-	assert(idxs != NULL);
-
-	double* vls = malloc(((*inst).dimension - 1) * sizeof(double));
-	assert(vls != NULL);
-
-	char** en = malloc(sizeof(char *));
-	assert(en != NULL);
-
-	*en = malloc(MAX_LINE_LENGTH * sizeof(char));
-	assert(*en != NULL);
-
-	sprintf(*en, "SEC");
-	
-	for(int k = 1; k <= ncomp; k++){
-
-		const int zero = 0;
-		const char sense = 'L';
-		int err, nnz = 0;
-		double rhs = -1.0;
-
-		for(int i = 0; i < inst->dimension - 1; i++){
-
-			if(comp[i] != k)
-				continue;
-			
-			rhs += 1.0;
-
-			for(int j = i+1; j < inst->dimension; j++){
-				
-				if(comp[j] == k){
-					idxs[nnz] = xpos(i, j, inst);
-					vls[nnz] = 1.0;
-					nnz++;
-				}
-
-			}
-
-		}
-		
-		if((err = CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &zero, idxs, vls, NULL, en))){
-			print_error("Wrong CPXaddrows(..)", err, env, lp);
-			return err;
-		} /* if */
-
-	}
-
-	free(vls);
-	free(idxs);
-	free(*en);
-	free(en);
-
-	return 0;
-
-}/* add_SEC */
-
-/*
 * Prints exact algorithms legend.
 */
 void exactAlgorithmLegend(void){
@@ -346,60 +279,6 @@ void exactAlgorithmLegend(void){
     printf("\n");
 
 }/* exactAlgorithmLegend */
-
-/*
-* IP set settings
-* IP inst tsp instance
-* IP env CPLEX environment
-* IP lp CPLEX linear program
-* IOP sol solution to be updated
-*/
-int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
-	
-	int ncomp=0, err;
-	double lb, ls = -1;
-	clock_t start = clock();
-	TSPSolution temp;
-	int* comp = (int*) malloc(inst->dimension * sizeof(int));
-
-	allocSol(inst->dimension, &temp);
-
-	best_start(set, inst, sol);
-	opt2(inst, sol);
-
-	while(true){
-		
-		err = CPXmipopt(env, lp);
-
-		if(err){
-			print_error("CPXmipopt failed.", err, env, lp);
-			break;
-		}
-		
-		CPXgetbestobjval(env, lp, &lb);
-
-		/*build_sol(&ncomp, comp);*/
-
-		if(ncomp == 1)
-			break;
-
-		add_SEC(inst, env, lp, ncomp, comp);
-
-		if(checkTimeLimit(set, start, &ls))
-			break;
-		
-	}
-
-	if(ncomp != 1)
-		printf("Benders algorithm exceeded the time limit\nLower Bound: %lf\nBest Solution found: %lf\n\n", lb, sol->val);
-	else
-		updateIncumbentSol(inst, &temp, sol);
-	
-	free(comp);
-
-	return 0;
-
-}/* benders */
 
 /*
 * IP set settings
@@ -424,6 +303,79 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	return 0;
 
 }/* run_exact */
+
+/*
+ * IP set settings
+ * IP start execution time
+ * OP env CPLEX environment
+ */
+void update_time_limit(const Settings *set, clock_t start, CPXENVptr env)
+{
+
+	double ntl = step((*set).tl - getSeconds(start));
+
+	CPXsetdblparam(env, CPX_PARAM_TILIM, ntl);
+
+} /* update_time_limit */
+
+/*
+* IP n number of nodes of the instance
+* IP comp components array to initialize
+*/
+void allocComp(int n, COMP* comp){
+
+	(*comp).nc = n;
+
+	(*comp).map = malloc(n * sizeof(int));
+	assert((*comp).map != NULL);
+
+}/* allocComp */
+
+/*
+* IOP comp components array to free memory
+*/
+void freeComp(COMP *comp){
+    free((*comp).map);
+}/* freeComp */
+
+/*
+ * IP set settings
+ * IP inst input instance
+ * IP env CPLEX environment
+ * IP lp CPLEX linear program
+ * OP sol solution to evaluate ( assume that the solution was already initialized )
+ * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
+ * OR false if no error, true otherwise
+ */
+int build_sol(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp){
+
+	int err, ncols = CPXgetnumcols(env, lp);
+	double *xstar;
+	instance finst = { .nnodes = (*inst).dimension };
+
+	xstar = malloc(ncols * sizeof(double));
+	assert(xstar != NULL);
+
+	if ((err = CPXgetx(env, lp, xstar, 0, ncols - 1)))
+	{
+		print_error("CPXgetx() error", err, env, lp);
+		return err;
+	} /* if */
+
+	build_sol_fischetti(xstar, &finst, (*sol).succ, (*comp).map, &((*comp).nc));
+	(*sol).val = getSSolCost(inst, sol);
+
+	free(xstar);
+
+	return 0;
+
+}/* build_sol */
+
+double solGap(const TSPSolution* sol, double lb){
+
+	return ((sol->val - lb) / sol->val) * 100;
+
+}/* solGap */
 
 /*
  * IP set settings

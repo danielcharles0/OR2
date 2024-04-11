@@ -26,6 +26,11 @@ typedef struct {
     double val;	/* val  := value of the cost of the solution $path */
 } TSPSolution;
 
+typedef struct {
+    int* succ;	/* path := array containing the successor nodes of the instance */
+    double val;	/* val  := value of the cost of the solution $path */
+} TSPSSolution;
+
 typedef enum {
     RANDOM,
     NEAREST_NEIGHBOR,
@@ -38,9 +43,13 @@ void allocInst(int, TSPInstance*);
 
 void allocSol(int, TSPSolution*);
 
+void allocSSol(int, TSPSSolution*);
+
 void freeInst(TSPInstance*);
 
 void freeSol(TSPSolution*);
+
+void freeSSol(TSPSSolution*);
 
 void computeDistances(TSPInstance*);
 
@@ -56,6 +65,8 @@ void ascendentSol(const TSPInstance*, TSPSolution*);
 
 double getSolCost(const TSPInstance*, const TSPSolution*);
 
+double getSSolCost(const TSPInstance*, const TSPSSolution*);
+
 bool checkSol(const TSPInstance*, const TSPSolution*);
 
 bool isDistinct(int, int*);
@@ -63,3 +74,5 @@ bool isDistinct(int, int*);
 void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
+
+void convertSSol(const TSPInstance*, const TSPSSolution*, TSPSolution*);

@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -19,7 +19,7 @@ main: $(OBJS)
 	gcc -o main $(OBJS) $(LIBS)
 
 ./obj/main.o: main.c
-	mkdir -p ./obj ./gnuplot_out ./tsp/output/cplex
+	mkdir -p ./obj ./gnuplot_out ./cplex_out ./tsp/output/cplex
 	gcc $(FLAGS) main.c -o ./obj/main.o
 
 ./obj/settings.o: ./tsp/input/settings/settings.h ./tsp/input/settings/settings.c
@@ -44,7 +44,7 @@ main: $(OBJS)
 	gcc $(FLAGS) ./tsp/output/output.c -o ./obj/output.o
 
 ./obj/tsp.o: ./tsp/tsp.h ./tsp/tsp.c
-	gcc $(FLAGS) ./tsp/tsp.c -o ./obj/tsp.o
+	gcc $(FLAGS) ./tsp/tsp.c -o ./obj/tsp.o -I $(CPLEX_LIB_PATH)
 
 ./obj/nearestneighbor.o: ./tsp/algorithms/nearestneighbor/nearestneighbor.h ./tsp/algorithms/nearestneighbor/nearestneighbor.c
 	gcc $(FLAGS) ./tsp/algorithms/nearestneighbor/nearestneighbor.c -o ./obj/nearestneighbor.o
@@ -69,6 +69,12 @@ main: $(OBJS)
 
 ./obj/cplex.o: ./tsp/algorithms/cplex/cplex.h ./tsp/algorithms/cplex/cplex.c
 	gcc $(FLAGS) ./tsp/algorithms/cplex/cplex.c -o ./obj/cplex.o -I $(CPLEX_LIB_PATH)
+
+./obj/benders.o: ./tsp/algorithms/cplex/benders/benders.h ./tsp/algorithms/cplex/benders/benders.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/benders/benders.c -o ./obj/benders.o -I $(CPLEX_LIB_PATH)
+
+./obj/fischetti.o: ./tsp/lib/fischetti/fischetti.h ./tsp/lib/fischetti/fischetti.c
+	gcc $(FLAGS) ./tsp/lib/fischetti/fischetti.c -o ./obj/fischetti.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1

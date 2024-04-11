@@ -51,6 +51,23 @@ double getSolCost(const TSPInstance* inst, const TSPSolution* sol){
 
 /*
 * IP inst instance
+* IP sol solution
+* OR cost of the solution $sol
+*/
+double getSSolCost(const TSPInstance* inst, const TSPSSolution* sol){
+	
+	int i;
+	double cost = 0;
+
+	for(i = 0; i < inst->dimension; i++)
+        cost += getDist(i, (*sol).succ[i], inst);
+
+	return cost;
+
+}/* getSSolCost */
+
+/*
+* IP inst instance
 * OP sol solution to compute
 */
 void ascendentSol(const TSPInstance* inst, TSPSolution* sol){
@@ -149,11 +166,28 @@ void allocSol(int n, TSPSolution* sol){
 }/* allocSol */
 
 /*
+* IP n number of nodes of the instance
+* IP sol solution to initialize
+*/
+void allocSSol(int n, TSPSSolution* sol){
+
+    allocSol(n, (TSPSolution*)sol);
+
+}/* allocSSol */
+
+/*
 * IOP sol solution to free memory
 */
 void freeSol(TSPSolution* sol){
     free(sol->path);
 }/* freeSol */
+
+/*
+* IOP sol solution to free memory
+*/
+void freeSSol(TSPSSolution* sol){
+    freeSol((TSPSolution*)sol);
+}/* freeSSol */
 
 /*
 * IP inst instance to print
@@ -319,3 +353,19 @@ void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSol
         cpSol(inst, temp, sol);
 
 } /* updateIncumbentSol */
+
+/*
+* IP in solution in successor representation
+* OP out solution in path representation
+* This method assumes $out is already allocated
+*/
+void convertSSol(const TSPInstance* inst, const TSPSSolution* in, TSPSolution* out){
+
+	int curr = 0;
+	
+	(*out).val = (*in).val;
+
+	for(int i = 0; i < (*inst).dimension; i++)
+		(*out).path[i] = (curr = (*in).succ[curr]);
+
+}/* convertSSol */

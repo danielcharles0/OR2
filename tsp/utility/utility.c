@@ -213,7 +213,7 @@ bool isTimeOutWarning(const char war[], clock_t start, int tl){
 	if(!isTimeOut(start, tl))
 		return false;
 
-	printf("\n%s", war);
+	printf("\n\n%s", war);
 	return true;
 
 }/* isTimeOutWarning */
@@ -394,3 +394,11 @@ void printError(const char err[]){
 	exit(1);
 
 } /* printError */
+
+/*
+* IP x value
+* OR x if x > 0, 0 otherwise
+*/
+double step(double x){
+	return x > 0 ? x : 0;
+}/* step */
