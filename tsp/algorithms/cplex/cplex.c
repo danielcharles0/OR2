@@ -115,7 +115,7 @@ void setCPXParameters(const Settings *set, CPXENVptr env)
 		/*CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON);*/ /* CPLEX output on screen */
 
 	CPXsetintparam(env, CPX_PARAM_RANDOMSEED, (*set).seed);
-	CPXsetintparam(env, CPX_PARAM_NODELIM, PARAM_NODELIM);
+	/*CPXsetintparam(env, CPX_PARAM_NODELIM, PARAM_NODELIM);*/
 	CPXsetdblparam(env, CPX_PARAM_TILIM, (*set).tl);
 
 } /* setCPXParameters */
@@ -276,6 +276,7 @@ void exactAlgorithmLegend(void){
 
 	printf("Available exact algorithms:\n");
     printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
+	printf("\t- Code: %d, Algorithm: Benders' loop with patch\n", BENDERS_PATCH);
     printf("\n");
 
 }/* exactAlgorithmLegend */
@@ -293,7 +294,10 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	
 	switch (readInt("Insert the code of the exact algorithm you want to run: ")){
 	    case BENDERS:
-	        benders(set, inst, env, lp, sol);
+	        benders(set, inst, env, lp, sol, (patchfunc)dummypatch);
+	        break;
+		case BENDERS_PATCH:
+			benders(set, inst, env, lp, sol, (patchfunc)patch);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
@@ -371,11 +375,40 @@ int build_sol(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLP
 
 }/* build_sol */
 
+/*
+* IP sol solution
+* IP lb lower bound
+* OR the % gap between the solution cost and the lower bound
+*/
 double solGap(const TSPSolution* sol, double lb){
 
 	return ((sol->val - lb) / sol->val) * 100;
 
 }/* solGap */
+
+/*
+ * IP set settings
+ * IP inst input instance
+ * IP env CPLEX environment
+ * IP lp CPLEX linear program
+ * OP sol solution to evaluate ( assume that the solution was already initialized )
+ * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
+ * OR 0 if no error, error code otherwise
+ * OV error message if any
+ */
+int optimize_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp)
+{
+
+	int err;
+
+	if ((err = CPXmipopt(env, lp) /* optimization */))
+		print_error("CPXmipopt() error", err, env, lp);
+	else
+		err = build_sol(set, inst, env, lp, sol, comp);
+
+	return err;
+
+} /* optimize_model */
 
 /*
  * IP set settings

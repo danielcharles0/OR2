@@ -8,4 +8,16 @@
 #include <ilcplex/cplex.h>
 #include "../cplex.h"
 
-int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*);
+/*
+ * IP set settings
+ * IP inst input instance
+ * IOP sol solution to patch
+ * IOP comp array of components
+ */
+typedef void (*patchfunc)(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
+
+void dummypatch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
+
+void patch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
+
+int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, patchfunc);

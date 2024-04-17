@@ -73,13 +73,126 @@ int add_SEC(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPptr l
 }/* add_SEC */
 
 /*
+ * IP inst input instance
+ * IP sol solution to patch
+ * IP a node of the first component
+ * IP b node of the second component
+ * OR delta cost of the patch
+ */
+int delta_patch_cost(const TSPInstance *inst, const TSPSSolution *sol, int a, int b)
+{
+
+	return (getDist(a, (*sol).succ[b], inst) + getDist(b, (*sol).succ[a], inst)) - (getDist(a, (*sol).succ[a], inst) + getDist(b, (*sol).succ[b], inst));
+
+} /* delta_patch_cost */
+
+/*
+ * IP inst input instance
+ * IP c1 first component
+ * IP c2 second component
+ * IOP sol solution to patch
+ * IOP comp array of components
+ */
+void merge_components(const TSPInstance *inst, int c1, int c2, TSPSSolution *sol, COMP *comp)
+{
+
+	int i, sc = c1, uc = c2;
+
+	if (c2 < c1)
+	{
+		sc = c2;
+		uc = c1;
+	} /* if */
+
+	/* DO WE NEED CONSECUTIVE COMPONENTS OR WE CAN JUST GO THROW SUCC WHEN WE FIND THE FIRST INDEX OF THE COMPONENT? */
+	for (i = 0; i < (*inst).dimension; i++)
+		if ((*comp).map[i] == uc)
+			(*comp).map[i] = sc;
+		else if ((*comp).map[i] > uc)
+			(*comp).map[i]--;
+
+	(*comp).nc--;
+
+} /* merge_components */
+
+/*
+ * IP inst input instance
+ * IP a node of the first component
+ * IP b node of the second component
+ * IOP sol solution to patch
+ * IOP comp array of components
+ */
+void patch_components(const TSPInstance *inst, int a, int b, TSPSSolution *sol, COMP *comp)
+{
+
+	int a1 = (*sol).succ[a];
+
+	(*sol).val += delta_patch_cost(inst, sol, a, b);
+
+	(*sol).succ[a] = (*sol).succ[b];
+	(*sol).succ[b] = a1;
+
+	merge_components(inst, (*comp).map[a], (*comp).map[b], sol, comp);
+
+} /* patch_components */
+
+/*
+ * IP set settings
+ * IP inst input instance
+ * IOP sol solution to patch
+ * IOP comp array of components
+ */
+void dummypatch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP *comp){}
+
+/*
+ * IP set settings
+ * IP inst input instance
+ * IOP sol solution to patch
+ * IOP comp array of components
+ */
+void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP *comp)
+{
+
+	int i, j, bi, bj, bdc;
+
+	/*if ((*set).v)
+		printf("\nStarting patching phase..\n");*/
+
+	while ((*comp).nc > 1)
+	{
+		bdc = INT_MAX;
+		for (i = 0; i < (*inst).dimension; i++)
+			for (j = i + 1; j < (*inst).dimension; j++)
+				/* I will not ho twice on the same pair so i can check just for different components */
+				if ((*comp).map[i] != (*comp).map[j])
+				{
+					int delta;
+					if ((delta = delta_patch_cost(inst, sol, i, j)) < bdc)
+					{
+						bi = i;
+						bj = j;
+						bdc = delta;
+					}
+				} /* if */
+		patch_components(inst, bi, bj, sol, comp);
+	} /* while */
+
+	(*sol).val = getSSolCost(inst, sol);
+
+	/*if ((*set).v)
+		printf("\nPatching phase ended.\n");*/
+
+} /* patch */
+
+/*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
+* OR error code
 */
-int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
+int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc){
 	
 	int err;
 	double lb = 0, ls = -1;
@@ -93,44 +206,46 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	checkTimeLimit(set, start, &ls);
 
 	while(true){
-		
-		err = CPXmipopt(env, lp);
 
-		if(err){
-			print_error("CPXmipopt failed.", err, env, lp);
+		if((err = optimize_model(set, inst, env, lp, &temp, &comp)))
 			break;
-		}/* if */
 		
 		CPXgetbestobjval(env, lp, &lb);
-		
-		build_sol(set, inst, env, lp, &temp, &comp);
 		
 		if(comp.nc == 1){
 			printf("\n\n");
 			break;
 		}/* if */
 
+		if((*set).v)
+			printf(", LB: %f", lb);
+		
+		if((err = add_SEC(inst, &comp, env, lp)))
+			break;
+
+		ptc(set, inst, &temp, &comp);
+
 		update_time_limit(set, start, env);
 		if(checkTimeLimit(set, start, &ls))
 			break;
-		
-		add_SEC(inst, &comp, env, lp);
 
 	}/* while */
 
-	if(comp.nc != 1){
-		Settings s;
-		cpSet(set, &s);
-		s.v = 0;
-		best_start(&s, inst, sol);
-		opt2(inst, sol);
-		printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
-	} else
-		convertSSol(inst, &temp, sol);
+	if(!err){
+		if(comp.nc != 1){
+			Settings s;
+			cpSet(set, &s);
+			s.v = 0;
+			best_start(&s, inst, sol);
+			opt2(inst, sol);
+			printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
+		} else
+			convertSSol(inst, &temp, sol);
+	}
 
 	freeSSol(&temp);
 	freeComp(&comp);
 
-	return 0;
+	return err;
 
 }/* benders */
