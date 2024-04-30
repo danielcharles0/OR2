@@ -22,6 +22,7 @@
 * IP iteration index
 * IP n size of the instance
 * OR tenure value for the current iteration
+* Costant tenure
 */
 int defaulttenure(int it, int n){
 
@@ -30,6 +31,51 @@ int defaulttenure(int it, int n){
 	return max(tenure, MIN_TENURE);
 
 }/* defaulttenure */
+
+/*
+* IP iteration index
+* IP n size of the instance
+* OR tenure value for the current iteration
+* Triangular tenure
+*/
+int triangulartenure(int it, int n){
+	
+	int max_tenure = defaulttenure(0, n);
+	int h = max_tenure - MIN_TENURE, win = it / h, val = it % h;
+	
+	return MIN_TENURE + ((win % 2) ? h - val : val);
+
+}/* triangulartenure */
+
+/*
+* IP iteration index
+* IP n size of the instance
+* OR tenure value for the current iteration
+* Square tenure
+*/
+int squaretenure(int it, int n){
+	
+	int max_tenure = defaulttenure(0, n);
+	int h = max_tenure - MIN_TENURE, win = it / h;
+	
+	return ((win % 2) ? max_tenure : MIN_TENURE);
+
+}/* squaretenure */
+
+/*
+* IP iteration index
+* IP n size of the instance
+* OR tenure value for the current iteration
+* Sawtooth tenure
+*/
+int sawtoothtenure(int it, int n){
+	
+	int max_tenure = defaulttenure(0, n);
+	int h = max_tenure - MIN_TENURE, val = it % (3 * h);
+	
+	return MIN_TENURE + val / 3;
+
+}/* sawtoothtenure */
 
 /*
 * IP inst tsp instance
