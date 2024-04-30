@@ -40,7 +40,7 @@ int defaulttenure(int it, int n){
 */
 int triangulartenure(int it, int n){
 	
-	int max_tenure = defaulttenure(0, n);
+	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
 	int h = max_tenure - MIN_TENURE, win = it / h, val = it % h;
 	
 	return MIN_TENURE + ((win % 2) ? h - val : val);
@@ -55,7 +55,7 @@ int triangulartenure(int it, int n){
 */
 int squaretenure(int it, int n){
 	
-	int max_tenure = defaulttenure(0, n);
+	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
 	int h = max_tenure - MIN_TENURE, win = it / h;
 	
 	return ((win % 2) ? max_tenure : MIN_TENURE);
@@ -70,7 +70,7 @@ int squaretenure(int it, int n){
 */
 int sawtoothtenure(int it, int n){
 	
-	int max_tenure = defaulttenure(0, n);
+	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
 	int h = max_tenure - MIN_TENURE, val = it % (3 * h);
 	
 	return MIN_TENURE + val / 3;

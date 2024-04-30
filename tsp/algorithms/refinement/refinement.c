@@ -31,6 +31,15 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance*
 		case TABU:
 			tabu(set, inst, sol, (tenurefunc)defaulttenure);
 			break;
+		case TABU_TRIANG:
+			tabu(set, inst, sol, (tenurefunc)triangulartenure);
+			break;
+		case TABU_SQUARE:
+			tabu(set, inst, sol, (tenurefunc)squaretenure);
+			break;
+		case TABU_SAWTOO:
+			tabu(set, inst, sol, (tenurefunc)sawtoothtenure);
+			break;
 		case VNS:
 	        vns(set, inst, sol);
 	        break;
@@ -51,7 +60,10 @@ void refinementaAlgorithmLegend(void){
 	printf("Available refinement algorithms:\n");
 	printf("\t- Code: %d to skip refinement\n", SKIP);
     printf("\t- Code: %d, Algorithm: 2opt refinement method\n", OPT2);
-	printf("\t- Code: %d, Algorithm: TABU refinement method\n", TABU);
+	printf("\t- Code: %d, Algorithm: TABU refinement method with constant tenure\n", TABU);
+	printf("\t- Code: %d, Algorithm: TABU refinement method with triangular tenure\n", TABU_TRIANG);
+	printf("\t- Code: %d, Algorithm: TABU refinement method with square tenure\n", TABU_SQUARE);
+	printf("\t- Code: %d, Algorithm: TABU refinement method with sawtooth tenure\n", TABU_SAWTOO);
 	printf("\t- Code: %d, Algorithm: VNS refinement method\n", VNS);
     printf("\n");
 
