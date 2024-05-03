@@ -88,6 +88,28 @@ clean:
 rebuild:
 	make clean && make
 
+# reference: https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/
+# NOTE:
+#	- Before running male concorde please fix the passage 7, step 'avoid error CPX_PARAM_FASTMIP' of the reference
+#	- reference: https://www.ibm.com/docs/en/icos/20.1.0?topic=s-cpxxsavwrite-cpxsavwrite \
+#		substitute the deprecated methods CPXXsavwrite & CPXsavwrite with the new ones \
+#		reference: https://www.ibm.com/docs/en/icos/22.1.1?topic=z-cpxxwriteprob-cpxwriteprob
+concorde:
+	mkdir -p /Users/Shared/lib/concorde/CPXREFERENCES /Users/Shared/lib/concorde/build
+	ln -s -f /Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/lib/arch/static_pic/libcplex.a /Users/Shared/lib/concorde/CPXREFERENCES/libcplex.a
+
+	ln -s -f /Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include/ilcplex/cplex.h /Users/Shared/lib/concorde/CPXREFERENCES/cplex.h
+#	ln -s -f /Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include/ilcplex/*.h /Users/Shared/lib/concorde/CPXREFERENCES
+	ln -s -f /Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include/ilcplex/cpxconst.h /Users/Shared/lib/concorde/CPXREFERENCES/cpxconst.h
+	
+	cd /Users/Shared/lib/concorde/build \
+		&& /Users/Shared/lib/concorde/configure --host=darwin --with-cplex=/Users/Shared/lib/concorde/CPXREFERENCES \
+		&& make
+
+#	cd /Users/Shared/lib/concorde/build \
+#		&& mv concorde.a libconcorde.a \
+#		&& make
+
 # target: dependencies
 # 	action
 
