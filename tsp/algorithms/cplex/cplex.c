@@ -10,6 +10,7 @@
 #include "cplex.h"
 #include "../../tsp.h"
 #include "benders/benders.h"
+#include "candidate/candidate.h"
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"
 
@@ -79,6 +80,8 @@ void print_error(const char *stre, int ec, CPXENVptr env, CPXLPptr lp)
 	s = getStatus(env, lp, buffer);
 
 	printf("\n\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
+
+	fflush(NULL); 
 
 } /* print_error */
 
@@ -277,6 +280,7 @@ void exactAlgorithmLegend(void){
 	printf("Available exact algorithms:\n");
     printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
 	printf("\t- Code: %d, Algorithm: Benders' loop with patch\n", BENDERS_PATCH);
+	printf("\t- Code: %d, Algorithm: Branch and Cut with Candidate Callback\n", CANDIDATE_CALLBACK);
     printf("\n");
 
 }/* exactAlgorithmLegend */
@@ -298,6 +302,9 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	        break;
 		case BENDERS_PATCH:
 			benders(set, inst, env, lp, sol, (patchfunc)patch);
+	        break;
+		case CANDIDATE_CALLBACK:
+			candidateCallback(set, inst, env, lp, sol);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
@@ -343,7 +350,6 @@ void freeComp(COMP *comp){
 }/* freeComp */
 
 /*
- * IP set settings
  * IP inst input instance
  * IP env CPLEX environment
  * IP lp CPLEX linear program
@@ -351,7 +357,7 @@ void freeComp(COMP *comp){
  * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
  * OR false if no error, true otherwise
  */
-int build_sol(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp){
+int build_sol(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp){
 
 	int err, ncols = CPXgetnumcols(env, lp);
 	double *xstar;
@@ -387,7 +393,6 @@ double solGap(const TSPSolution* sol, double lb){
 }/* solGap */
 
 /*
- * IP set settings
  * IP inst input instance
  * IP env CPLEX environment
  * IP lp CPLEX linear program
@@ -396,7 +401,7 @@ double solGap(const TSPSolution* sol, double lb){
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int optimize_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp)
+int optimize_model(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution *sol, COMP *comp)
 {
 
 	int err;
@@ -404,7 +409,7 @@ int optimize_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, 
 	if ((err = CPXmipopt(env, lp) /* optimization */))
 		print_error("CPXmipopt() error", err, env, lp);
 	else
-		err = build_sol(set, inst, env, lp, sol, comp);
+		err = build_sol(inst, env, lp, sol, comp);
 
 	return err;
 
@@ -455,3 +460,38 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 	} /* else */
 
 } /* optimize */
+
+/*
+* Initializes CPXinstance passed in input
+* IP cpx_inst cplex instance to be initialized
+* IP tsp_inst tsp instance to be passed to cplex instance
+* IP numCols number of columns of the variables table used by CPLEX
+* IP env cplex environment
+* IP lp cplex lp
+*/
+void initCPXInstance(CPXInstance* cpx_inst, const TSPInstance* tsp_inst, TSPSSolution* temp, int numCols, CPXENVptr env, CPXLPptr lp){
+
+	cpx_inst->inst = tsp_inst;
+	cpx_inst->temp = temp;
+	cpx_inst->ncols = numCols;
+	cpx_inst->env = env;
+	cpx_inst->lp = lp;
+
+}/* initCPXInstance */
+
+/*
+ * IP cpx_inst cplex instance
+ * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
+ */
+void build_comp(CPXInstance* cpx_inst, double* xstar, COMP* comp){
+	
+	int* temp = malloc(cpx_inst->inst->dimension * sizeof(int));
+	assert(temp != NULL);
+
+	instance finst = { .nnodes = cpx_inst->inst->dimension };
+
+	build_sol_fischetti(xstar, &finst, temp, (*comp).map, &((*comp).nc));
+
+	free(temp);
+
+}/* build_comp */

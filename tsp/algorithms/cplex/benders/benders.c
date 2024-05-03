@@ -163,7 +163,7 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 		bdc = INT_MAX;
 		for (i = 0; i < (*inst).dimension; i++)
 			for (j = i + 1; j < (*inst).dimension; j++)
-				/* I will not ho twice on the same pair so i can check just for different components */
+				/* I will not go twice on the same pair so i can check just for different components */
 				if ((*comp).map[i] != (*comp).map[j])
 				{
 					int delta;
@@ -190,6 +190,7 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
+* IP ptc patching function
 * OR error code
 */
 int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc){
@@ -207,7 +208,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	while(true){
 
-		if((err = optimize_model(set, inst, env, lp, &temp, &comp)))
+		if((err = optimize_model(inst, env, lp, &temp, &comp)))
 			break;
 		
 		CPXgetbestobjval(env, lp, &lb);
