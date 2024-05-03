@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o
+OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -16,7 +16,7 @@ endif
 
 main: $(OBJS)
 	rm -f ./tsp/output/cplex/model.lp
-	gcc -o main $(OBJS) $(LIBS)
+	gcc -o main ./obj/main.o $(OBJS) $(LIBS)
 
 ./obj/main.o: main.c
 	mkdir -p ./obj ./gnuplot_out ./cplex_out ./tsp/output/cplex
@@ -76,6 +76,9 @@ main: $(OBJS)
 ./obj/fischetti.o: ./tsp/lib/fischetti/fischetti.h ./tsp/lib/fischetti/fischetti.c
 	gcc $(FLAGS) ./tsp/lib/fischetti/fischetti.c -o ./obj/fischetti.o -I $(CPLEX_LIB_PATH)
 
+./obj/pprof.o: ./tsp/pprofile/pprofile.h ./tsp/pprofile/pprofile.c
+	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o
+
 debug:
 	make DEBUG=1
 
@@ -84,6 +87,10 @@ clean:
 
 rebuild:
 	make clean && make
+
+pprof: $(OBJS) ./obj/pprof.o
+	make
+	gcc -o pprof ./obj/pprof.o $(OBJS) $(LIBS)
 
 # reference: https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/
 # NOTE:

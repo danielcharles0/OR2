@@ -32,7 +32,7 @@ static struct option long_options[] = {
 */
 void help(void){
 
-    printf("Options:\n");
+    printf("TSP solver options:\n");
 	                                                            /* remember that the last character contains the special EOS value '\0' */
     printf("\t-f, --file  <file_name>\t\tinput file (no file names with more than %d characters are accepted)\n", MAX_FILE_NAME_SIZE - 1);
     printf("\t-s, --seed  <seed_value>\tseed used for random generation (integer value)\n");
