@@ -90,7 +90,7 @@ rebuild:
 
 # reference: https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/
 # NOTE:
-#	- Before running male concorde please fix the passage 7, step 'avoid error CPX_PARAM_FASTMIP' of the reference
+#	- Before running make concorde please fix the passage 7, step 'avoid error CPX_PARAM_FASTMIP' of the reference
 #	- reference: https://www.ibm.com/docs/en/icos/20.1.0?topic=s-cpxxsavwrite-cpxsavwrite \
 #		substitute the deprecated methods CPXXsavwrite & CPXsavwrite with the new ones \
 #		reference: https://www.ibm.com/docs/en/icos/22.1.1?topic=z-cpxxwriteprob-cpxwriteprob
