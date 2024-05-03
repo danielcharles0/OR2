@@ -7,14 +7,6 @@
 
 #include "../../tsp.h"
 
-typedef enum {
-	SKIP,
-    OPT2,
-	TABU,
-	TABU_TRIANG,
-	TABU_SQUARE,
-	TABU_SAWTOO,
-	VNS
-} REFINEMENT_ALGORITHM;
-
 bool runRefinement(const Settings*, const TSPInstance*, TSPSolution*);
+
+bool runRefAlg(REFINEMENT_ALGORITHM, const Settings*, const TSPInstance*, TSPSolution*);

@@ -192,6 +192,15 @@ int runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* ins
 }/* runConfiguration */
 
 /*
+* IP conf configuration code
+* OR int execution seconds, -1 if error
+* Note: It is just a new name for runConfiguration to make it available in the .h
+*/
+int NNRunConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+	return runConfiguration(conf, set, inst, sol);
+}/* NNRunConfiguration */
+
+/*
 * IP set settings
 * IP inst tsp instance
 * IOP sol solution

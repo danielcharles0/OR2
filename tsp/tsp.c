@@ -237,6 +237,58 @@ bool isExactMethod(ALGORITHM alg){
 * IP set settings
 * OP error true if an error occurred, false otherwise.
 */
+bool offline_run(OFFLINE_ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
+    
+	int et; /* execution time in seconds */
+    
+    switch (alg){
+	    case O_RANDOM:
+	        et = randomSol(inst, sol);
+	        break;
+	    case O_NEAREST_NEIGHBOR_START_FIRST_NODE:
+	        if((et = NNRunConfiguration(START_FIRST_NODE, set, inst, sol)) == -1)
+				return true;
+	        break;
+		case O_NEAREST_NEIGHBOR_START_RANDOM_NODE:
+	        if((et = NNRunConfiguration(START_RANDOM_NODE, set, inst, sol)) == -1)
+				return true;
+	        break;
+		case O_NEAREST_NEIGHBOR_BEST_START:
+	        if((et = NNRunConfiguration(BEST_START, set, inst, sol)) == -1)
+				return true;
+	        break;
+
+		// case O_CPLEX:
+		// 	return optimize(set, inst, sol);
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+	        return true;
+    }/* switch */
+
+    return false;
+
+}/* offline_run */
+
+/*
+* IP alg algorithm to run
+* IP inst tsp instance
+* IOP sol solution
+* IP set settings
+* OP error true if an error occurred, false otherwise.
+*/
+bool offline_run_refinement(OFFLINE_ALGORITHM alg, REFINEMENT_ALGORITHM ref, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
+    
+	return offline_run(alg, inst, sol, set) || runRefAlg(ref, set, inst, sol);
+
+}/* offline_run_refinement */
+
+/*
+* IP alg algorithm to run
+* IP inst tsp instance
+* IOP sol solution
+* IP set settings
+* OP error true if an error occurred, false otherwise.
+*/
 bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
 	int et; /* execution time in seconds */
