@@ -13,7 +13,8 @@
 
 typedef enum{
     BENDERS,
-	BENDERS_PATCH
+	BENDERS_PATCH,
+    CANDIDATE_CALLBACK
 } EXACTS;
 
 typedef struct{
@@ -22,6 +23,16 @@ typedef struct{
     int* map;	/* map	:= array of components */
 
 } COMP;
+
+typedef struct{
+
+    const TSPInstance* inst;
+    TSPSSolution* temp;
+    int ncols;
+    CPXENVptr env;
+    CPXLPptr lp;
+
+} CPXInstance;
 
 int optimize(const Settings*, const TSPInstance*, TSPSolution*);
 
@@ -35,6 +46,12 @@ void allocComp(int, COMP*);
 
 void freeComp(COMP*);
 
-int optimize_model(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSSolution*, COMP*);
+int build_sol(const TSPInstance*, CPXENVptr, CPXLPptr, TSPSSolution*, COMP*);
+
+int optimize_model(const TSPInstance*, CPXENVptr, CPXLPptr, TSPSSolution*, COMP*);
 
 double solGap(const TSPSolution*, double);
+
+void initCPXInstance(CPXInstance*, const TSPInstance*, TSPSSolution*, int, CPXENVptr, CPXLPptr);
+
+void build_comp(CPXInstance*, double*, COMP*);
