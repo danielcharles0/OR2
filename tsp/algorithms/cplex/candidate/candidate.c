@@ -2,7 +2,7 @@
 * Project  : Travelling Salesman Problem implementations
 * Authors  : Luigi Frigione, Daniel Carlesso
 * IDs      : 2060685, 2088626
-* File     : cplex.c
+* File     : candidate.c
 */
 
 #include "candidate.h"
@@ -19,7 +19,7 @@
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int add_SEC_bnb(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPptr lp, CPXCALLBACKCONTEXTptr context, int ncols){
+int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPptr lp, CPXCALLBACKCONTEXTptr context, int ncols){
 
 	int* idxs = malloc(ncols * sizeof(int));
 	assert(idxs != NULL);
@@ -68,9 +68,11 @@ int add_SEC_bnb(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPp
 
 	return 0;
 
-}/* add_SEC */
+}/* add_SEC_candidate */
 
 /*
+* Checks candidate solution
+*
 * IP context CPLEX callback context, handled internally by CPLEX
 * IP context_id id of the callback context
 * IOP userhandle pointer to a structure external to CPLEX
@@ -95,13 +97,14 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 	build_comp(cpx_inst, xstar, &comp);
 
 	if(comp.nc > 1)
-    	add_SEC_bnb(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+    	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
 	
 	freeComp(&comp);
 	free(xstar);
 
 	return 0;
-}
+
+}/* checkCandidateSol */
 
 /*
 * IP set settings
@@ -136,4 +139,5 @@ int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr en
 	freeComp(&comp);
 
 	return 0;
-}
+
+}/* candidateCallback */

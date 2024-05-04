@@ -5,3 +5,7 @@
 * File     : usercut.c
 */
 
+#include <ilcplex/cplex.h>
+#include "../cplex.h"
+
+int usercutCallback(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*);

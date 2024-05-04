@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -78,6 +78,9 @@ main: $(OBJS)
 
 ./obj/candidate.o: ./tsp/algorithms/cplex/candidate/candidate.h ./tsp/algorithms/cplex/candidate/candidate.c
 	gcc $(FLAGS) ./tsp/algorithms/cplex/candidate/candidate.c -o ./obj/candidate.o -I $(CPLEX_LIB_PATH)
+
+./obj/usercut.o: ./tsp/algorithms/cplex/usercut/usercut.h ./tsp/algorithms/cplex/usercut/usercut.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1
