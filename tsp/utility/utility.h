@@ -5,6 +5,8 @@
 * File     : utility.h
 */
 
+#pragma once
+
 #include <stdbool.h>
 #include <time.h>
 
