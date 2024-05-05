@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
+OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -14,9 +14,10 @@ else
 	FLAGS = $(STD_FLAGS) -O3
 endif
 
-main: $(OBJS)
+main: ./obj/main.o $(OBJS)
 	rm -f ./tsp/output/cplex/model.lp
 	gcc -o main ./obj/main.o $(OBJS) $(LIBS)
+
 
 ./obj/main.o: main.c
 	mkdir -p ./obj ./gnuplot_out ./cplex_out ./tsp/output/cplex
