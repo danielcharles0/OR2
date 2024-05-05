@@ -219,7 +219,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	double ls = -1, lp = -1; /* ls := last stamp, seconds from the start to the last stamp */
 
-	initCostPlotPipe("TABU - Solutions Costs", &cost_pipe);
+	if((*set).v)
+		initCostPlotPipe("TABU - Solutions Costs", &cost_pipe);
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);
@@ -235,8 +236,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 			updateIncumbentSol(inst, &temp, sol);
             
 		}/* if */
-
-		if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
+		
+		if((*set).v && timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
         	addCost(cost_pipe, it, temp.val);
 
 		if(checkTimeLimit(set, start, &ls))
@@ -248,6 +249,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 
 	freeTabuList(&tl);
 	freeSol(&temp);
-	closeGnuplotPipe(cost_pipe);
+	
+	if((*set).v)
+		closeGnuplotPipe(cost_pipe);
 
 }/* tabu */

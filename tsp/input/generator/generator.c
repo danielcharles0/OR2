@@ -28,16 +28,28 @@ void generatePoints(int seed, TSPInstance* inst){
 
 /*
  * IP set settings
+ * IP name of the instance
+ * OP inst instance to random generate
+ * This method assumes the instance to be already allocated
+ */
+void generateInstanceName(const Settings* set, const char name[], TSPInstance* inst){
+
+	strcpy(inst->name, name);
+
+	generatePoints((*set).seed, inst);
+	
+	computeDistances(inst);
+
+}/* generateInstance */
+
+/*
+ * IP set settings
  * OP inst instance to random generate
  */
 void generateInstance(const Settings* set, TSPInstance* inst){
 
     allocInst((*set).n, inst);
 
-	strcpy(inst->name, "RANDOM");
-
-	generatePoints((*set).seed, inst);
-	
-	computeDistances(inst);
+	generateInstanceName(set, "RANDOM", inst);
 
 }/* generateInstance */

@@ -235,7 +235,7 @@ bool isExactMethod(ALGORITHM alg){
 * IP inst tsp instance
 * IOP sol solution
 * IP set settings
-* OP error true if an error occurred, false otherwise.
+* OR true if an error occurred, false otherwise.
 */
 bool offline_run(OFFLINE_ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
@@ -274,7 +274,7 @@ bool offline_run(OFFLINE_ALGORITHM alg, const TSPInstance* inst, TSPSolution* so
 * IP inst tsp instance
 * IOP sol solution
 * IP set settings
-* OP error true if an error occurred, false otherwise.
+* OR true if an error occurred, false otherwise.
 */
 bool offline_run_refinement(OFFLINE_ALGORITHM alg, REFINEMENT_ALGORITHM ref, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     

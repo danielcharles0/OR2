@@ -140,7 +140,7 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	for(i = 1; i < (*inst).dimension; i++){
 
-		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl, (*set).v))
 			break;
 
 		NN_solver(i, inst, &temp);

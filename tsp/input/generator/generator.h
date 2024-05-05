@@ -9,3 +9,5 @@
 #include "../../tsp.h"
 
 void generateInstance(const Settings*, TSPInstance*);
+
+void generateInstanceName(const Settings*, const char[], TSPInstance*);

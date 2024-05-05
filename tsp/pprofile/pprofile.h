@@ -10,7 +10,8 @@
 
 typedef enum {
 	PP_DUMMY, /* Justo to make the indexes start from 1 */
-    PP_RANDOM,
+    
+	PP_RANDOM,
 	PP_RANDOM_2OPT,
 	PP_RANDOM_TABU_CONST,
 	PP_RANDOM_TABU_TRIANG,

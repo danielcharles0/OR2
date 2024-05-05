@@ -45,7 +45,7 @@ void invertArray(int, int, int*);
 
 bool isTimeOut(clock_t, int);
 
-bool isTimeOutWarning(const char[], clock_t, int);
+bool isTimeOutWarning(const char[], clock_t, int, bool);
 
 bool checkTimeLimit(const Settings*, clock_t, double*);
 

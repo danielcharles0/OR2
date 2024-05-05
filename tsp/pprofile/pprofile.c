@@ -7,7 +7,13 @@
 
 #include "pprofile.h"
 #include "../utility/utility.h"
+#include "../input/generator/generator.h"
 #include <stdio.h>
+
+#define NOF_TEST_INSTANCES 2 //20
+#define PPROF_OUT_FILE "./perfprof/pprof.csv"
+/* TO BE FIXED */
+#define PP_PLOT_CMD "python ./perfprof/perfprof.py -D , -M 7 ./performance_profile/pp.csv ./performance_profile/pp.pdf -X \"Cost Ratio\" -P \"all instances, shift 2 sec.s\""
 
 /*
 * OV help section
@@ -27,7 +33,7 @@ void pp_help(void){
     printf("\tParameter <timelimit_value> accepts only strictly positive integer values\n");
     printf("\tParameter <seed_value> accepts only positive integer values\n");
     printf("\tParameter <number_of_nodes> accepts only integer values strictly greater than 2\n");
-	printf("\tOption help must be specified itself\n\n");
+	printf("\tOption help must be specified itself\n");
 
 }/* help */
 
@@ -168,14 +174,276 @@ bool readAlgorithms(PP_CONF* conf){
 * OP conf configuration for the program execution
 * OR true if error, false otherwise
 */
-bool readConfiguration(int argc, char* const* argv, PP_CONF* conf){
+bool readPPConfiguration(int argc, char* const* argv, PP_CONF* conf){
 	
 	if(pp_validate(&((*conf).set), parseCMDLine(argc, argv, &((*conf).set))))
 		return true;
-
+	
 	return !readAlgorithms(conf);
 	
 }/* readConfiguration */
+
+/*
+* IP set settings to run
+* IP alg algorithm to run
+* OP sol solution
+* OR true if error, false otherwise
+*/
+bool runPPAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol){
+
+	switch (alg){
+	    case PP_RANDOM:
+	        return offline_run_refinement(O_RANDOM, SKIP, inst, sol, set);
+		case PP_RANDOM_2OPT:
+	        return offline_run_refinement(O_RANDOM, OPT2, inst, sol, set);
+		case PP_RANDOM_TABU_CONST:
+	        return offline_run_refinement(O_RANDOM, TABU, inst, sol, set);
+		case PP_RANDOM_TABU_TRIANG:
+	        return offline_run_refinement(O_RANDOM, TABU_TRIANG, inst, sol, set);
+		case PP_RANDOM_TABU_SQUARE:
+	        return offline_run_refinement(O_RANDOM, TABU_SQUARE, inst, sol, set);
+		case PP_RANDOM_TABU_SAWTOO:
+	        return offline_run_refinement(O_RANDOM, TABU_SAWTOO, inst, sol, set);
+		case PP_RANDOM_VNS:
+	        return offline_run_refinement(O_RANDOM, VNS, inst, sol, set);
+
+	    case PP_NEAREST_NEIGHBOR_START_FIRST_NODE:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, SKIP, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_2OPT:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, OPT2, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_CONST:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, TABU, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_TRIANG:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, TABU_TRIANG, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_SQUARE:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, TABU_SQUARE, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_SAWTOO:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, TABU_SAWTOO, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_VNS:
+	        return offline_run_refinement(O_NEAREST_NEIGHBOR_START_FIRST_NODE, VNS, inst, sol, set);
+
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, SKIP, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_2OPT:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, OPT2, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_CONST:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, TABU, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_TRIANG:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, TABU_TRIANG, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_SQUARE:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, TABU_SQUARE, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_SAWTOO:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, TABU_SAWTOO, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_VNS:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_START_RANDOM_NODE, VNS, inst, sol, set);
+
+		case PP_NEAREST_NEIGHBOR_BEST_START:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, SKIP, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_2OPT:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, OPT2, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_CONST:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, TABU, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_TRIANG:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, TABU_TRIANG, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_SQUARE:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, TABU_SQUARE, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_SAWTOO:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, TABU_SAWTOO, inst, sol, set);
+		case PP_NEAREST_NEIGHBOR_BEST_START_VNS:
+			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, VNS, inst, sol, set);
+
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+	        return true;
+    }/* switch */
+
+}/* runPPAlg */
+
+/*
+* IP alg algorithm
+* OP name of the algorithm
+*/
+void getAlgName(PP_ALG alg, char name[]){
+
+	switch (alg){
+	    case PP_RANDOM:
+	        sprintf(name, "rndm");
+			break;
+		case PP_RANDOM_2OPT:
+	        sprintf(name, "rndm_2opt");
+			break;
+		case PP_RANDOM_TABU_CONST:
+	        sprintf(name, "rndm_tabu");
+			break;
+		case PP_RANDOM_TABU_TRIANG:
+	        sprintf(name, "rndm_triang_tabu");
+			break;
+		case PP_RANDOM_TABU_SQUARE:
+	        sprintf(name, "rndm_square_tabu");
+			break;
+		case PP_RANDOM_TABU_SAWTOO:
+	        sprintf(name, "rndm_sawtoo_tabu");
+			break;
+		case PP_RANDOM_VNS:
+	        sprintf(name, "rndm_vns");
+			break;
+
+	    case PP_NEAREST_NEIGHBOR_START_FIRST_NODE:
+	        sprintf(name, "nnfn");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_2OPT:
+	        sprintf(name, "nnfn_2opt");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_CONST:
+	        sprintf(name, "nnfn_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_TRIANG:
+	        sprintf(name, "nnfn_triang_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_SQUARE:
+	        sprintf(name, "nnfn_square_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_TABU_SAWTOO:
+	        sprintf(name, "nnfn_sawtoo_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_FIRST_NODE_VNS:
+	        sprintf(name, "nnfn_vns");
+			break;
+
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE:
+			sprintf(name, "nnrn");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_2OPT:
+			sprintf(name, "nnrn_2opt");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_CONST:
+			sprintf(name, "nnrn_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_TRIANG:
+			sprintf(name, "nnrn_triang_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_SQUARE:
+			sprintf(name, "nnrn_square_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_TABU_SAWTOO:
+			sprintf(name, "nnrn_sawtoo_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_START_RANDOM_NODE_VNS:
+			sprintf(name, "nnrn_vns");
+			break;
+
+		case PP_NEAREST_NEIGHBOR_BEST_START:
+			sprintf(name, "nnbs");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_2OPT:
+			sprintf(name, "nnbs_2opt");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_CONST:
+			sprintf(name, "nnbs_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_TRIANG:
+			sprintf(name, "nnbs_triang_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_SQUARE:
+			sprintf(name, "nnbs_square_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_TABU_SAWTOO:
+			sprintf(name, "nnbs_sawtoo_tabu");
+			break;
+		case PP_NEAREST_NEIGHBOR_BEST_START_VNS:
+			sprintf(name, "nnbs_vns");
+			break;
+
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+			sprintf(name, "UNKNOWN");
+
+    }/* switch */
+
+}/* getAlgName */
+
+/*
+* IP conf configuration for the program execution
+* OF outF already opened output file
+*/
+void writeHeader(const PP_CONF* conf, FILE *outF){
+
+	int i;
+	char name[MAX_FILE_NAME_SIZE];
+
+	fprintf(outF, "%d", (*conf).algs.n);
+
+	for(i = 0; i < (*conf).algs.n; i++){
+		getAlgName((PP_ALG)(*conf).algs.v[i], name);
+		fprintf(outF, ", %s", name);
+	}/* for */
+
+	fprintf(outF, "\n");
+
+}/* writeHeader */
+
+/*
+* IP conf configuration for the program execution
+* OR true if error, false otherwise
+*/
+bool runPPConfiguration(const PP_CONF* conf){
+
+	int i, j;
+	char nametemp[MAX_FILE_NAME_SIZE];
+	TSPInstance inst;
+	TSPSolution sol;
+	FILE *outF;
+
+    if ((outF = fopen(PPROF_OUT_FILE, "w")) == NULL){
+        printf("Error while opening the file: %s\n\n", PPROF_OUT_FILE);
+        return -1;
+    }/* if */
+	
+	allocInst((*conf).set.n, &inst);
+	allocSol((*conf).set.n, &sol);
+	
+	writeHeader(conf, outF);
+
+	printf("\n");
+
+	for(i = 0; i < NOF_TEST_INSTANCES; i++){
+
+		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%d_id%d", (*conf).set.n, (*conf).set.seed, (*conf).set.tl, i + 1);
+		generateInstanceName(&((*conf).set), nametemp, &inst);
+
+		printf("* Working on instance %s\n", inst.name);
+
+		fprintf(outF, "%s", inst.name);
+
+		for(j = 0; j < (*conf).algs.n; j++){
+
+			getAlgName((PP_ALG)(*conf).algs.v[j], nametemp);
+			printf("\t -> Running algorithm %s...\n", nametemp);
+
+			if(runPPAlg(&((*conf).set), (*conf).algs.v[j], &inst, &sol)){
+				fclose(outF);
+				freeInst(&inst);
+				freeSol(&sol);
+				return true;
+			}/* if */
+			
+			fprintf(outF, ", %lf", sol.val);
+
+		}/* for */
+
+		fprintf(outF, "\n");
+
+	}/* for */
+	
+	fclose(outF);
+	freeInst(&inst);
+	freeSol(&sol);
+
+	// system(PP_PLOT_CMD);
+
+	return false;
+
+}/* runConfiguration */
 
 /*
 * IP argc number of elements contained in $argv
@@ -190,7 +458,8 @@ int main(int argc, char* const* argv){
 
     printf("\nPerformance Profile program started...\n\n");
 
-	readConfiguration(argc, argv, &conf);
+	if(!readPPConfiguration(argc, argv, &conf))
+		runPPConfiguration(&conf);
 	
     printf("\nPerformance Profile progran ended.\n\n");
     

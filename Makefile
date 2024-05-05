@@ -18,7 +18,6 @@ main: ./obj/main.o $(OBJS)
 	rm -f ./tsp/output/cplex/model.lp
 	gcc -o main ./obj/main.o $(OBJS) $(LIBS)
 
-
 ./obj/main.o: main.c
 	mkdir -p ./obj ./gnuplot_out ./cplex_out ./tsp/output/cplex
 	gcc $(FLAGS) main.c -o ./obj/main.o
