@@ -5,6 +5,8 @@
 * File     : array.h
 */
 
+#pragma once
+
 typedef struct {
     int n;
     int* v;

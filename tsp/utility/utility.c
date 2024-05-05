@@ -5,8 +5,9 @@
 * File     : utility.c
 */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "utility.h"
@@ -402,3 +403,69 @@ void printError(const char err[]){
 double step(double x){
 	return x > 0 ? x : 0;
 }/* step */
+
+/*
+* IP dummy integer
+* OR true
+*/
+bool intTrue(int dummy){
+	return true;
+}/* intTrue */
+
+/* Reads an int array from the keyboard.
+* IP label for the output
+* IK+OP Array to be read.
+* IK+OR $a dimension, -1 if error.
+*/
+int readArrIntValidate(const char label[], int a[], intvalidatorfunc validate) {
+    int i, n;
+    printf("%s", label);
+    n = readInt("Number of elements of the array: ");
+    for (i = 0; i < n; i++) {
+        printf("Value[%d]: ", i);
+        scanf("%d", &a[i]);
+		if(!(validate(a[i])))
+			return -1;
+    } /* for */
+    return n;
+} /* readArrIntValidate */
+
+/* Reads an int array from the keyboard.
+* IP label for the output
+* IK+OP Array to be read.
+* IK+OR $a dimension.
+*/
+int readArrInt(const char label[], int a[]) {
+   return readArrIntValidate(label, a, (intvalidatorfunc)intTrue);
+} /* readArrInt */
+
+/* Reads and allocate an integer dinamic array from the keyboard.
+* IP label for the output
+* IK+OP a Array to be allocated and read.
+* OR false if error, true otherwise
+*/
+bool readArrayDinaIntValidate(const char label[], ArrayDinaInt* a, intvalidatorfunc validate) {
+    int i;
+    printf("%s", label);
+    a->n = readInt("Number of elements of the array: ");
+    a->v = malloc(a->n * sizeof(int));
+    assert(a->v != NULL);
+    for (i = 0; i < a->n; i++) {
+        printf("Value[%d]: ", i);
+        scanf("%d", &a->v[i]);
+		if(!(validate(a->v[i]))){
+			free(a->v);
+			return false;
+		}/* if */
+    } /* for */
+	return true;
+} /* readArrayDinaIntValidate */
+
+/* Reads and allocate an integer dinamic array from the keyboard.
+* IP label for the output
+* IK+OP a Array to be allocated and read.
+* OR false if error, true otherwise
+*/
+void readArrayDinaInt(const char label[], ArrayDinaInt* a) {
+    readArrayDinaIntValidate(label, a, (intvalidatorfunc)intTrue);
+} /* readArrayDinaInt */

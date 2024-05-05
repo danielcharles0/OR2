@@ -5,8 +5,11 @@
 * File     : pprofile.h
 */
 
-typedef enum {
+#include "../array/array.h"
+#include "../tsp.h"
 
+typedef enum {
+	PP_DUMMY, /* Justo to make the indexes start from 1 */
     PP_RANDOM,
 	PP_RANDOM_2OPT,
 	PP_RANDOM_TABU_CONST,
@@ -39,5 +42,13 @@ typedef enum {
 	PP_NEAREST_NEIGHBOR_BEST_START_TABU_SAWTOO,
 	PP_NEAREST_NEIGHBOR_BEST_START_VNS,
 
-	PP___END_HEURISTIC
+	PP___END_HEURISTIC,
+	PP___END_EXACT
+} PP_ALG;
+
+typedef struct {
+
+	Settings set;
+	ArrayDinaInt algs;
+    
 } PP_CONF;
