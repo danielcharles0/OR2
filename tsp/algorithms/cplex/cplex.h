@@ -14,7 +14,8 @@
 typedef enum{
     BENDERS,
 	BENDERS_PATCH,
-    CANDIDATE_CALLBACK
+    CANDIDATE_CALLBACK,
+    USERCUT_CALLBACK
 } EXACTS;
 
 typedef struct{

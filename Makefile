@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -79,6 +79,9 @@ main: $(OBJS)
 ./obj/candidate.o: ./tsp/algorithms/cplex/candidate/candidate.h ./tsp/algorithms/cplex/candidate/candidate.c
 	gcc $(FLAGS) ./tsp/algorithms/cplex/candidate/candidate.c -o ./obj/candidate.o -I $(CPLEX_LIB_PATH)
 
+./obj/usercut.o: ./tsp/algorithms/cplex/usercut/usercut.h ./tsp/algorithms/cplex/usercut/usercut.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH)
+
 ./obj/pprof.o: ./tsp/pprofile/pprofile.h ./tsp/pprofile/pprofile.c
 	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o
 
@@ -97,7 +100,7 @@ pprof: $(OBJS) ./obj/pprof.o
 
 # reference: https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/
 # NOTE:
-#	- Before running male concorde please fix the passage 7, step 'avoid error CPX_PARAM_FASTMIP' of the reference
+#	- Before running make concorde please fix the passage 7, step 'avoid error CPX_PARAM_FASTMIP' of the reference
 #	- reference: https://www.ibm.com/docs/en/icos/20.1.0?topic=s-cpxxsavwrite-cpxsavwrite \
 #		substitute the deprecated methods CPXXsavwrite & CPXsavwrite with the new ones \
 #		reference: https://www.ibm.com/docs/en/icos/22.1.1?topic=z-cpxxwriteprob-cpxwriteprob

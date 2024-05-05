@@ -11,6 +11,7 @@
 #include "../../tsp.h"
 #include "benders/benders.h"
 #include "candidate/candidate.h"
+#include "usercut/usercut.h"
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"
 
@@ -281,6 +282,7 @@ void exactAlgorithmLegend(void){
     printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
 	printf("\t- Code: %d, Algorithm: Benders' loop with patch\n", BENDERS_PATCH);
 	printf("\t- Code: %d, Algorithm: Branch and Cut with Candidate Callback\n", CANDIDATE_CALLBACK);
+	printf("\t- Code: %d, Algorithm: Branch and Cut with User-cut Callback\n", USERCUT_CALLBACK);
     printf("\n");
 
 }/* exactAlgorithmLegend */
@@ -305,6 +307,9 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	        break;
 		case CANDIDATE_CALLBACK:
 			candidateCallback(set, inst, env, lp, sol);
+	        break;
+		case USERCUT_CALLBACK:
+			usercutCallback(set, inst, env, lp, sol);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
