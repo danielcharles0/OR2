@@ -17,12 +17,6 @@
 #define PRINT_FREQUENCY 1 /* seconds between one print and another */
 #define COST_SAMPLING_FREQUENCY 0.1 /* We print everi COST_SAMPLING_FREQUENCY seconds and so 1 / COST_SAMPLING_FREQUENCY times per second */
 
-/*
-* IP integer to validate
-* OR true if the input is valid, false otherwise
-*/
-typedef bool (*intvalidatorfunc)(int);
-
 void printBool(const char[], bool);
 
 int rand0N(int);
@@ -64,5 +58,3 @@ bool timeToPlot(clock_t, double, double*);
 void printError(const char[]);
 
 double step(double);
-
-bool readArrayDinaIntValidate(const char[], ArrayDinaInt*, intvalidatorfunc);

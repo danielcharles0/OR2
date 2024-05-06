@@ -9,11 +9,11 @@
 #include "../utility/utility.h"
 #include "../input/generator/generator.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-#define NOF_TEST_INSTANCES 2 //20
+#define NOF_TEST_INSTANCES 10 //20
 #define PPROF_OUT_FILE "./perfprof/pprof.csv"
-/* TO BE FIXED */
-#define PP_PLOT_CMD "python ./perfprof/perfprof.py -D , -M 7 ./performance_profile/pp.csv ./performance_profile/pp.pdf -X \"Cost Ratio\" -P \"all instances, shift 2 sec.s\""
+#define PP_PLOT_CMD "python3 ./perfprof/perfprof.py -D , -M 1.2 -T %d ./perfprof/pprof.csv ./perfprof/pprof.pdf -X \"Cost Ratio\" -P \"TSP Performance Profile\""
 
 /*
 * OV help section
@@ -439,11 +439,30 @@ bool runPPConfiguration(const PP_CONF* conf){
 	freeInst(&inst);
 	freeSol(&sol);
 
-	// system(PP_PLOT_CMD);
-
 	return false;
 
 }/* runConfiguration */
+
+/*
+* IP conf configuration
+* OF the pdf plot of the performance profile
+*/
+void ppplot(const PP_CONF* conf){
+	
+	char cmd[MAX_FILE_NAME_SIZE * 5];
+	
+	sprintf(cmd, PP_PLOT_CMD, (*conf).set.tl);
+
+	system(cmd);
+	
+}/* ppplot */
+
+/*
+* IP conf configuration to free the memory
+*/
+void freePPConf(PP_CONF* conf){
+	freeArrayDinaInt(&((*conf).algs));
+}/* freePPConf */
 
 /*
 * IP argc number of elements contained in $argv
@@ -461,6 +480,10 @@ int main(int argc, char* const* argv){
 	if(!readPPConfiguration(argc, argv, &conf))
 		runPPConfiguration(&conf);
 	
+	ppplot(&conf);
+
+	freePPConf(&conf);
+
     printf("\nPerformance Profile progran ended.\n\n");
     
     return 0;
