@@ -410,12 +410,13 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
  * IP set settings
  * IP start execution time
  * OP env CPLEX environment
+ * IP lp CPLEX linear program
  */
-void update_time_limit(const Settings *set, clock_t start, CPXENVptr env)
+void update_time_limit(const Settings *set, clock_t start, CPXENVptr env, CPXLPptr lp)
 {
 	double ntl = step((*set).tl - getSeconds(start));
 
-	CPXsetdblparam(env, CPX_PARAM_TILIM, ntl);
+	setdblparam(CPX_PARAM_TILIM, ntl, env, lp);
 
 } /* update_time_limit */
 
