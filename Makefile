@@ -9,7 +9,7 @@ CPLEX_LIB_PATH = "/Users/Shared/lib/cplex/CPLEX_Studio2211/cplex/include"
 CONCORDE_LINK_PATH = "/Users/Shared/lib/concorde/build"
 CONCORDE_LIB_PATH = $(CONCORDE_LINK_PATH)
 
-LIBS = -L $(CPLEX_LINK_PATH) -lcplex -L $(CONCORDE_LINK_PATH) -L "/Users/Shared/lib/concorde/INCLUDE"
+LIBS = -L $(CPLEX_LINK_PATH) -lcplex -L $(CONCORDE_LINK_PATH) -lconcorde
 
 ifdef DEBUG
 	FLAGS = $(STD_FLAGS) -g
@@ -83,7 +83,7 @@ main: $(OBJS)
 	gcc $(FLAGS) ./tsp/algorithms/cplex/candidate/candidate.c -o ./obj/candidate.o -I $(CPLEX_LIB_PATH)
 
 ./obj/usercut.o: ./tsp/algorithms/cplex/usercut/usercut.h ./tsp/algorithms/cplex/usercut/usercut.c
-	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH) -I "/Users/Shared/lib/concorde/INCLUDE"
+	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH) -I $(CONCORDE_LIB_PATH)
 
 debug:
 	make DEBUG=1

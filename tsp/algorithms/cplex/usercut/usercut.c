@@ -10,7 +10,7 @@
 #include "usercut.h"
 #include "../cplex.h"
 #include "../candidate/candidate.h"
-#include "cut.h"
+#include <concorde.h>
 
 /*
  * Adds user cuts, called by Concorde methods
