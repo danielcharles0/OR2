@@ -74,7 +74,10 @@ def readTable(fp, delimiter):
 def main():
 	parser = CmdLineParser()
 	opt = parser.parseArgs()
-	print(opt)
+	
+	optstr = str(opt).replace("{", "{\n\t").replace("}", "\n}").replace(",", ",\n\t").replace(",\n\t\'", ",\'")
+	print("\nperfprof options: " + optstr)
+
 	# read data
 	rnames, cnames, data = readTable(open(opt.input, 'r'), opt.delimiter)
 	nrows, ncols = data.shape
@@ -99,7 +102,7 @@ def main():
 	y = np.arange(nrows, dtype=np.float64) / nrows
 	for j in range(ncols):
 		options = dict(label=cnames[j],
-				linewidth=defLW, linestyle='steps-post' + dashes[j],
+				linewidth=defLW, drawstyle='steps-post', linestyle=dashes[j],
 				marker=markers[j], markeredgewidth=defLW, markersize=defMS)
 		#plt.step(ratio[:,j], y, label=cnames[j], linewidth=defLW, marker=markers[j], markersize=defMS)
 		if opt.bw:

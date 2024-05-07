@@ -5,9 +5,12 @@
 * File     : utility.h
 */
 
+#pragma once
+
 #include <stdbool.h>
 #include <time.h>
 
+#include "../array/array.h"
 #include "../input/settings/settings.h"
 
 #define MAX_STRING_LENGTH 65
@@ -36,7 +39,7 @@ void invertArray(int, int, int*);
 
 bool isTimeOut(clock_t, int);
 
-bool isTimeOutWarning(const char[], clock_t, int);
+bool isTimeOutWarning(const char[], clock_t, int, bool);
 
 bool checkTimeLimit(const Settings*, clock_t, double*);
 

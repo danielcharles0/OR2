@@ -5,8 +5,9 @@
 * File     : utility.c
 */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "utility.h"
@@ -208,12 +209,14 @@ bool isTimeOut(clock_t start, int tl){
 * IP tl time limit in seconds
 * OR true if the execution time exceeded the time limit, false otherwise
 */
-bool isTimeOutWarning(const char war[], clock_t start, int tl){
+bool isTimeOutWarning(const char war[], clock_t start, int tl, bool v){
 
 	if(!isTimeOut(start, tl))
 		return false;
 
-	printf("\n\n%s", war);
+	if(v)
+		printf("\n\n%s", war);
+		
 	return true;
 
 }/* isTimeOutWarning */
@@ -298,7 +301,7 @@ bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
 	if((*set).v)
     	timeBar(start, (*set).tl, ls);
     
-	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl);
+	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl, (*set).v);
 
 }/* checkTimeLimit */
 

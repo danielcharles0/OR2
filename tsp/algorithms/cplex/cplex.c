@@ -66,6 +66,24 @@ int getStatus(CPXENVptr env, CPXLPptr lp, char *buffer)
 } /* getStatus */
 
 /*
+ * IP env CPLEX environment, can be NULL to be able to translate CPXopenCPLEX routine errors
+ * IP lp CPLEX linear program
+ * OV Error details and flushs
+ */
+void print_status(CPXENVptr env, CPXLPptr lp)
+{
+	int s;
+	char buffer[BUFFER_SIZE]; /* The buffer must be at least 4096 characters to hold the error string */
+
+	s = getStatus(env, lp, buffer);
+
+	printf("\n\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
+
+	fflush(NULL); 
+
+} /* print_status */
+
+/*
  * IP stre string containing the error informations
  * IP ec error code
  * IP env CPLEX environment, can be NULL to be able to translate CPXopenCPLEX routine errors
@@ -74,18 +92,13 @@ int getStatus(CPXENVptr env, CPXLPptr lp, char *buffer)
  */
 void print_error(const char *stre, int ec, CPXENVptr env, CPXLPptr lp)
 {
-	int s;
 	char buffer[BUFFER_SIZE]; /* The buffer must be at least 4096 characters to hold the error string */
 
 	getErrorMessage(env, ec, buffer);
 
 	printf("\n\nERROR: %s\nCODE: %d\nMESSAGE: %s", stre, ec, buffer);
 
-	s = getStatus(env, lp, buffer);
-
-	printf("\n\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
-
-	fflush(NULL); 
+	print_status(env, lp);
 
 } /* print_error */
 
@@ -108,22 +121,96 @@ int xpos(int i, int j, const TSPInstance* inst){
 }/* xpos */
 
 /*
+* IP param parameter to set
+* IP val integer value of the parameter $param
+* OP env CPLEX environment
+* OP lp CPLEX linear program
+*/
+int setintparam(int param, int val, CPXENVptr env, CPXLPptr lp){
+	
+	int err;
+	char errStr[MAX_LINE_LENGTH];
+	
+	if(!(err = CPXsetintparam(env, param, val)))
+		return 0;
+	
+	sprintf(errStr, "Wrong CPXsetintparam(%d:%d)", param, val);
+
+	print_error(errStr, err, env, lp);
+	
+	return err;
+
+}/* setintparam */
+
+/*
+* IP param parameter to set
+* IP val double value of the parameter $param
+* OP env CPLEX environment
+* OP lp CPLEX linear program
+*/
+int setdblparam(int param, double val, CPXENVptr env, CPXLPptr lp){
+	
+	int err;
+	char errStr[MAX_LINE_LENGTH];
+	
+	if(!(err = CPXsetdblparam(env, param, val)))
+		return 0;
+	
+	sprintf(errStr, "Wrong CPXsetdblparam(%d:%lf)", param, val);
+
+	print_error(errStr, err, env, lp);
+	
+	return err;
+
+}/* setdblparam */
+
+/*
+* OP env CPLEX environment
+* OP lp CPLEX linear program
+*/
+int setlogfilename(CPXENVptr env, CPXLPptr lp){
+	
+	int err;
+	char errStr[MAX_LINE_LENGTH];
+	
+	if(!(err = CPXsetlogfilename(env, OUTPUT_LOG_FILE, "w")))
+		return 0;
+	
+	sprintf(errStr, "Wrong CPXsetlogfilename(%s:%s)", OUTPUT_LOG_FILE, "w");
+
+	print_error(errStr, err, env, lp);
+	
+	return err;
+
+}/* setdblparam */
+
+/*
  * IP set settings
  * OP env CPLEX environment
+ * OP lp CPLEX linear program
+ * OR 0 if no error, error code otherwise
+ * OV error message if any
  * Reference: https://www.ibm.com/docs/en/icos/20.1.0?topic=optimizer-terminating-mip-optimization
  */
-void setCPXParameters(const Settings *set, CPXENVptr env)
+int setCPXParameters(const Settings *set, CPXENVptr env, CPXLPptr lp)
 {
+	int err;
 
-	CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_OFF);
+	if((err = setintparam(CPX_PARAM_SCRIND, CPX_OFF, env, lp)))
+		return err;
 
 	if ((*set).v)
-		CPXsetlogfilename(env, OUTPUT_LOG_FILE, "w");
-		/*CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON);*/ /* CPLEX output on screen */
+		if((err = setlogfilename(env, lp)))
+			return err;
+		/*CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON); TO BE CONVERTED TO setintparam TO ACTIVATE*/ /* CPLEX output on screen */
 
-	CPXsetintparam(env, CPX_PARAM_RANDOMSEED, (*set).seed);
-	/*CPXsetintparam(env, CPX_PARAM_NODELIM, PARAM_NODELIM);*/
-	CPXsetdblparam(env, CPX_PARAM_TILIM, (*set).tl);
+	if((err = setintparam(CPX_PARAM_RANDOMSEED, (*set).seed, env, lp)))
+		return err;
+	/*CPXsetintparam(env, CPX_PARAM_NODELIM, PARAM_NODELIM); TO BE CONVERTED TO setintparam TO ACTIVATE*/
+	if((err = setdblparam(CPX_PARAM_TILIM, (*set).tl, env, lp)))
+		return err;
+	
+	return 0;
 
 } /* setCPXParameters */
 
@@ -262,17 +349,18 @@ int build(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp)
  */
 int build_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPXLPptr lp)
 {
-	int err;
+	int err = 0;
 
-	setCPXParameters(set, env);
+	setCPXParameters(set, env, lp);
 
 	if ((err = build(inst, env, lp)))
 		return err;
 
 	if ((*set).v && (*inst).dimension < MAX_OUTPUT_MODEL_FILE_DIMENSION)
-		CPXwriteprob(env, lp, OUTPUT_MODEL_FILE, NULL);
+		if((err = CPXwriteprob(env, lp, OUTPUT_MODEL_FILE, NULL)))
+			print_error("Wrong CPXwriteprob(..)", err, env, lp);
 
-	return 0;
+	return err;
 
 } /* build_model */
 
@@ -305,16 +393,16 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	
 	switch (readInt("Insert the code of the exact algorithm you want to run: ")){
 	    case BENDERS:
-	        benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
+	        return benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
 	        break;
 		case BENDERS_PATCH:
-			benders(set, inst, env, lp, sol, (patchfunc)patch, start);
+			return benders(set, inst, env, lp, sol, (patchfunc)patch, start);
 	        break;
 		case CANDIDATE_CALLBACK:
-			candidateCallback(set, inst, env, lp, sol, start);
+			return candidateCallback(set, inst, env, lp, sol, start);
 	        break;
 		case USERCUT_CALLBACK:
-			usercutCallback(set, inst, env, lp, sol, start);
+			return usercutCallback(set, inst, env, lp, sol, start);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
@@ -329,13 +417,13 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
  * IP set settings
  * IP start execution time
  * OP env CPLEX environment
+ * IP lp CPLEX linear program
  */
-void update_time_limit(const Settings *set, clock_t start, CPXENVptr env)
+void update_time_limit(const Settings *set, clock_t start, CPXENVptr env, CPXLPptr lp)
 {
-
 	double ntl = step((*set).tl - getSeconds(start));
 
-	CPXsetdblparam(env, CPX_PARAM_TILIM, ntl);
+	setdblparam(CPX_PARAM_TILIM, ntl, env, lp);
 
 } /* update_time_limit */
 
@@ -458,7 +546,8 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 		else
 		{
 			if (!(err = build_model(set, inst, env, lp)))
-				err = run_exact(set, inst, env, lp, sol);
+				if(!(err = run_exact(set, inst, env, lp, sol)))
+					print_status(env, lp);
 
 			CPXfreeprob(env, &lp);
 			CPXcloseCPLEX(&env);

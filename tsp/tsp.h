@@ -39,6 +39,25 @@ typedef enum {
 	CPLEX
 } ALGORITHM;
 
+typedef enum {
+	SKIP,
+    OPT2,
+	TABU,
+	TABU_TRIANG,
+	TABU_SQUARE,
+	TABU_SAWTOO,
+	VNS
+} REFINEMENT_ALGORITHM;
+
+typedef enum {
+    O_RANDOM,
+	O_NEAREST_NEIGHBOR_START_FIRST_NODE,
+    O_NEAREST_NEIGHBOR_START_RANDOM_NODE,
+	O_NEAREST_NEIGHBOR_BEST_START,
+	O___END_HEURISTIC//,
+	// O_CPLEX
+} OFFLINE_ALGORITHM;
+
 void allocInst(int, TSPInstance*);
 
 void allocSol(int, TSPSolution*);
@@ -76,3 +95,5 @@ void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void convertSSol(const TSPInstance*, const TSPSSolution*, TSPSolution*);
+
+bool offline_run_refinement(OFFLINE_ALGORITHM, REFINEMENT_ALGORITHM, const TSPInstance*, TSPSolution*, const Settings*);

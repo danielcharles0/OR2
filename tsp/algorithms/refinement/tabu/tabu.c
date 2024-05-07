@@ -41,7 +41,8 @@ int defaulttenure(int it, int n){
 int triangulartenure(int it, int n){
 	
 	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
-	int h = max_tenure - MIN_TENURE, win = it / h, val = it % h;
+	int h = max_tenure - MIN_TENURE;
+	int win = it / h, val = it % h;
 	
 	return MIN_TENURE + ((win % 2) ? h - val : val);
 
@@ -56,7 +57,8 @@ int triangulartenure(int it, int n){
 int squaretenure(int it, int n){
 	
 	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
-	int h = max_tenure - MIN_TENURE, win = it / h;
+	int h = max_tenure - MIN_TENURE;
+	int win = it / h;
 	
 	return ((win % 2) ? max_tenure : MIN_TENURE);
 
@@ -71,7 +73,8 @@ int squaretenure(int it, int n){
 int sawtoothtenure(int it, int n){
 	
 	int max_tenure = defaulttenure(0, n) + MIN_TENURE;
-	int h = max_tenure - MIN_TENURE, val = it % (3 * h);
+	int h = max_tenure - MIN_TENURE;
+	int val = it % (3 * h);
 	
 	return MIN_TENURE + val / 3;
 
@@ -219,7 +222,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	double ls = -1, lp = -1; /* ls := last stamp, seconds from the start to the last stamp */
 
-	initCostPlotPipe("TABU - Solutions Costs", &cost_pipe);
+	if((*set).v)
+		initCostPlotPipe("TABU - Solutions Costs", &cost_pipe);
 
 	allocSol((*inst).dimension, &temp);
 	initTabuList(inst, &tl, tf);
@@ -235,8 +239,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 			updateIncumbentSol(inst, &temp, sol);
             
 		}/* if */
-
-		if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
+		
+		if((*set).v && timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))
         	addCost(cost_pipe, it, temp.val);
 
 		if(checkTimeLimit(set, start, &ls))
@@ -248,6 +252,8 @@ void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenure
 
 	freeTabuList(&tl);
 	freeSol(&temp);
-	closeGnuplotPipe(cost_pipe);
+	
+	if((*set).v)
+		closeGnuplotPipe(cost_pipe);
 
 }/* tabu */

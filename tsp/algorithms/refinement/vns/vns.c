@@ -123,7 +123,10 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     cpSet(set, &vns_set);
 
-    initCostPlotPipe("VNS - Solutions Costs", &pipe);
+    cpSet(set, &vns_set);
+
+	if(vns_set.v)
+    	initCostPlotPipe("VNS - Solutions Costs", &pipe);
 
     allocSol(inst->dimension, &temp);
 
@@ -141,13 +144,16 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
             break;
 
         /*if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))*/
-        addCost(pipe, iter, temp.val);
+		if((*set).v)
+        	addCost(pipe, iter, temp.val);
 
         kickSol(inst, &temp);
 
     }
 
     freeSol(&temp);
-	closeGnuplotPipe(pipe);
+	
+	if((*set).v)
+		closeGnuplotPipe(pipe);
 
 }/* vns */

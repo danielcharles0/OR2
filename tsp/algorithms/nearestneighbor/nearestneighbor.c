@@ -140,7 +140,7 @@ int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	for(i = 1; i < (*inst).dimension; i++){
 
-		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl))
+		if(isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl, (*set).v))
 			break;
 
 		NN_solver(i, inst, &temp);
@@ -190,6 +190,15 @@ int runConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* ins
 	return -1;
 
 }/* runConfiguration */
+
+/*
+* IP conf configuration code
+* OR int execution seconds, -1 if error
+* Note: It is just a new name for runConfiguration to make it available in the .h
+*/
+int NNRunConfiguration(NN_CONFIG conf, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+	return runConfiguration(conf, set, inst, sol);
+}/* NNRunConfiguration */
 
 /*
 * IP set settings

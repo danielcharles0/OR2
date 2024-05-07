@@ -192,7 +192,8 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
 * IP ptc patching function
-* OR error code
+* OR 0 if no error, error code otherwise
+* OV error message if any
 */
 int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start){
 	
@@ -218,7 +219,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 		if((err = optimize_model(inst, env, lp, &temp, &comp)))
 			break;
 		
-		CPXgetbestobjval(env, lp, &lb);
+		if((err = CPXgetbestobjval(env, lp, &lb)))
+			break;
 		
 		if(comp.nc == 1){
 			printf("\n\n");
@@ -233,7 +235,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 		ptc(set, inst, &temp, &comp);
 
-		update_time_limit(set, start, env);
+		update_time_limit(set, start, env, lp);
+
 		if(checkTimeLimit(set, start, &ls))
 			break;
 
@@ -249,7 +252,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
 		} else
 			convertSSol(inst, &temp, sol);
-	}
+	} else
+		print_error("Error in BENDERS", err, env, lp);
 
 	freeSSol(&temp);
 	freeComp(&comp);
