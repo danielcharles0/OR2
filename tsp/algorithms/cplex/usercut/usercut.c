@@ -10,10 +10,10 @@
 #include "usercut.h"
 #include "../cplex.h"
 #include "../candidate/candidate.h"
-#include <cut.h>
+#include "cut.h"
 
 /*
- * Adds user cuts
+ * Adds user cuts, called by Concorde methods
  */
 static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle){
 
@@ -50,11 +50,32 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
         exit(1);
     }
     
+    free(edges);
     free(vls);
     
     return 0;
 
 }/* add_cuts */
+
+/*
+* Called by the user
+*/
+static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int current_tour, int* comp, int* indices, double* values) {
+    double rhs; 
+    char sense;
+    int matbeg = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
+    int purgeable = CPX_USECUT_FILTER;
+	int local = 0, err = 0;
+    int nnz = 0; //prepare_SEC(inst, current_tour, comp, &sense, indexes, values, &rhs); 
+    
+    if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ // add one violated usercut 
+        print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
+        return err;
+    }
+
+    return 0;
+
+}/* add_SEC_relaxation */
 
 /*
 * Checks candidate solution
@@ -105,31 +126,40 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 	int err = 0;
 	int ncomp = 1;
 
-	double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
-    assert(xstar != NULL);
+	double* xstar = NULL;
 
     /* copied */
-
-    int *elist = malloc(2*cpx_inst->ncols * sizeof(int)); // elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
-    assert(elist != NULL);
     
+    int* elist = NULL;
     int *compscount = NULL; 
     int *comps = NULL;
+    double objval = CPX_INFBOUND;
     int k = 0, num_edges = 0, node = -1;
 
     CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
     
-    /* do it once every 10 calls */
+    /* user cuts applied once every 10 calls */
     if(node % 10 != 0)
         return 0;
 
-    for (int i = 0; i < cpx_inst->inst->dimension; i++) {
+    xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
+    assert(xstar != NULL);
+
+    elist = malloc(2*cpx_inst->ncols * sizeof(int)); // elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
+    assert(elist != NULL);
+
+    if((err = CPXcallbackgetrelaxationpoint(context, xstar, 0, cpx_inst->ncols - 1 , &objval))){
+        print_error("CPXcallbackgetrelaxationpoint() error", err, cpx_inst->env, cpx_inst->lp);
+        exit(1);
+    }
+
+    for (int i = 0; i < cpx_inst->inst->dimension; i++)
         for (int j = i+1; j < cpx_inst->inst->dimension; j++) {
             elist[k++] = i;
             elist[k++] = j;
             num_edges++;
         }
-    }
+
     // Checking whether or not the graph is connected with the fractional solution.
     if((err = CCcut_connect_components(cpx_inst->inst->dimension, num_edges, elist, xstar, &ncomp, &compscount, &comps))){
         print_error("CCcut_connect_components error", err, cpx_inst->env, cpx_inst->lp);
@@ -152,11 +182,19 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
             print_error("CCcut_violated_cuts error", err, cpx_inst->env, cpx_inst->lp);
             exit(1);
         }
+
     } else if (ncomp > 1) {
 
         int startindex = 0;
 
-        int *components = malloc(cpx_inst->inst->dimension * sizeof(int));
+        int* components = malloc(cpx_inst->inst->dimension * sizeof(int));
+        assert(components != NULL);
+
+        int* indices = (int*) malloc(cpx_inst->ncols * sizeof(int));
+        assert(indices != NULL);
+
+        double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
+        assert(values != NULL);
 
         // Transforming the concorde's component format into our component format in order to use our addSEC function
         for (int subtour = 0; subtour < ncomp; subtour++) {
@@ -169,9 +207,18 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
             startindex += compscount[subtour];
             
         }
+
+        for (int subtour = 1; subtour <= ncomp; subtour++)
+            // For each subtour we add the constraints in one shot
+            if((err = add_SEC_relaxation(cpx_inst, context, subtour, components, indices, values))){
+                return err;
+        }
+
+        free(values);
+        free(indices);
+        free(components);
     }
-    /* end copied */
-	
+    
 	free(elist);
 	free(xstar);
 
@@ -204,7 +251,7 @@ int usercutCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env,
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
-        update_time_limit(set, start, env);
+        update_time_limit(set, start, env, lp);
     }
     
     if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_CANDIDATE, checkCandidateSol, &cpx_inst))){

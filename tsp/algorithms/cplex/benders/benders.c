@@ -211,7 +211,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
-        update_time_limit(set, start, env);
+        update_time_limit(set, start, env, lp);
     }
 
 	while(true){

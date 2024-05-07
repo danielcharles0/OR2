@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
+OBJS = ./obj/main.o ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -17,9 +17,9 @@ else
 	FLAGS = $(STD_FLAGS) -O3
 endif
 
-main: ./obj/main.o $(OBJS)
+main: $(OBJS)
 	rm -f ./tsp/output/cplex/model.lp
-	gcc -o main ./obj/main.o $(OBJS) $(LIBS)
+	gcc -o main $(OBJS) $(LIBS)
 
 ./obj/main.o: main.c
 	mkdir -p ./obj ./gnuplot_out ./cplex_out ./tsp/output/cplex
@@ -83,10 +83,7 @@ main: ./obj/main.o $(OBJS)
 	gcc $(FLAGS) ./tsp/algorithms/cplex/candidate/candidate.c -o ./obj/candidate.o -I $(CPLEX_LIB_PATH)
 
 ./obj/usercut.o: ./tsp/algorithms/cplex/usercut/usercut.h ./tsp/algorithms/cplex/usercut/usercut.c
-	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH) -I $(CONCORDE_LIB_PATH)
-
-./obj/pprof.o: ./tsp/pprofile/pprofile.h ./tsp/pprofile/pprofile.c
-	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o
+	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH) -I "/Users/Shared/lib/concorde/INCLUDE"
 
 debug:
 	make DEBUG=1
@@ -95,11 +92,7 @@ clean:
 	rm -f ./obj/*.o main
 
 rebuild:
-	make clean && make pprof
-
-pprof: $(OBJS) ./obj/pprof.o
-	make
-	gcc -o pprof ./obj/pprof.o $(OBJS) $(LIBS)
+	make clean && make
 
 # reference: https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/
 # NOTE:
