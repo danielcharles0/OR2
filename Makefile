@@ -112,6 +112,8 @@ concorde:
 		&& /Users/Shared/lib/concorde/configure --host=darwin --with-cplex=/Users/Shared/lib/concorde/CPXREFERENCES \
 		&& make
 
+	ln -s -f /Users/Shared/lib/concorde/build/concorde.a /Users/Shared/lib/concorde/build/libconcorde.a
+
 #	cd /Users/Shared/lib/concorde/build \
 #		&& mv concorde.a libconcorde.a \
 #		&& make
