@@ -7,6 +7,7 @@
 
 #include <time.h>
 #include <assert.h>
+
 #include "benders.h"
 #include "../../nearestneighbor/nearestneighbor.h"
 #include "../../refinement/2opt/2opt.h"
@@ -193,7 +194,7 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 * IP ptc patching function
 * OR error code
 */
-int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc){
+int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start){
 	
 	int err;
 	double lb = 0, ls = -1;
@@ -205,6 +206,12 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	allocSSol(inst->dimension, &temp);
 
 	checkTimeLimit(set, start, &ls);
+
+	if(warm_start){
+        if((err = mip_start(set, inst, env, lp)))
+            return err;
+        update_time_limit(set, start, env);
+    }
 
 	while(true){
 
@@ -238,7 +245,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			cpSet(set, &s);
 			s.v = 0;
 			best_start(&s, inst, sol);
-			opt2(inst, sol);
+			opt2(&s, inst, sol);
 			printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
 		} else
 			convertSSol(inst, &temp, sol);

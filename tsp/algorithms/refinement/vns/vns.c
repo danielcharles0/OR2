@@ -117,8 +117,11 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
     clock_t start = clock();
     TSPSolution temp;
     FILE* pipe;
+    Settings vns_set;
 	double ls = -1;
     int iter = 0;
+
+    cpSet(set, &vns_set);
 
     initCostPlotPipe("VNS - Solutions Costs", &pipe);
 
@@ -128,13 +131,13 @@ void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
     while(true){
 
-        opt2(inst, &temp);
+        vns_set.tl -= opt2(set, inst, &temp);
 
         updateIncumbentSol(inst, &temp, sol);
 
 		iter++;
 		
-        if(checkTimeLimit(set, start, &ls))
+        if(checkTimeLimit(&vns_set, start, &ls))
             break;
 
         /*if(timeToPlot(start, COST_SAMPLING_FREQUENCY, &lp))*/

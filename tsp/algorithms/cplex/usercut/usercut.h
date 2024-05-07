@@ -6,6 +6,12 @@
 */
 
 #include <ilcplex/cplex.h>
+
 #include "../cplex.h"
 
-int usercutCallback(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*);
+typedef struct{
+    CPXInstance* cpx_inst;
+    CPXCALLBACKCONTEXTptr context;
+} CCInstance;
+
+int usercutCallback(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, bool);

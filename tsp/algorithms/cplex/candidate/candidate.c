@@ -5,10 +5,10 @@
 * File     : candidate.c
 */
 
+#include <assert.h>
+
 #include "candidate.h"
 #include "../cplex.h"
-
-#include <assert.h>
 
 /*
  * IP inst input instance
@@ -114,10 +114,11 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 * IOP sol solution to be updated
 * OR error code
 */
-int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
+int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
 
     CPXLONG context_id = CPX_CALLBACKCONTEXT_CANDIDATE;
 	int err = 0;
+	clock_t start = clock();
 
 	COMP comp;
 	allocComp(inst->dimension, &comp);
@@ -128,9 +129,16 @@ int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr en
 	CPXInstance cpx_inst;
 	initCPXInstance(&cpx_inst, inst, &temp, CPXgetnumcols(env, lp), env, lp);
 
-    if((err = CPXcallbacksetfunc(env, lp, context_id, checkCandidateSol, &cpx_inst)))
-        print_error("CPXcallbacksetfunc() error", err, env, lp);
+	if(warm_start){
+        if((err = mip_start(set, inst, env, lp)))
+            return err;
+        update_time_limit(set, start, env);
+    }
 
+    if((err = CPXcallbacksetfunc(env, lp, context_id, checkCandidateSol, &cpx_inst))){
+        print_error("CPXcallbacksetfunc() error", err, env, lp);
+		return err;
+	}
     optimize_model(inst, env, lp, &temp, &comp);
 
 	convertSSol(inst, &temp, sol);

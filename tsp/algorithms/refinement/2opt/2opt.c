@@ -88,14 +88,20 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 * OR int execution seconds
 * NB: this method will perform the best move, not just the first one that improve the solution cost
 */
-int opt2(const TSPInstance* inst, TSPSolution* sol){
+int opt2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
 	clock_t start = clock();
+	double ls = -1;
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	
-	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0)
+	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0){
 		opt2move(opti, optj, inst, sol);
-	
+
+		if(checkTimeLimit(set, start, &ls))
+            break;
+
+	}
+
 	return getSeconds(start);
 
 }/* opt2 */

@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <assert.h>
+
 #include "cplex.h"
 #include "../../tsp.h"
 #include "benders/benders.h"
@@ -14,6 +15,8 @@
 #include "usercut/usercut.h"
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"
+#include "../nearestneighbor/nearestneighbor.h"
+#include "../refinement/2opt/2opt.h"
 
 #define MODEL_NAME "TSP model version 1"
 #define UNKNOWN_ERROR_MESSAGE "Unknown error code."
@@ -296,20 +299,22 @@ void exactAlgorithmLegend(void){
 */
 int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
 
+	bool start = true;
+
 	exactAlgorithmLegend();
 	
 	switch (readInt("Insert the code of the exact algorithm you want to run: ")){
 	    case BENDERS:
-	        benders(set, inst, env, lp, sol, (patchfunc)dummypatch);
+	        benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
 	        break;
 		case BENDERS_PATCH:
-			benders(set, inst, env, lp, sol, (patchfunc)patch);
+			benders(set, inst, env, lp, sol, (patchfunc)patch, start);
 	        break;
 		case CANDIDATE_CALLBACK:
-			candidateCallback(set, inst, env, lp, sol);
+			candidateCallback(set, inst, env, lp, sol, start);
 	        break;
 		case USERCUT_CALLBACK:
-			usercutCallback(set, inst, env, lp, sol);
+			usercutCallback(set, inst, env, lp, sol, start);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
@@ -500,3 +505,60 @@ void build_comp(CPXInstance* cpx_inst, double* xstar, COMP* comp){
 	free(temp);
 
 }/* build_comp */
+
+/*
+* Generates a solution with Nearest Neighbor + 2opt algorithms
+*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX env
+* IP lp CPLEX lp
+*/
+int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp){
+
+	int effortlevel = CPX_MIPSTART_NOCHECK;  
+	int beg = 0, nnz = 0, err = 0; 
+	double* values;
+	int* indices;
+	Settings mip_start_set;
+
+	TSPSolution sol;
+	allocSol(inst->dimension, &sol);
+
+	cpSet(set, &mip_start_set);
+
+	mip_start_set.tl = set->tl / 10;
+
+	mip_start_set.tl -= best_start(set, inst, &sol);
+
+	mip_start_set.tl -= opt2(set, inst, &sol);
+
+	if(mip_start_set.tl < 0){
+		printf("mip_start exceeded time limit. No starting solution set.\n");
+		freeSol(&sol);
+		return 0;
+	}
+
+	indices = (int *) malloc(inst->dimension * sizeof(int));
+	assert(indices != NULL);
+
+	values = (double*) malloc(inst->dimension * sizeof(double));
+	assert(values != NULL);
+
+	for (int i = 0; i < inst->dimension; i++) {
+        indices[nnz] = xpos(sol.path[i], sol.path[i+1 % inst->dimension], inst);
+		values[nnz++] = 1.0;
+    }
+		
+	if ((err = CPXaddmipstarts(env, lp, 1, nnz, &beg, indices, values, &effortlevel, NULL))){
+		print_error("CPXaddmipstarts() error", err, env, lp);	
+		return err;
+	}
+
+	free(indices);
+	free(values);
+	freeSol(&sol);
+
+	return 0;
+
+}/* mip_start */

@@ -6,6 +6,7 @@
 */
 
 #include <ilcplex/cplex.h>
+
 #include "../cplex.h"
 
 /*
@@ -20,4 +21,4 @@ void dummypatch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
 
 void patch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
 
-int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, patchfunc);
+int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, patchfunc, bool);

@@ -7,7 +7,7 @@
 
 #include "../../../tsp.h"
 
-int opt2(const TSPInstance*, TSPSolution*);
+int opt2(const Settings*, const TSPInstance*, TSPSolution*);
 
 void opt2move(int, int, const TSPInstance*, TSPSolution*);
 

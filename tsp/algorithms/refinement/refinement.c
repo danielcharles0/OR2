@@ -26,7 +26,7 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance*
 		case SKIP:
 			break;
 	    case OPT2:
-	        opt2(inst, sol);
+	        opt2(set, inst, sol);
 	        break;
 		case TABU:
 			tabu(set, inst, sol, (tenurefunc)defaulttenure);

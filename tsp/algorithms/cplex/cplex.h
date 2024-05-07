@@ -9,6 +9,7 @@
 
 #include <ilcplex/cplex.h>
 #include <time.h>
+
 #include "../../tsp.h"
 
 typedef enum{
@@ -56,3 +57,5 @@ double solGap(const TSPSolution*, double);
 void initCPXInstance(CPXInstance*, const TSPInstance*, TSPSSolution*, int, CPXENVptr, CPXLPptr);
 
 void build_comp(CPXInstance*, double*, COMP*);
+
+int mip_start(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
