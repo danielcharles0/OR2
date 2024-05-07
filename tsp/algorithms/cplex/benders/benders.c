@@ -228,7 +228,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 		ptc(set, inst, &temp, &comp);
 
-		update_time_limit(set, start, env);
+		update_time_limit(set, start, env, lp);
 
 		if(checkTimeLimit(set, start, &ls))
 			break;

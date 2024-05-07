@@ -41,7 +41,7 @@ int xpos(int, int, const TSPInstance*);
 
 void print_error(const char*, int, CPXENVptr, CPXLPptr);
 
-void update_time_limit(const Settings*, clock_t, CPXENVptr);
+void update_time_limit(const Settings*, clock_t, CPXENVptr, CPXLPptr);
 
 void allocComp(int, COMP*);
 
