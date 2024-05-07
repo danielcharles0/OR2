@@ -74,7 +74,10 @@ def readTable(fp, delimiter):
 def main():
 	parser = CmdLineParser()
 	opt = parser.parseArgs()
-	print(opt)
+	
+	optstr = str(opt).replace("{", "{\n\t").replace("}", "\n}").replace(",", ",\n\t").replace(",\n\t\'", ",\'")
+	print("\nperfprof options: " + optstr)
+
 	# read data
 	rnames, cnames, data = readTable(open(opt.input, 'r'), opt.delimiter)
 	nrows, ncols = data.shape
