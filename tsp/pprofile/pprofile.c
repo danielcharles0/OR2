@@ -156,12 +156,25 @@ void pp_legend(){
 
 /*
 * OP conf configuration for the program execution
+* OR false if error, true otherwise
 */
 bool readAlgorithms(PP_CONF* conf){
 	
+	bool result;
+
 	pp_legend();
 
-	return readArrayDinaIntValidate("Insert the numer of algorithms you want to compare and their codes.\n\n", &((*conf).algs), (intvalidatorfunc)validateAlgCode);
+	result = readArrayDinaIntValidate("Insert the numer of algorithms you want to compare and their codes.\n\n", &((*conf).algs), (intvalidatorfunc)validateAlgCode);
+
+	if(!result)
+		return false;
+
+	if((*conf).algs.n == 0){
+		printf("Nothing to do..\n");
+		return false;
+	}/* if */
+
+	return true;
 
 }/* readAlgorithms */
 
@@ -477,9 +490,13 @@ int main(int argc, char* const* argv){
 
     printf("\nPerformance Profile program started...\n\n");
 
-	if(!readPPConfiguration(argc, argv, &conf))
-		runPPConfiguration(&conf);
-	
+	if(readPPConfiguration(argc, argv, &conf)){
+		printf("\nPerformance Profile progran ended.\n\n");
+		return 0;
+	}/* if */
+
+	runPPConfiguration(&conf);
+
 	ppplot(&conf);
 
 	freePPConf(&conf);

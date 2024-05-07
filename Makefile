@@ -92,7 +92,7 @@ clean:
 	rm -f ./obj/*.o main
 
 rebuild:
-	make clean && make
+	make clean && make pprof
 
 pprof: $(OBJS) ./obj/pprof.o
 	make
