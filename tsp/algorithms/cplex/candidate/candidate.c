@@ -27,11 +27,6 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 	double* vls = malloc(ncols * sizeof(double));
 	assert(vls != NULL);
 
-	char** en = malloc(sizeof(char*));
-	assert(en != NULL);
-
-	*en = "SEC";
-
 	for(int k = 1; k <= (*comp).nc; k++){
 
 		const int zero = 0;
@@ -61,8 +56,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 		}
 
 	}/* for */
-
-	free(en);
+	
 	free(idxs);
 	free(vls);
 
