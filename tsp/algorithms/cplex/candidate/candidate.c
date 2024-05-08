@@ -107,6 +107,8 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 }/* checkCandidateSol */
 
 /*
+* Installs the candidate callback and runs the solver.
+*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment

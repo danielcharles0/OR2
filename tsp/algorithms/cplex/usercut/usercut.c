@@ -13,7 +13,12 @@
 #include <concorde.h>
 
 /*
- * Adds user cuts, called by Concorde methods
+ * Adds user cuts, called by CCcut_violated_cuts
+ *
+ * IP cutval
+ * IP num_nodes number of nodes in the cut.
+ * IP members array containing the nodes belonging to this cut.
+ * IP userhandle user defined data structure.
  */
 static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle){
 
@@ -21,54 +26,75 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
     CPXInstance* cpx_inst = params->cpx_inst;
     CPXCALLBACKCONTEXTptr context = params->context;
 
-    double rhs = num_nodes - 1;
+    double rhs = num_nodes - 1; /* because ncomp = 1 */
     char sense = 'L';
     int purgeable = CPX_USECUT_FILTER;
 	int local = 0;
     int err = 0, matbeg = 0;
     int num_edges = num_nodes * (num_nodes - 1) / 2;
 
-    double* vls = malloc(num_edges *  sizeof(double));
-    assert(vls != NULL);
+    double* values = malloc(num_edges *  sizeof(double));
+    assert(values != NULL);
 
-    int* edges = malloc(num_edges * sizeof(int));
-    assert(edges != NULL);
+    int* indices = malloc(num_edges * sizeof(int));
+    assert(indices != NULL);
 
     int k = 0;
     for (int i = 0; i < num_nodes; i++) {
         for (int j = 0; j < num_nodes; j++) {
             if (members[i] >= members[j])
                 continue; // undirected graph. If the node in index i is greated than the node in index j, we skip since (i,j) = (j,i)
-            edges[k] = xpos(members[i], members[j], cpx_inst->inst);
-            vls[k] = 1.0;
-            k++;
+            indices[k] = xpos(members[i], members[j], cpx_inst->inst);
+            values[k++] = 1.0;
         }
     }
     
-    if((err = CPXcallbackaddusercuts(context, 1, num_edges, &rhs, &sense, &matbeg, edges, vls, &purgeable, &local))){
+    if((err = CPXcallbackaddusercuts(context, 1, num_edges, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){
         print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
         exit(1);
     }
     
-    free(edges);
-    free(vls);
+    free(indices);
+    free(values);
     
     return 0;
 
 }/* add_cuts */
 
 /*
-* Called by the user
+* Called by the user.
+* IP cpx_inst user defines data structure passed by CPLEX.
+* IP context context in which the callback is called from.
+* IP current_tour current subtour we are analyzing to add constraint of.
+* IP comp array that specifies che component each node belongs to.
+* IP indices
+* IP values
 */
 static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int current_tour, int* comp, int* indices, double* values) {
+    
     double rhs; 
-    char sense;
+    char sense = 'L';
     int matbeg = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
     int purgeable = CPX_USECUT_FILTER;
-	int local = 0, err = 0;
-    int nnz = 0; //prepare_SEC(inst, current_tour, comp, &sense, indexes, values, &rhs); 
+	int local = 0, err = 0, nnz = 0, num_nodes = 0;
     
-    if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ // add one violated usercut 
+    for (int i = 0; i < cpx_inst->inst->dimension; i++) {
+        if (comp[i] != current_tour) 
+            continue;
+
+        num_nodes++;
+
+        for (int j = i+1; j < cpx_inst->inst->dimension; j++) {
+            if (comp[j] != current_tour) 
+                continue;
+            indices[nnz] = xpos(i, j, cpx_inst->inst);
+            values[nnz++] = 1.0;
+        }
+    }
+    
+    rhs = num_nodes - 1; /* |S| - 1 */
+    
+    if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
         print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
         return err;
     }
@@ -97,7 +123,7 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
     assert(xstar != NULL);
 
     if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){ 
-        print_error("CPXcallbackgetcandidatepoint error", err, cpx_inst->env, cpx_inst->lp);
+        print_error("CPXcallbackgetcandidatepoint() error", err, cpx_inst->env, cpx_inst->lp);
 		exit(1);
 	}
 
@@ -162,7 +188,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     // Checking whether or not the graph is connected with the fractional solution.
     if((err = CCcut_connect_components(cpx_inst->inst->dimension, num_edges, elist, xstar, &ncomp, &compscount, &comps))){
-        print_error("CCcut_connect_components error", err, cpx_inst->env, cpx_inst->lp);
+        print_error("CCcut_connect_components() error", err, cpx_inst->env, cpx_inst->lp);
         exit(1);
     }
 
@@ -179,7 +205,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         NB: We use cutoff as 1.9 for numerical stability due the fractional values we obtain in the solution. 
         */
         if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, cpx_inst->ncols, elist, xstar, 1.9, add_cuts, &params))){
-            print_error("CCcut_violated_cuts error", err, cpx_inst->env, cpx_inst->lp);
+            print_error("CCcut_violated_cuts() error", err, cpx_inst->env, cpx_inst->lp);
             exit(1);
         }
 
@@ -227,6 +253,8 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 }/* checkRelaxedSol */
 
 /*
+* Installs the candidate and relaxation callbacks and runs the solver.
+*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment
