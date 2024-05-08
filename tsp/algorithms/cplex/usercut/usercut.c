@@ -49,7 +49,7 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
         }
     }
     
-    if((err = CPXcallbackaddusercuts(context, 1, num_edges, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){
+    if((err = CPXcallbackaddusercuts(context, 1, k, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){
         print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
         exit(1);
     }
@@ -72,27 +72,26 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
 */
 static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int current_tour, int* comp, int* indices, double* values) {
     
-    double rhs; 
+    double rhs = 0.0; 
     char sense = 'L';
     int matbeg = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
     int purgeable = CPX_USECUT_FILTER;
-	int local = 0, err = 0, nnz = 0, num_nodes = 0;
+	int local = 0, err = 0, nnz = 0;
     
-    for (int i = 0; i < cpx_inst->inst->dimension; i++) {
-        if (comp[i] != current_tour) 
+    for(int i = 0; i < cpx_inst->inst->dimension - 1; i++){
+        if(comp[i] != current_tour)
             continue;
+            
+        rhs += 1;
 
-        num_nodes++;
-
-        for (int j = i+1; j < cpx_inst->inst->dimension; j++) {
-            if (comp[j] != current_tour) 
+        for(int j = i + 1; j < cpx_inst->inst->dimension; j++)
+            if(comp[j] != current_tour)
                 continue;
+
             indices[nnz] = xpos(i, j, cpx_inst->inst);
-            values[nnz++] = 1.0;
-        }
+            values[nnz] = 1.0;
+            nnz++;
     }
-    
-    rhs = num_nodes - 1; /* |S| - 1 */
     
     if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
         print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
@@ -153,9 +152,6 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 	int ncomp = 1;
 
 	double* xstar = NULL;
-
-    /* copied */
-    
     int* elist = NULL;
     int *compscount = NULL; 
     int *comps = NULL;
@@ -204,7 +200,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         constraints and we are going to add SEC to them.
         NB: We use cutoff as 1.9 for numerical stability due the fractional values we obtain in the solution. 
         */
-        if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, cpx_inst->ncols, elist, xstar, 1.9, add_cuts, &params))){
+        if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, num_edges, elist, xstar, 1.9, add_cuts, &params))){
             print_error("CCcut_violated_cuts() error", err, cpx_inst->env, cpx_inst->lp);
             exit(1);
         }
@@ -293,6 +289,24 @@ int usercutCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env,
     }
 
     optimize_model(inst, env, lp, &temp, &comp);
+
+    double cost = 0;
+    for(int i=0; i<inst->dimension; i++){
+        cost += getDist(i, temp.succ[i], inst);
+        printf("%d\n", temp.succ[i]);
+    }
+
+    printf("\nCHECK COST BEFORE CONVERSION: %lf", cost);
+
+    int ncols = CPXgetnumcols(env,lp);
+    double* xstar = (double*) malloc(ncols * sizeof(double));
+
+    int counter = 0;
+    for(int i = 0; i<inst->dimension; i++){
+        for(int j = i+1; j<inst->dimension; j++)
+            if(xstar[counter++] == 1)
+                printf("%d: %d\n", i, j);
+    }
 
 	convertSSol(inst, &temp, sol);
 
