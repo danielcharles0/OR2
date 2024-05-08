@@ -84,13 +84,14 @@ static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr conte
             
         rhs += 1;
 
-        for(int j = i + 1; j < cpx_inst->inst->dimension; j++)
+        for(int j = i + 1; j < cpx_inst->inst->dimension; j++){
             if(comp[j] != current_tour)
                 continue;
 
             indices[nnz] = xpos(i, j, cpx_inst->inst);
             values[nnz] = 1.0;
             nnz++;
+        }
     }
     
     if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
