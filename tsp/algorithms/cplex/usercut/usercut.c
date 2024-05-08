@@ -139,9 +139,9 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 		/* run 2opt or patching and then post solution */
 
 	}
-	
+    
+    free(xstar);
 	freeComp(&comp);
-	free(xstar);
 
 	return 0;
 
@@ -234,9 +234,9 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
         for (int subtour = 1; subtour <= ncomp; subtour++)
             // For each subtour we add the constraints in one shot
-            if((err = add_SEC_relaxation(cpx_inst, context, subtour, components, indices, values))){
+            if((err = add_SEC_relaxation(cpx_inst, context, subtour, components, indices, values)))
                 return err;
-        }
+        
 
         free(values);
         free(indices);
@@ -294,14 +294,14 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 
     /* START: TEST PURPOSE*/
-    
+
     double cost = 0;
     for(int i=0; i<inst->dimension; i++){
         cost += getDist(i, temp.succ[i], inst);
         printf("%d\n", temp.succ[i]);
     }
 
-    printf("\nCHECK COST BEFORE CONVERSION: %lf", cost);
+    printf("\nCHECK COST BEFORE CONVERSION: %lf\n", cost);
 
     int ncols = CPXgetnumcols(env,lp);
     double* xstar = (double*) malloc(ncols * sizeof(double));
