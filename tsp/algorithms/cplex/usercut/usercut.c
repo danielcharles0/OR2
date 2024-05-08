@@ -63,6 +63,7 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
 
 /*
 * Called by the user.
+*
 * IP cpx_inst user defines data structure passed by CPLEX.
 * IP context context in which the callback is called from.
 * IP current_tour current subtour we are analyzing to add constraint of.
@@ -72,7 +73,7 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
 */
 static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int current_tour, int* comp, int* indices, double* values) {
     
-    double rhs = 0.0; 
+    double rhs = -1.0; 
     char sense = 'L';
     int matbeg = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
     int purgeable = CPX_USECUT_FILTER;
@@ -94,10 +95,12 @@ static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr conte
         }
     }
     
-    if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
-        print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
-        return err;
-    }
+    if(nnz > 0)
+
+        if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
+            print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
+            return err;
+        }
 
     return 0;
 
@@ -131,6 +134,11 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
 	if(comp.nc > 1)
     	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+	else{
+
+		/* run 2opt or patching and then post solution */
+
+	}
 	
 	freeComp(&comp);
 	free(xstar);
@@ -191,16 +199,9 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
 
     if (ncomp == 1) { 
+
         CCInstance params = {.context = context, .cpx_inst = cpx_inst};
-        /* 
-        At this point we have a connected graph. This graph could not be a "tsp". We interpret the fractional
-        solution as capacity of a cut. A cut of a graph G is composed by S and T = V - S where V is the nodes set.
-        The capacity of the cut is the sum of all ingoing and outgoing edges of the cut. Since we have a TSP,
-        we want that for each cut, we have a capacity of 2 (i.e. one ingoing edge and one outgoing edge).
-        So we want to seek the cuts which don't have a capacity of 2. The cuts with capacity < 2 violates the 
-        constraints and we are going to add SEC to them.
-        NB: We use cutoff as 1.9 for numerical stability due the fractional values we obtain in the solution. 
-        */
+    
         if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, num_edges, elist, xstar, 1.9, add_cuts, &params))){
             print_error("CCcut_violated_cuts() error", err, cpx_inst->env, cpx_inst->lp);
             exit(1);
@@ -219,7 +220,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
         assert(values != NULL);
 
-        // Transforming the concorde's component format into our component format in order to use our addSEC function
+        /* Transforming the concorde's component format into our component format in order to use our add_SEC_relaxation function */
         for (int subtour = 0; subtour < ncomp; subtour++) {
 
             for (int i = startindex; i < startindex + compscount[subtour]; i++) {
@@ -259,7 +260,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 * IOP sol solution to be updated
 * OR error code
 */
-int usercutCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
+int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
 
 	int err = 0;
     clock_t start = clock();
@@ -291,6 +292,9 @@ int usercutCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 
     optimize_model(inst, env, lp, &temp, &comp);
 
+
+    /* START: TEST PURPOSE*/
+    
     double cost = 0;
     for(int i=0; i<inst->dimension; i++){
         cost += getDist(i, temp.succ[i], inst);
@@ -308,6 +312,8 @@ int usercutCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env,
             if(xstar[counter++] == 1)
                 printf("%d: %d\n", i, j);
     }
+
+    /* END: TEST PURPOSE*/
 
 	convertSSol(inst, &temp, sol);
 

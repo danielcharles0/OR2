@@ -62,9 +62,9 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 
 	}/* for */
 
-	free(vls);
-	free(idxs);
 	free(en);
+	free(idxs);
+	free(vls);
 
 	return 0;
 
@@ -98,9 +98,15 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
 	if(comp.nc > 1)
     	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+	else{
+
+		/* run 2opt or patching and then post solution */
+
+	}
+
 	
-	freeComp(&comp);
 	free(xstar);
+	freeComp(&comp);
 
 	return 0;
 
@@ -116,7 +122,7 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 * IOP sol solution to be updated
 * OR error code
 */
-int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
+int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
 
     CPXLONG context_id = CPX_CALLBACKCONTEXT_CANDIDATE;
 	int err = 0;
@@ -141,6 +147,7 @@ int candidateCallback(const Settings* set, const TSPInstance* inst, CPXENVptr en
         print_error("CPXcallbacksetfunc() error", err, env, lp);
 		return err;
 	}
+
     optimize_model(inst, env, lp, &temp, &comp);
 
 	convertSSol(inst, &temp, sol);

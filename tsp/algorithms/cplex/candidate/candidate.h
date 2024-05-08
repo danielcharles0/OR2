@@ -9,7 +9,7 @@
 
 #include "../cplex.h"
 
-int candidateCallback(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, bool);
+int candidate(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, bool);
 
 int add_SEC_candidate(const TSPInstance*, const COMP*, CPXENVptr, CPXLPptr, CPXCALLBACKCONTEXTptr, int);
 

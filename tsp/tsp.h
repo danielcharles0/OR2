@@ -27,7 +27,7 @@ typedef struct {
 } TSPSolution;
 
 typedef struct {
-    int* succ;	/* path := array containing the successor nodes of the instance */
+    int* succ;	/* succ := array containing the successor nodes of the instance */
     double val;	/* val  := value of the cost of the solution $path */
 } TSPSSolution;
 

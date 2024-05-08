@@ -18,6 +18,8 @@
 #include "../nearestneighbor/nearestneighbor.h"
 #include "../refinement/2opt/2opt.h"
 
+#include "../../output/output.h"
+
 #define MODEL_NAME "TSP model version 1"
 #define UNKNOWN_ERROR_MESSAGE "Unknown error code."
 #define UNKNOWN_STATUS_MESSAGE "Unknown status code."
@@ -399,10 +401,10 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 			return benders(set, inst, env, lp, sol, (patchfunc)patch, start);
 	        break;
 		case CANDIDATE_CALLBACK:
-			return candidateCallback(set, inst, env, lp, sol, start);
+			return candidate(set, inst, env, lp, sol, start);
 	        break;
 		case USERCUT_CALLBACK:
-			return usercutCallback(set, inst, env, lp, sol, start);
+			return usercut(set, inst, env, lp, sol, start);
 	        break;
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
@@ -638,11 +640,20 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
         indices[nnz] = xpos(sol.path[i], sol.path[i+1 % inst->dimension], inst);
 		values[nnz++] = 1.0;
     }
-		
-	if ((err = CPXaddmipstarts(env, lp, 1, nnz, &beg, indices, values, &effortlevel, NULL))){
-		print_error("CPXaddmipstarts() error", err, env, lp);	
-		return err;
-	}
+
+	if(checkSol(inst, &sol)){
+
+		if ((err = CPXaddmipstarts(env, lp, 1, nnz, &beg, indices, values, &effortlevel, NULL))){
+			print_error("CPXaddmipstarts() error", err, env, lp);	
+			return err;
+		}
+
+		/* plotSolution(inst, &sol); ADDED FOR TEST PURPOSE */
+
+		printf("\n\nMIP start added successfully.\n");
+
+	} else 
+		printf("\n\nMIP start not added: invalid solution.\n");
 
 	free(indices);
 	free(values);
