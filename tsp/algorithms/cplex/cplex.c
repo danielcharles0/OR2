@@ -381,6 +381,18 @@ void exactAlgorithmLegend(void){
 }/* exactAlgorithmLegend */
 
 /*
+* Prints preferences for MIP start.
+*/
+void mipStartMessage(void){
+
+	printf("Would you like a MIP start?\n");
+	printf("\t- Code 0: NO\n");
+	printf("\t- COde 1: YES\n");
+	printf("\n");
+
+}/* mipStartMessage */
+
+/*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment
@@ -389,7 +401,9 @@ void exactAlgorithmLegend(void){
 */
 int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
 
-	bool start = true;
+	mipStartMessage();
+
+	bool start = readInt("Insert the code to specify MIP start preference: ") ? true : false;
 
 	exactAlgorithmLegend();
 	
@@ -654,9 +668,9 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
 	} else 
 		printf("\n\nMIP start not added: invalid solution.\n");
-
-	free(indices);
+	
 	free(values);
+	free(indices);
 	freeSol(&sol);
 
 	return 0;

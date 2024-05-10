@@ -42,7 +42,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 				for(int j = i + 1; j < inst->dimension; j++)
 					if((*comp).map[j] == k){
 						idxs[nnz] = xpos(i, j, inst);
-						vls[nnz] = 1;
+						vls[nnz] = 1.0;
 						nnz++;
 					}/* if */
 			}/* if */
@@ -56,7 +56,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 		}
 
 	}/* for */
-	
+
 	free(idxs);
 	free(vls);
 
@@ -75,34 +75,33 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
     CPXInstance* cpx_inst = (CPXInstance*) userhandle; 
     double objval = CPX_INFBOUND;
-	int err = 0;
-	
-	COMP comp;
-	allocComp(cpx_inst->inst->dimension, &comp);
+    int err = 0;
+    
+    COMP comp;
+    allocComp(cpx_inst->inst->dimension, &comp);
 
-	double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
+    double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
     assert(xstar != NULL);
 
     if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){ 
         print_error("CPXcallbackgetcandidatepoint error", err, cpx_inst->env, cpx_inst->lp);
-		exit(1);
-	}
+        exit(1);
+    }
 
-	build_comp(cpx_inst, xstar, &comp);
+    build_comp(cpx_inst, xstar, &comp);
 
-	if(comp.nc > 1)
-    	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-	else{
+    if(comp.nc > 1)
+        add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+    else{
 
-		/* run 2opt or patching and then post solution */
+        /* run 2opt or patching and then post solution */
 
-	}
+    }
+    
+    free(xstar);
+    freeComp(&comp);
 
-	
-	free(xstar);
-	freeComp(&comp);
-
-	return 0;
+    return 0;
 
 }/* checkCandidateSol */
 
@@ -140,7 +139,7 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
     if((err = CPXcallbacksetfunc(env, lp, context_id, checkCandidateSol, &cpx_inst))){
         print_error("CPXcallbacksetfunc() error", err, env, lp);
 		return err;
-	}
+	}	
 
     optimize_model(inst, env, lp, &temp, &comp);
 
@@ -151,4 +150,4 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
 	return 0;
 
-}/* candidateCallback */
+}/* candidate */

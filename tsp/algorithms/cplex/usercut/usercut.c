@@ -208,7 +208,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         }
 
     } else if (ncomp > 1) {
-
+        
         int startindex = 0;
 
         int* components = malloc(cpx_inst->inst->dimension * sizeof(int));
@@ -292,7 +292,6 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
     optimize_model(inst, env, lp, &temp, &comp);
 
-
     /* START: TEST PURPOSE*/
 
     double cost = 0;
@@ -322,4 +321,4 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	return 0;
 
-}/* usercutCallback */
+}/* usercut */
