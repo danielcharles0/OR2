@@ -664,10 +664,10 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
 		/* plotSolution(inst, &sol); ADDED FOR TEST PURPOSE */
 
-		printf("\n\nMIP start added successfully.\n");
+		printf("\n\nMIP start added successfully.\n\n");
 
 	} else 
-		printf("\n\nMIP start not added: invalid solution.\n");
+		printf("\n\nMIP start not added: invalid solution.\n\n");
 	
 	free(values);
 	free(indices);

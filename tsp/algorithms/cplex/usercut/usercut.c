@@ -71,36 +71,42 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
 * IP indices
 * IP values
 */
-static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int current_tour, int* comp, int* indices, double* values) {
+static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int ncomp, int* comp, int* indices, double* values) {
     
-    double rhs = -1.0; 
-    char sense = 'L';
-    int matbeg = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
-    int purgeable = CPX_USECUT_FILTER;
-	int local = 0, err = 0, nnz = 0;
-    
-    for(int i = 0; i < cpx_inst->inst->dimension - 1; i++){
-        if(comp[i] != current_tour)
-            continue;
-            
-        rhs += 1;
+    for(int k = 1; k <= ncomp; k++){
+        
+        double rhs = -1.0; 
+        char sense = 'L';
+        int zero = 0; // Contains the index of the beginning column. In this case we add 1 row at a time so no need for an array
+        int purgeable = CPX_USECUT_FILTER;
+	    int local = 0, err = 0, nnz = 0;
 
-        for(int j = i + 1; j < cpx_inst->inst->dimension; j++){
-            if(comp[j] != current_tour)
+        for(int i = 0; i < cpx_inst->inst->dimension; i++){
+            if(comp[i] != k)
                 continue;
+                
+            rhs += 1;
 
-            indices[nnz] = xpos(i, j, cpx_inst->inst);
-            values[nnz] = 1.0;
-            nnz++;
+            for(int j = i + 1; j < cpx_inst->inst->dimension; j++){
+                if(comp[j] != k)
+                    continue;
+
+                indices[nnz] = xpos(i, j, cpx_inst->inst);
+                values[nnz] = 1.0;
+                nnz++;
+            }
         }
+        
+        if(nnz > 0){
+
+            if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &zero, indices, values, &purgeable, &local))){ /* add one violated cut */ 
+                print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
+                return err;
+            }
+
+        }
+
     }
-    
-    if(nnz > 0)
-
-        if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){ /* add one violated cut */ 
-            print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
-            return err;
-        }
 
     return 0;
 
@@ -200,6 +206,8 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     if (ncomp == 1) { 
 
+        printf("NCOMP = 1\n");
+
         CCInstance params = {.context = context, .cpx_inst = cpx_inst};
     
         if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, num_edges, elist, xstar, 1.9, add_cuts, &params))){
@@ -208,9 +216,11 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         }
 
     } else if (ncomp > 1) {
-        
-        int startindex = 0;
 
+        printf("NCOMP > 1\n");
+
+        int startindex = 0;
+        
         int* components = malloc(cpx_inst->inst->dimension * sizeof(int));
         assert(components != NULL);
 
@@ -232,15 +242,20 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
             
         }
 
+        if((err = add_SEC_relaxation(cpx_inst, context, ncomp, components, indices, values)))
+            return err;
+
+        /*
         for (int subtour = 1; subtour <= ncomp; subtour++)
             // For each subtour we add the constraints in one shot
             if((err = add_SEC_relaxation(cpx_inst, context, subtour, components, indices, values)))
                 return err;
-        
+        */
 
         free(values);
         free(indices);
         free(components);
+        
     }
     
 	free(elist);
@@ -293,7 +308,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     optimize_model(inst, env, lp, &temp, &comp);
 
     /* START: TEST PURPOSE*/
-
+    /*
     double cost = 0;
     for(int i=0; i<inst->dimension; i++){
         cost += getDist(i, temp.succ[i], inst);
@@ -311,7 +326,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
             if(xstar[counter++] == 1)
                 printf("%d: %d\n", i, j);
     }
-
+    */
     /* END: TEST PURPOSE*/
 
 	convertSSol(inst, &temp, sol);
