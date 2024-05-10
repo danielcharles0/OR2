@@ -34,7 +34,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 		int err, nnz = 0;
 		double rhs = -1.0;
 
-		for(int i = 0; i < inst->dimension - 1; i++)
+		for(int i = 0; i < inst->dimension; i++)
 			if((*comp).map[i] == k){
 				
 				rhs += 1;
