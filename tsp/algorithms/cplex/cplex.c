@@ -200,6 +200,9 @@ int setCPXParameters(const Settings *set, CPXENVptr env, CPXLPptr lp)
 
 	if((err = setintparam(CPX_PARAM_SCRIND, CPX_OFF, env, lp)))
 		return err;
+	
+	if((err = setintparam(CPX_PARAM_CLONELOG, -1, env, lp)))
+		return err;
 
 	if ((*set).v)
 		if((err = setlogfilename(env, lp)))
