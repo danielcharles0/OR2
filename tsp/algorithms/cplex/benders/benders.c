@@ -45,7 +45,7 @@ int add_SEC(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPptr l
 		int err, nnz = 0;
 		double rhs = -1.0;
 
-		for(int i = 0; i < inst->dimension - 1; i++)
+		for(int i = 0; i < inst->dimension; i++)
 			if((*comp).map[i] == k){
 				
 				rhs += 1;
@@ -253,7 +253,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 		} else
 			convertSSol(inst, &temp, sol);
 	} else
-		print_error("Error in BENDERS", err, env, lp);
+		print_error("Error in BENDERS\n", err, env, lp);
 
 	freeSSol(&temp);
 	freeComp(&comp);
