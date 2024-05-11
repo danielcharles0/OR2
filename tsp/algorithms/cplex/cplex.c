@@ -390,7 +390,7 @@ void mipStartMessage(void){
 
 	printf("Would you like a MIP start?\n");
 	printf("\t- Code 0: NO\n");
-	printf("\t- COde 1: YES\n");
+	printf("\t- Code 1: YES\n");
 	printf("\n");
 
 }/* mipStartMessage */
@@ -499,6 +499,28 @@ int build_sol(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution 
 }/* build_sol */
 
 /*
+ * IP cpx_inst input instance
+ * IP xstar CPLEX solution
+ */
+int build_sol_callback(const CPXInstance* cpx_inst, double* xstar){
+
+	instance finst = { .nnodes = cpx_inst->inst->dimension };
+
+	TSPSSolution* sol = cpx_inst->temp;
+
+	COMP comp;
+	allocComp(cpx_inst->inst->dimension, &comp);
+
+	build_sol_fischetti(xstar, &finst, (*sol).succ, comp.map, &(comp.nc));
+	(*sol).val = getSSolCost(cpx_inst->inst, sol);
+
+	freeComp(&comp);
+
+	return 0;
+
+}/* build_sol_callback */
+
+/*
 * IP sol solution
 * IP lb lower bound
 * OR the % gap between the solution cost and the lower bound
@@ -587,13 +609,14 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 * IP env cplex environment
 * IP lp cplex lp
 */
-void initCPXInstance(CPXInstance* cpx_inst, const TSPInstance* tsp_inst, TSPSSolution* temp, int numCols, CPXENVptr env, CPXLPptr lp){
+void initCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, TSPSSolution* temp, int numCols, CPXENVptr env, CPXLPptr lp){
 
 	cpx_inst->inst = tsp_inst;
 	cpx_inst->temp = temp;
 	cpx_inst->ncols = numCols;
 	cpx_inst->env = env;
 	cpx_inst->lp = lp;
+	cpx_inst->set = set;
 
 }/* initCPXInstance */
 

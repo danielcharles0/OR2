@@ -9,6 +9,7 @@
 
 #include "candidate.h"
 #include "../cplex.h"
+#include "../../refinement/2opt/2opt.h"
 
 /*
  * IP inst input instance
@@ -93,9 +94,52 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
     if(comp.nc > 1)
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
     else{
+		
+		/* NOT WORKING: 1003 error when posting heuristic solution */
+		/* 
+		int nnz = 0;
+		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
 
-        /* run 2opt or patching and then post solution */
+		int* indices = (int*) malloc(cpx_inst->ncols * sizeof(int));
+		assert(indices != NULL);
 
+		double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
+		assert(values != NULL);
+
+		TSPSolution sol;
+		allocSol(cpx_inst->inst->dimension, &sol);
+
+		build_sol_callback(cpx_inst, xstar);
+
+		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+
+		opt2(cpx_inst->set, cpx_inst->inst, &sol);
+
+		if(checkSol(cpx_inst->inst, &sol)){
+
+			printf("\n2OPT VALID\n");
+
+			for(int i = 0; i < cpx_inst->inst->dimension; i++){
+				printf("%d -> ", i);
+
+				indices[nnz] = xpos(sol.path[i], sol.path[i+1 % cpx_inst->inst->dimension], cpx_inst->inst);
+				values[nnz] = 1.0;
+				nnz++;
+
+				printf("%d\n", i);
+			}
+
+			if((err = CPXcallbackpostheursoln(context, nnz, indices, values, sol.val, strat))){
+				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
+				exit(1);
+			}
+
+		}
+
+		freeSol(&sol);
+		free(values);
+		free(indices);
+		*/
     }
     
     free(xstar);
@@ -128,7 +172,7 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	allocSSol(inst->dimension, &temp);
 
 	CPXInstance cpx_inst;
-	initCPXInstance(&cpx_inst, inst, &temp, CPXgetnumcols(env, lp), env, lp);
+	initCPXInstance(&cpx_inst, set, inst, &temp, CPXgetnumcols(env, lp), env, lp);
 
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))

@@ -29,6 +29,7 @@ typedef struct{
 typedef struct{
 
     const TSPInstance* inst;
+    const Settings* set;
     TSPSSolution* temp;
     int ncols;
     CPXENVptr env;
@@ -54,8 +55,10 @@ int optimize_model(const TSPInstance*, CPXENVptr, CPXLPptr, TSPSSolution*, COMP*
 
 double solGap(const TSPSolution*, double);
 
-void initCPXInstance(CPXInstance*, const TSPInstance*, TSPSSolution*, int, CPXENVptr, CPXLPptr);
+void initCPXInstance(CPXInstance*, const Settings*, const TSPInstance*, TSPSSolution*, int, CPXENVptr, CPXLPptr);
 
 void build_comp(CPXInstance*, double*, COMP*);
 
 int mip_start(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
+
+int build_sol_callback(const CPXInstance*, double*);

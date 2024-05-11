@@ -30,7 +30,7 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
     char sense = 'L';
     int purgeable = CPX_USECUT_FILTER;
 	int local = 0;
-    int err = 0, matbeg = 0;
+    int err = 0, matbeg = 0, nnz = 0;
     int num_edges = num_nodes * (num_nodes - 1) / 2;
 
     double* values = malloc(num_edges *  sizeof(double));
@@ -39,17 +39,18 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
     int* indices = malloc(num_edges * sizeof(int));
     assert(indices != NULL);
 
-    int k = 0;
     for (int i = 0; i < num_nodes; i++) {
         for (int j = 0; j < num_nodes; j++) {
             if (members[i] >= members[j])
-                continue; // undirected graph. If the node in index i is greated than the node in index j, we skip since (i,j) = (j,i)
-            indices[k] = xpos(members[i], members[j], cpx_inst->inst);
-            values[k++] = 1.0;
+                continue; // undirected graph. If the node in index i is greater than the node in index j, we skip since (i,j) = (j,i)
+
+            indices[nnz] = xpos(members[i], members[j], cpx_inst->inst);
+            values[nnz] = 1.0;
+            nnz++;
         }
     }
     
-    if((err = CPXcallbackaddusercuts(context, 1, k, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){
+    if((err = CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &matbeg, indices, values, &purgeable, &local))){
         print_error("CPXcallbackaddusercuts() error", err, cpx_inst->env, cpx_inst->lp);
         exit(1);
     }
@@ -203,7 +204,6 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         exit(1);
     }
 
-
     if (ncomp == 1) { 
 
         printf("NCOMP = 1\n");
@@ -258,6 +258,8 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         
     }
     
+    free(comps);
+    free(compscount);
 	free(elist);
 	free(xstar);
 
@@ -287,7 +289,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	allocSSol(inst->dimension, &temp);
 
 	CPXInstance cpx_inst;
-	initCPXInstance(&cpx_inst, inst, &temp, CPXgetnumcols(env, lp), env, lp);
+	initCPXInstance(&cpx_inst, set, inst, &temp, CPXgetnumcols(env, lp), env, lp);
 
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
@@ -308,15 +310,14 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     optimize_model(inst, env, lp, &temp, &comp);
 
     /* START: TEST PURPOSE*/
-    /*
     double cost = 0;
     for(int i=0; i<inst->dimension; i++){
         cost += getDist(i, temp.succ[i], inst);
-        printf("%d\n", temp.succ[i]);
+        //printf("%d\n", temp.succ[i]);
     }
 
     printf("\nCHECK COST BEFORE CONVERSION: %lf\n", cost);
-
+    /*
     int ncols = CPXgetnumcols(env,lp);
     double* xstar = (double*) malloc(ncols * sizeof(double));
 
