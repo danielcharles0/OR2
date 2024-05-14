@@ -9,6 +9,7 @@
 
 #include "candidate.h"
 #include "../cplex.h"
+#include "../benders/benders.h"
 #include "../../refinement/2opt/2opt.h"
 
 /*
@@ -94,9 +95,7 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
     if(comp.nc > 1)
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
     else{
-		
-		/* NOT WORKING: 1003 error when posting heuristic solution */
-		/* 
+		/*
 		int nnz = 0;
 		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
 
@@ -108,9 +107,15 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
 		TSPSolution sol;
 		allocSol(cpx_inst->inst->dimension, &sol);
-
+		*/
+		/* PATCHING	*/
+		/*
 		build_sol_callback(cpx_inst, xstar);
 
+		patch(cpx_inst->set, cpx_inst->inst, cpx_inst->temp, &comp);
+		*/
+		/* 2OPT NOT WORKING: 1003 error when posting heuristic solution */
+		/*
 		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
 
 		opt2(cpx_inst->set, cpx_inst->inst, &sol);
