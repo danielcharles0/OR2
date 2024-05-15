@@ -603,22 +603,43 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 
 /*
 * Initializes CPXinstance passed in input
+*
 * IP cpx_inst cplex instance to be initialized
 * IP tsp_inst tsp instance to be passed to cplex instance
 * IP numCols number of columns of the variables table used by CPLEX
+* IP temp temporary succ solution to be used in callbacks
 * IP env cplex environment
 * IP lp cplex lp
 */
-void initCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, TSPSSolution* temp, int numCols, CPXENVptr env, CPXLPptr lp){
+void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, int numCols, TSPSSolution* temp, CPXENVptr env, CPXLPptr lp){
+
+	int k = 0;
+
+	int* ind = (int*) malloc(numCols * sizeof(int));
+	assert(ind != NULL);
+
+	for(int i = 0; i < tsp_inst->dimension - 1; i++)
+		for(int j = i + 1; j < tsp_inst->dimension; j++)
+			ind[k++] = xpos(i, j, tsp_inst);
 
 	cpx_inst->inst = tsp_inst;
 	cpx_inst->temp = temp;
 	cpx_inst->ncols = numCols;
+	cpx_inst->indices = ind;
 	cpx_inst->env = env;
 	cpx_inst->lp = lp;
 	cpx_inst->set = set;
 
-}/* initCPXInstance */
+}/* allocCPXInstance */
+
+/*
+* IP cpx_inst instance to free
+*/
+void freeCPXInstance(CPXInstance* cpx_inst){
+
+	free(cpx_inst->indices);
+
+}/* freeCPXInstance */
 
 /*
  * IP cpx_inst cplex instance

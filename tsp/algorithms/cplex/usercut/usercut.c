@@ -6,11 +6,15 @@
 */
 
 #include <assert.h>
+#include <string.h>
 
 #include "usercut.h"
 #include "../cplex.h"
+#include "concorde.h"
 #include "../candidate/candidate.h"
-#include <concorde.h>
+#include "../benders/benders.h"
+#include "../../refinement/2opt/2opt.h"
+
 
 /*
  * Adds user cuts, called by CCcut_violated_cuts
@@ -142,10 +146,46 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 	if(comp.nc > 1)
     	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
 	else{
+		
+		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_CHECKFEAS;
 
-		/* run 2opt or patching and then post solution */
+		TSPSolution sol;
+		allocSol(cpx_inst->inst->dimension, &sol);
+		
+		/* 2OPT	*/
 
-	}
+		build_sol_callback(cpx_inst, xstar);
+		
+		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+		
+		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
+
+		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
+
+		if(checkSol(cpx_inst->inst, &sol)){
+
+			for(int i = 0; i < cpx_inst->inst->dimension; i++){
+
+				int index = xpos(sol.path[i], sol.path[i+1 % cpx_inst->inst->dimension], cpx_inst->inst);
+				xstar[index] = 1.0;
+
+			}
+			
+			/*
+			printf("\nCPLEX SOLCOST: %lf\n", cpx_inst->temp->val);
+			printf("\n2-OPT SOLCOST: %lf\n", sol.val);
+			*/
+
+			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
+				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
+				exit(1);
+			}
+			
+		}
+
+		freeSol(&sol);
+		
+    }
     
     free(xstar);
 	freeComp(&comp);
@@ -289,7 +329,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	allocSSol(inst->dimension, &temp);
 
 	CPXInstance cpx_inst;
-	initCPXInstance(&cpx_inst, set, inst, &temp, CPXgetnumcols(env, lp), env, lp);
+	allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
 
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
@@ -332,6 +372,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	convertSSol(inst, &temp, sol);
 
+    freeCPXInstance(&cpx_inst);
 	freeSSol(&temp);
 	freeComp(&comp);
 

@@ -6,6 +6,7 @@
 */
 
 #include <assert.h>
+#include <string.h>
 
 #include "candidate.h"
 #include "../cplex.h"
@@ -59,8 +60,8 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 
 	}/* for */
 
-	free(idxs);
 	free(vls);
+	free(idxs);
 
 	return 0;
 
@@ -95,56 +96,45 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
     if(comp.nc > 1)
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
     else{
-		/*
-		int nnz = 0;
-		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
-
-		int* indices = (int*) malloc(cpx_inst->ncols * sizeof(int));
-		assert(indices != NULL);
-
-		double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
-		assert(values != NULL);
+		
+		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_CHECKFEAS;
 
 		TSPSolution sol;
 		allocSol(cpx_inst->inst->dimension, &sol);
-		*/
-		/* PATCHING	*/
-		/*
+		
+		/* 2OPT	*/
+
 		build_sol_callback(cpx_inst, xstar);
-
-		patch(cpx_inst->set, cpx_inst->inst, cpx_inst->temp, &comp);
-		*/
-		/* 2OPT NOT WORKING: 1003 error when posting heuristic solution */
-		/*
+		
 		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+		
+		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
 
-		opt2(cpx_inst->set, cpx_inst->inst, &sol);
+		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
 
 		if(checkSol(cpx_inst->inst, &sol)){
 
-			printf("\n2OPT VALID\n");
-
 			for(int i = 0; i < cpx_inst->inst->dimension; i++){
-				printf("%d -> ", i);
 
-				indices[nnz] = xpos(sol.path[i], sol.path[i+1 % cpx_inst->inst->dimension], cpx_inst->inst);
-				values[nnz] = 1.0;
-				nnz++;
+				int index = xpos(sol.path[i], sol.path[i+1 % cpx_inst->inst->dimension], cpx_inst->inst);
+				xstar[index] = 1.0;
 
-				printf("%d\n", i);
 			}
+			
+			/*
+			printf("\nCPLEX SOLCOST: %lf\n", cpx_inst->temp->val);
+			printf("\n2-OPT SOLCOST: %lf\n", sol.val);
+			*/
 
-			if((err = CPXcallbackpostheursoln(context, nnz, indices, values, sol.val, strat))){
+			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
 				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
 				exit(1);
 			}
-
+			
 		}
 
 		freeSol(&sol);
-		free(values);
-		free(indices);
-		*/
+		
     }
     
     free(xstar);
@@ -177,7 +167,7 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	allocSSol(inst->dimension, &temp);
 
 	CPXInstance cpx_inst;
-	initCPXInstance(&cpx_inst, set, inst, &temp, CPXgetnumcols(env, lp), env, lp);
+	allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
 
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
@@ -194,6 +184,7 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
 	convertSSol(inst, &temp, sol);
 
+	freeCPXInstance(&cpx_inst);
 	freeSSol(&temp);
 	freeComp(&comp);
 
