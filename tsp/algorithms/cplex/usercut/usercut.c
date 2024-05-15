@@ -143,16 +143,16 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
 	build_comp(cpx_inst, xstar, &comp);
 
-	if(comp.nc > 1)
-    	add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-	else{
-		
-		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_CHECKFEAS;
+	if(comp.nc > 1){
+
+        add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+
+    } else{
+
+		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
 
 		TSPSolution sol;
 		allocSol(cpx_inst->inst->dimension, &sol);
-		
-		/* 2OPT	*/
 
 		build_sol_callback(cpx_inst, xstar);
 		
@@ -165,16 +165,11 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 		if(checkSol(cpx_inst->inst, &sol)){
 
 			for(int i = 0; i < cpx_inst->inst->dimension; i++){
-
-				int index = xpos(sol.path[i], sol.path[i+1 % cpx_inst->inst->dimension], cpx_inst->inst);
+				
+				int index = xpos(sol.path[i], sol.path[(i+1) % cpx_inst->inst->dimension], cpx_inst->inst);
 				xstar[index] = 1.0;
 
-			}
-			
-			/*
-			printf("\nCPLEX SOLCOST: %lf\n", cpx_inst->temp->val);
-			printf("\n2-OPT SOLCOST: %lf\n", sol.val);
-			*/
+			}	
 
 			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
 				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
