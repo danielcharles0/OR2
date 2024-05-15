@@ -15,6 +15,7 @@
 #include "../benders/benders.h"
 #include "../../refinement/2opt/2opt.h"
 
+#include "../../../output/output.h"
 
 /*
  * Adds user cuts, called by CCcut_violated_cuts
@@ -37,10 +38,10 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
     int err = 0, matbeg = 0, nnz = 0;
     int num_edges = num_nodes * (num_nodes - 1) / 2;
 
-    double* values = malloc(num_edges *  sizeof(double));
+    double* values = (double*) malloc(num_edges *  sizeof(double));
     assert(values != NULL);
 
-    int* indices = malloc(num_edges * sizeof(int));
+    int* indices = (int*) malloc(num_edges * sizeof(int));
     assert(indices != NULL);
 
     for (int i = 0; i < num_nodes; i++) {
@@ -73,11 +74,15 @@ static int add_cuts(double cutval, int num_nodes, int* members, void* userhandle
 * IP context context in which the callback is called from.
 * IP current_tour current subtour we are analyzing to add constraint of.
 * IP comp array that specifies che component each node belongs to.
-* IP indices
-* IP values
 */
-static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int ncomp, int* comp, int* indices, double* values) {
+static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr context, int ncomp, int* comp) {
     
+    int* indices = (int*) malloc(cpx_inst->ncols * sizeof(int));
+    assert(indices != NULL);
+
+    double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
+    assert(values != NULL);
+
     for(int k = 1; k <= ncomp; k++){
         
         double rhs = -1.0; 
@@ -112,6 +117,9 @@ static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr conte
         }
 
     }
+
+    free(values);
+    free(indices);
 
     return 0;
 
@@ -200,7 +208,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     CPXInstance* cpx_inst = (CPXInstance*) userhandle; 
 	int err = 0;
-	int ncomp = 1;
+	int ncomp = 0;
 
 	double* xstar = NULL;
     int* elist = NULL;
@@ -210,7 +218,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
     int k = 0, num_edges = 0, node = -1;
 
     CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
-    
+
     /* user cuts applied once every 10 calls */
     if(node % 10 != 0)
         return 0;
@@ -218,7 +226,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
     xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
     assert(xstar != NULL);
 
-    elist = malloc(2*cpx_inst->ncols * sizeof(int)); // elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
+    elist = (int*) malloc(2*cpx_inst->ncols * sizeof(int)); // elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
     assert(elist != NULL);
 
     if((err = CPXcallbackgetrelaxationpoint(context, xstar, 0, cpx_inst->ncols - 1 , &objval))){
@@ -241,8 +249,6 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     if (ncomp == 1) { 
 
-        printf("NCOMP = 1\n");
-
         CCInstance params = {.context = context, .cpx_inst = cpx_inst};
     
         if((err = CCcut_violated_cuts(cpx_inst->inst->dimension, num_edges, elist, xstar, 1.9, add_cuts, &params))){
@@ -252,18 +258,10 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     } else if (ncomp > 1) {
 
-        printf("NCOMP > 1\n");
-
         int startindex = 0;
         
-        int* components = malloc(cpx_inst->inst->dimension * sizeof(int));
+        int* components = (int*) malloc(cpx_inst->inst->dimension * sizeof(int));
         assert(components != NULL);
-
-        int* indices = (int*) malloc(cpx_inst->ncols * sizeof(int));
-        assert(indices != NULL);
-
-        double* values = (double*) malloc(cpx_inst->ncols * sizeof(double));
-        assert(values != NULL);
 
         /* Transforming the concorde's component format into our component format in order to use our add_SEC_relaxation function */
         for (int subtour = 0; subtour < ncomp; subtour++) {
@@ -277,18 +275,9 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
             
         }
 
-        if((err = add_SEC_relaxation(cpx_inst, context, ncomp, components, indices, values)))
+        if((err = add_SEC_relaxation(cpx_inst, context, ncomp, components)))
             return err;
 
-        /*
-        for (int subtour = 1; subtour <= ncomp; subtour++)
-            // For each subtour we add the constraints in one shot
-            if((err = add_SEC_relaxation(cpx_inst, context, subtour, components, indices, values)))
-                return err;
-        */
-
-        free(values);
-        free(indices);
         free(components);
         
     }
@@ -303,6 +292,24 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 }/* checkRelaxedSol */
 
 /*
+* Dispatcher callback.
+*
+* IP context CPLEX callback context, handled internally by CPLEX
+* IP context_id id of the callback context
+* IOP userhandle pointer to a structure external to CPLEX
+*/
+static int CPXPUBLIC dispatcher(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
+
+    if(context_id == CPX_CALLBACKCONTEXT_CANDIDATE)
+        return checkCandidateSol(context, context_id, userhandle);
+    else if ( context_id == CPX_CALLBACKCONTEXT_RELAXATION)
+        return checkRelaxedSol(context, context_id, userhandle);
+       
+    return 0;
+
+}/* dispatcher */
+
+/*
 * Installs the candidate and relaxation callbacks and runs the solver.
 *
 * IP set settings
@@ -314,37 +321,47 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 */
 int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
 
-	int err = 0;
+    int err = 0;
     clock_t start = clock();
 
-	COMP comp;
-	allocComp(inst->dimension, &comp);
+    COMP comp;
+    allocComp(inst->dimension, &comp);
 
-	TSPSSolution temp;
-	allocSSol(inst->dimension, &temp);
+    TSPSSolution temp;
+    allocSSol(inst->dimension, &temp);
 
-	CPXInstance cpx_inst;
-	allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
+    CPXInstance cpx_inst;
+    allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
 
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
         update_time_limit(set, start, env, lp);
     }
-    
-    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_CANDIDATE, checkCandidateSol, &cpx_inst))){
-        print_error("CPXcallbacksetfunc() error: CandidateCallback", err, env, lp);
+
+    /*
+    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_RELAXATION, checkRelaxedSol, &cpx_inst))){
+        print_error("CPXcallbacksetfunc() error: checkRelaxedSol", err, env, lp);
         return err;
     }
 
-    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_RELAXATION, checkRelaxedSol, &cpx_inst))){
-        print_error("CPXcallbacksetfunc() error: RelaxationCallback", err, env, lp);
+    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_CANDIDATE, checkCandidateSol, &cpx_inst))){
+        print_error("CPXcallbacksetfunc() error: checkCandidateSol", err, env, lp);
+        return err;
+    }
+    */
+
+    CPXLONG context = CPX_CALLBACKCONTEXT_CANDIDATE | CPX_CALLBACKCONTEXT_RELAXATION;
+
+    if((err = CPXcallbacksetfunc(env, lp, context, dispatcher, &cpx_inst))){
+        print_error("CPXcallbacksetfunc() error: dispatcher", err, env, lp);
         return err;
     }
 
     optimize_model(inst, env, lp, &temp, &comp);
 
     /* START: TEST PURPOSE*/
+    /*
     double cost = 0;
     for(int i=0; i<inst->dimension; i++){
         cost += getDist(i, temp.succ[i], inst);
@@ -352,25 +369,65 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     }
 
     printf("\nCHECK COST BEFORE CONVERSION: %lf\n", cost);
-    /*
-    int ncols = CPXgetnumcols(env,lp);
-    double* xstar = (double*) malloc(ncols * sizeof(double));
 
-    int counter = 0;
-    for(int i = 0; i<inst->dimension; i++){
-        for(int j = i+1; j<inst->dimension; j++)
-            if(xstar[counter++] == 1)
-                printf("%d: %d\n", i, j);
+    int curr = 0, count_visited = 0;
+    bool entered = false;
+
+    int* visited = (int*) malloc(inst->dimension * sizeof(int));
+    assert(visited != NULL);
+
+    for(int i = 0; i < inst->dimension; i++)
+        visited[i] = 0;
+
+    while(count_visited != inst->dimension){
+
+        printf("%.2d\n", curr);
+        visited[curr] = 1;
+        count_visited++;
+        
+        curr = temp.succ[curr];
+
+        while(visited[curr] && count_visited != inst->dimension){
+            entered = true;
+            printf("-");
+            curr = (curr + 1) % inst->dimension;
+        }
+
+        if(entered){
+            entered = false;
+            printf("\n");
+        }
+    } 
+    */
+    /*
+    int* counter = malloc(inst->dimension * sizeof(int));
+    assert(counter != NULL);
+
+    for(int i = 0; i < inst->dimension; i++)
+        counter[i] = 0;
+
+    for(int i = 0; i < inst->dimension; i++){
+
+        counter[i]++;
+        counter[temp.succ[i]]++;
+
     }
+
+    for(int i = 0; i < inst->dimension; i++)
+        printf("%.2d: %d\n", i, counter[i]);
+
+    free(counter);
     */
     /* END: TEST PURPOSE*/
 
-	convertSSol(inst, &temp, sol);
+    convertSSol(inst, &temp, sol);
+
+    //plotSolution(inst, sol);
 
     freeCPXInstance(&cpx_inst);
-	freeSSol(&temp);
-	freeComp(&comp);
+    freeSSol(&temp);
+    freeComp(&comp);
 
-	return 0;
+    return 0;
 
 }/* usercut */
