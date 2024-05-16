@@ -219,7 +219,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
 
-    /* user cuts applied once every 10 calls */
+    /* user cuts applied (approximately) once every 10 calls */
     if(node % 10 != 0)
         return 0;
 
@@ -339,18 +339,6 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
         update_time_limit(set, start, env, lp);
     }
 
-    /*
-    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_RELAXATION, checkRelaxedSol, &cpx_inst))){
-        print_error("CPXcallbacksetfunc() error: checkRelaxedSol", err, env, lp);
-        return err;
-    }
-
-    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_CANDIDATE, checkCandidateSol, &cpx_inst))){
-        print_error("CPXcallbacksetfunc() error: checkCandidateSol", err, env, lp);
-        return err;
-    }
-    */
-
     CPXLONG context = CPX_CALLBACKCONTEXT_CANDIDATE | CPX_CALLBACKCONTEXT_RELAXATION;
 
     if((err = CPXcallbacksetfunc(env, lp, context, dispatcher, &cpx_inst))){
@@ -360,69 +348,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
     optimize_model(inst, env, lp, &temp, &comp);
 
-    /* START: TEST PURPOSE*/
-    /*
-    double cost = 0;
-    for(int i=0; i<inst->dimension; i++){
-        cost += getDist(i, temp.succ[i], inst);
-        //printf("%d\n", temp.succ[i]);
-    }
-
-    printf("\nCHECK COST BEFORE CONVERSION: %lf\n", cost);
-
-    int curr = 0, count_visited = 0;
-    bool entered = false;
-
-    int* visited = (int*) malloc(inst->dimension * sizeof(int));
-    assert(visited != NULL);
-
-    for(int i = 0; i < inst->dimension; i++)
-        visited[i] = 0;
-
-    while(count_visited != inst->dimension){
-
-        printf("%.2d\n", curr);
-        visited[curr] = 1;
-        count_visited++;
-        
-        curr = temp.succ[curr];
-
-        while(visited[curr] && count_visited != inst->dimension){
-            entered = true;
-            printf("-");
-            curr = (curr + 1) % inst->dimension;
-        }
-
-        if(entered){
-            entered = false;
-            printf("\n");
-        }
-    } 
-    */
-    /*
-    int* counter = malloc(inst->dimension * sizeof(int));
-    assert(counter != NULL);
-
-    for(int i = 0; i < inst->dimension; i++)
-        counter[i] = 0;
-
-    for(int i = 0; i < inst->dimension; i++){
-
-        counter[i]++;
-        counter[temp.succ[i]]++;
-
-    }
-
-    for(int i = 0; i < inst->dimension; i++)
-        printf("%.2d: %d\n", i, counter[i]);
-
-    free(counter);
-    */
-    /* END: TEST PURPOSE*/
-
     convertSSol(inst, &temp, sol);
-
-    //plotSolution(inst, sol);
 
     freeCPXInstance(&cpx_inst);
     freeSSol(&temp);
