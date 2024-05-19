@@ -66,3 +66,5 @@ tsp/output/cplex/model.lp
 pprof
 perfprof/pprof.csv
 perfprof/pprof.pdf
+errors
+pprof_bak
