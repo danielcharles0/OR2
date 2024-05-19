@@ -10,4 +10,4 @@
 
 void generateInstance(const Settings*, TSPInstance*);
 
-void generateInstanceName(const Settings*, const char[], TSPInstance*);
+void generateInstanceName(const Settings*, bool, const char[], TSPInstance*);

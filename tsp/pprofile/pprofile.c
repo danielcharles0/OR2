@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NOF_TEST_INSTANCES 10 //20
+#define NOF_TEST_INSTANCES 20
 #define PPROF_OUT_FILE "./perfprof/pprof.csv"
 #define PP_PLOT_CMD "python3 ./perfprof/perfprof.py -D , -M 1.2 -T %d ./perfprof/pprof.csv ./perfprof/pprof.pdf -X \"Cost Ratio\" -P \"TSP Performance Profile\""
 
@@ -422,7 +422,7 @@ bool runPPConfiguration(const PP_CONF* conf){
 	for(i = 0; i < NOF_TEST_INSTANCES; i++){
 
 		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%d_id%d", (*conf).set.n, (*conf).set.seed, (*conf).set.tl, i + 1);
-		generateInstanceName(&((*conf).set), nametemp, &inst);
+		generateInstanceName(&((*conf).set), (i == 0), nametemp, &inst);
 
 		printf("* Working on instance %s\n", inst.name);
 

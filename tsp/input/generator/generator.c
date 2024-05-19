@@ -13,13 +13,15 @@
 
 /*
 * IP seed for the random generation
+* IP reset boolean indicating if the seed needs to be resetted
 * OP inst instance to random generate
 */
-void generatePoints(int seed, TSPInstance* inst){
+void generatePointsResetSeed(int seed, bool reset, TSPInstance* inst){
 	
 	int i;
 
-	srand(seed);
+	if(reset)
+		srand(seed);
 
     for(i = 0; i < (*inst).dimension; i++)
         randomPoint(&((*inst).points[i]));
@@ -27,16 +29,27 @@ void generatePoints(int seed, TSPInstance* inst){
 }/* generatePoints */
 
 /*
+* IP seed for the random generation
+* OP inst instance to random generate
+*/
+void generatePoints(int seed, TSPInstance* inst){
+
+	generatePointsResetSeed(seed, true, inst);
+
+}/* generatePoints */
+
+/*
  * IP set settings
  * IP name of the instance
+ * IP reset boolean indicating if the seed needs to be resetted
  * OP inst instance to random generate
  * This method assumes the instance to be already allocated
  */
-void generateInstanceName(const Settings* set, const char name[], TSPInstance* inst){
+void generateInstanceName(const Settings* set, bool reset, const char name[], TSPInstance* inst){
 
 	strcpy(inst->name, name);
 
-	generatePoints((*set).seed, inst);
+	generatePointsResetSeed((*set).seed, reset, inst);
 	
 	computeDistances(inst);
 
@@ -50,6 +63,6 @@ void generateInstance(const Settings* set, TSPInstance* inst){
 
     allocInst((*set).n, inst);
 
-	generateInstanceName(set, "RANDOM", inst);
+	generateInstanceName(set, true, "RANDOM", inst);
 
 }/* generateInstance */
