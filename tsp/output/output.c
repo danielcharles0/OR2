@@ -18,6 +18,7 @@ void plotSettings(FILE* gnuplotPipe, const char title[]){
 
     fprintf(gnuplotPipe, "set term qt font \"Arial\"\n");
 	fprintf(gnuplotPipe, "set title '%s'\n", title);
+    fprintf(gnuplotPipe, "set terminal '%s'\n", "x11");
     fprintf(gnuplotPipe, "set xlabel 'X'\n");
     fprintf(gnuplotPipe, "set ylabel 'Y'\n");
     fprintf(gnuplotPipe, "plot '-' with linespoints pointtype 7 pointsize 1 linewidth 2 notitle\n");

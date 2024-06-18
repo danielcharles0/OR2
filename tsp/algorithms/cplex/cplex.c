@@ -400,6 +400,33 @@ void mipStartMessage(void){
 * IP inst tsp instance
 * IP env CPLEX environment
 * IP lp CPLEX linear program
+* IP start boolean indicating whether to use mipstart
+* IP alg algorithm to run
+* IOP sol solution to be updated
+*/
+int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, TSPSolution* sol){
+	
+	switch (alg){
+	    case BENDERS:
+	        return benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
+		case BENDERS_PATCH:
+			return benders(set, inst, env, lp, sol, (patchfunc)patch, start);
+		case CANDIDATE_CALLBACK:
+			return candidate(set, inst, env, lp, sol, start);
+		case USERCUT_CALLBACK:
+			return usercut(set, inst, env, lp, sol, start);
+	    default:
+	        printf("Error: Exact algorithm code not found.\n\n");
+	        return 1;
+    }/* switch */
+
+}/* run_exact_offline */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX environment
+* IP lp CPLEX linear program
 * IOP sol solution to be updated
 */
 int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
@@ -410,25 +437,7 @@ int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
 	exactAlgorithmLegend();
 	
-	switch (readInt("Insert the code of the exact algorithm you want to run: ")){
-	    case BENDERS:
-	        return benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
-	        break;
-		case BENDERS_PATCH:
-			return benders(set, inst, env, lp, sol, (patchfunc)patch, start);
-	        break;
-		case CANDIDATE_CALLBACK:
-			return candidate(set, inst, env, lp, sol, start);
-	        break;
-		case USERCUT_CALLBACK:
-			return usercut(set, inst, env, lp, sol, start);
-	        break;
-	    default:
-	        printf("Error: Exact algorithm code not found.\n\n");
-	        return 1;
-    }/* switch */
-
-	return 0;
+	return run_exact_offline(set, inst, env, lp, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), sol);
 
 }/* run_exact */
 
