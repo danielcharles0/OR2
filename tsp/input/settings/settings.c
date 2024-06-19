@@ -14,7 +14,7 @@
 #include "validator/validator.h"
 #include "../../utility/utility.h"
 
-#define DEFAULT_TIME_LIMIT 30 /* 300 */ /* 60 s/min * 5 min */
+#define DEFAULT_TIME_LIMIT 30 /* 30 s */
 #define DEFAULT_SEED 2060685 + 2088626
 
 static struct option long_options[] = {
@@ -36,7 +36,7 @@ void help(void){
 	                                                            /* remember that the last character contains the special EOS value '\0' */
     printf("\t-f, --file  <file_name>\t\tinput file (no file names with more than %d characters are accepted)\n", MAX_FILE_NAME_SIZE - 1);
     printf("\t-s, --seed  <seed_value>\tseed used for random generation (integer value)\n");
-    printf("\t-tl         <timelimit_value>\tset an execution time limit (in seconds)\n");
+    printf("\t-tl         <timelimit_value>\tset an execution time limit (in seconds) - default 30s\n");
     printf("\t-v          <\\>\t\t\tset the verbose flag to true\n");
 	printf("\t-n, --nodes <number_of_nodes>\tnumber of nodes for the random instance\n");
     printf("\t-h  --help\t\t\tto reach this section\n");
