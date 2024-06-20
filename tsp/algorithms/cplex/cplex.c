@@ -570,7 +570,8 @@ int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, E
 		{
 			if (!(err = build_model(set, inst, env, lp)))
 				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, sol, et)))
-					print_status(env, lp);
+					if((*set).v)
+						print_status(env, lp);
 
 			CPXfreeprob(env, &lp);
 			CPXcloseCPLEX(&env);
@@ -710,9 +711,8 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 			return err;
 		}
 
-		/* plotSolution(inst, &sol); ADDED FOR TEST PURPOSE */
-
-		printf("\n\nMIP start added successfully.\n\n");
+		if((*set).v)
+			printf("\n\nMIP start added successfully.\n\n");
 
 	} else 
 		printf("\n\nMIP start not added: invalid solution.\n\n");

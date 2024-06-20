@@ -224,7 +224,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			break;
 		
 		if(comp.nc == 1){
-			printf("\n\n");
+			if((*set).v)
+				printf("\n\n");
 			break;
 		}/* if */
 

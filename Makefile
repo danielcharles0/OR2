@@ -86,7 +86,7 @@ main: ./obj/main.o $(OBJS)
 	gcc $(FLAGS) ./tsp/algorithms/cplex/usercut/usercut.c -o ./obj/usercut.o -I $(CPLEX_LIB_PATH) -I $(CONCORDE_LIB_PATH)
 
 ./obj/pprof.o: ./tsp/pprofile/pprofile.h ./tsp/pprofile/pprofile.c
-	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o
+	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1
