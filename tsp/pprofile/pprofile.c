@@ -542,7 +542,16 @@ void writeHeader(const PP_CONF* conf, FILE *outF){
 	fprintf(outF, "%d", (*conf).algs.n);
 
 	for(i = 0; i < (*conf).algs.n; i++){
-		getAlgName((PP_ALG)(*conf).algs.v[i], name);
+		
+		PP_ALG alg;
+
+		if((*conf).isExact)
+			alg = (PP_ALG)((*conf).algs.v[i] + EXACT_METHODS_OFFSET);
+		else
+			alg = (PP_ALG)(*conf).algs.v[i];
+
+		getAlgName(alg, name);
+
 		fprintf(outF, ", %s", name);
 	}/* for */
 
