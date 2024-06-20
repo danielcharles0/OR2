@@ -60,3 +60,5 @@ void printError(const char[]);
 double step(double);
 
 bool readBool(const char[]);
+
+double getSeconds(clock_t);

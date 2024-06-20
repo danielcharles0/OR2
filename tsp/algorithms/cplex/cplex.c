@@ -384,18 +384,6 @@ void exactAlgorithmLegend(void){
 }/* exactAlgorithmLegend */
 
 /*
-* Prints preferences for MIP start.
-*/
-void mipStartMessage(void){
-
-	printf("Would you like a MIP start?\n");
-	printf("\t- Code 0: NO\n");
-	printf("\t- Code 1: YES\n");
-	printf("\n");
-
-}/* mipStartMessage */
-
-/*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment
@@ -403,43 +391,25 @@ void mipStartMessage(void){
 * IP start boolean indicating whether to use mipstart
 * IP alg algorithm to run
 * IOP sol solution to be updated
+* OP et execution time
 */
-int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, TSPSolution* sol){
+int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, TSPSolution* sol, double* et){
 	
 	switch (alg){
 	    case BENDERS:
-	        return benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start);
+	        return benders(set, inst, env, lp, sol, (patchfunc)dummypatch, start, et);
 		case BENDERS_PATCH:
-			return benders(set, inst, env, lp, sol, (patchfunc)patch, start);
+			return benders(set, inst, env, lp, sol, (patchfunc)patch, start, et);
 		case CANDIDATE_CALLBACK:
-			return candidate(set, inst, env, lp, sol, start);
+			return candidate(set, inst, env, lp, sol, start, et);
 		case USERCUT_CALLBACK:
-			return usercut(set, inst, env, lp, sol, start);
+			return usercut(set, inst, env, lp, sol, start, et);
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
 	        return 1;
     }/* switch */
 
 }/* run_exact_offline */
-
-/*
-* IP set settings
-* IP inst tsp instance
-* IP env CPLEX environment
-* IP lp CPLEX linear program
-* IOP sol solution to be updated
-*/
-int run_exact(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol){
-
-	mipStartMessage();
-
-	bool start = readInt("Insert the code to specify MIP start preference: ") ? true : false;
-
-	exactAlgorithmLegend();
-	
-	return run_exact_offline(set, inst, env, lp, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), sol);
-
-}/* run_exact */
 
 /*
  * IP set settings
@@ -566,11 +536,14 @@ int optimize_model(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolu
 /*
  * IP set settings
  * IP inst input instance
+ * IP start boolean indicating whether to use mipstart
+ * IP alg algorithm to run
  * OP sol solution to evaluate ( assume that the solution was already initialized )
+ * OP et execution time
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
+int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, EXACTS alg, TSPSolution *sol, double* et)
 {
 
 	int err;
@@ -596,7 +569,7 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 		else
 		{
 			if (!(err = build_model(set, inst, env, lp)))
-				if(!(err = run_exact(set, inst, env, lp, sol)))
+				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, sol, et)))
 					print_status(env, lp);
 
 			CPXfreeprob(env, &lp);
@@ -607,6 +580,25 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 		} /* else */
 
 	} /* else */
+
+} /* optimize_offline */
+
+/*
+ * IP set settings
+ * IP inst input instance
+ * OP sol solution to evaluate ( assume that the solution was already initialized )
+ * OR 0 if no error, error code otherwise
+ * OV error message if any
+ */
+int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
+{
+	double et;
+
+	bool start = readBool("Would you like a MIP start? (yes/no): ");
+
+	exactAlgorithmLegend();
+
+	return optimize_offline(set, inst, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), sol, &et);
 
 } /* optimize */
 

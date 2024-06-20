@@ -12,6 +12,7 @@
 #include "../cplex.h"
 #include "../benders/benders.h"
 #include "../../refinement/2opt/2opt.h"
+#include "../../../utility/utility.h"
 
 /*
  * IP inst input instance
@@ -147,9 +148,11 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
+* IP warm_start true if MIPSTART is required
+* OP et execution time in seconds
 * OR error code
 */
-int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
+int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start, double* et){
 
     CPXLONG context_id = CPX_CALLBACKCONTEXT_CANDIDATE;
 	int err = 0;
@@ -182,6 +185,8 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	freeCPXInstance(&cpx_inst);
 	freeSSol(&temp);
 	freeComp(&comp);
+
+	*et = getSeconds(start);
 
 	return 0;
 

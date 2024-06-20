@@ -192,10 +192,11 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
 * IP ptc patching function
+* OP et execution time in seconds
 * OR 0 if no error, error code otherwise
 * OV error message if any
 */
-int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start){
+int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start, double* et){
 	
 	int err;
 	double lb = 0, ls = -1;
@@ -257,6 +258,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	freeSSol(&temp);
 	freeComp(&comp);
+
+	*et = getSeconds(start);
 
 	return err;
 
