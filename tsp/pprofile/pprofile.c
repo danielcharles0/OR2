@@ -586,7 +586,8 @@ bool runPPConfiguration(const PP_CONF* conf){
 
 	for(i = 0; i < NOF_TEST_INSTANCES; i++){
 
-		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%lf_id%d", (*conf).set.n, (*conf).set.seed, (*conf).set.tl, i + 1);
+		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%d_id%d", (*conf).set.n, (*conf).set.seed, (int)(*conf).set.tl, i + 1);
+
 		generateInstanceName(&((*conf).set), (i == 0), nametemp, &inst);
 
 		printf("* Working on instance %s\n", inst.name);
