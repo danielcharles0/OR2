@@ -207,13 +207,11 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	allocComp(inst->dimension, &comp);
 	allocSSol(inst->dimension, &temp);
 
-	checkTimeLimit(set, start, &ls);
-
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
         update_time_limit(set, start, env, lp);
-    }
+    }/* if */
 
 	while(true){
 
@@ -251,7 +249,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			s.v = 0;
 			best_start(&s, inst, sol);
 			opt2(&s, inst, sol);
-			printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
+			// printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
 		} else
 			convertSSol(inst, &temp, sol);
 	} else

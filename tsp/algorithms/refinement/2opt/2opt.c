@@ -95,12 +95,16 @@ double opt2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	
 	while(getOpt2OptMove(inst, sol, &opti, &optj) < 0){
+		
 		opt2move(opti, optj, inst, sol);
 
 		if(checkTimeLimit(set, start, &ls))
-            break;
+            return getSeconds(start);
 
-	}
+	}/* while */
+
+	if((*set).v)
+		processBar(1, 1);
 
 	return getSeconds(start);
 

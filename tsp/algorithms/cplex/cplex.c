@@ -79,7 +79,7 @@ void print_status(CPXENVptr env, CPXLPptr lp)
 
 	s = getStatus(env, lp, buffer);
 
-	printf("\n\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
+	printf("\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
 
 	fflush(NULL); 
 
@@ -670,20 +670,20 @@ void build_comp(CPXInstance* cpx_inst, double* xstar, COMP* comp){
 */
 int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp){
 
-	int effortlevel = CPX_MIPSTART_NOCHECK;  
-	int beg = 0, nnz = 0, err = 0; 
-	double* values;
-	int* indices;
 	Settings mip_start_set;
-
 	TSPSolution sol;
-	allocSol(inst->dimension, &sol);
 
 	cpSet(set, &mip_start_set);
 
-	mip_start_set.tl = set->tl / 10;
+	allocSol(inst->dimension, &sol);
 
-	mip_start_set.tl -= best_start(set, inst, &sol);
+	if((*set).v)
+		printf("Running nnbs\n");
+
+	mip_start_set.tl = (set->tl / 10) - best_start(set, inst, &sol);
+	
+	if((*set).v)
+		printf("Running 2opt\n");
 
 	mip_start_set.tl -= opt2(set, inst, &sol);
 
@@ -691,25 +691,33 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 		printf("mip_start exceeded time limit. No starting solution set.\n");
 		freeSol(&sol);
 		return 0;
-	}
-
-	indices = (int *) malloc(inst->dimension * sizeof(int));
-	assert(indices != NULL);
-
-	values = (double*) malloc(inst->dimension * sizeof(double));
-	assert(values != NULL);
-
-	for (int i = 0; i < inst->dimension; i++) {
-        indices[nnz] = xpos(sol.path[i], sol.path[i+1 % inst->dimension], inst);
-		values[nnz++] = 1.0;
-    }
+	}/* if */
 
 	if(checkSol(inst, &sol)){
+
+		int effortlevel = CPX_MIPSTART_NOCHECK;  
+		int beg = 0, nnz = 0, err = 0;
+		double* values;
+		int* indices;
+
+		indices = (int *) malloc(inst->dimension * sizeof(int));
+		assert(indices != NULL);
+
+		values = (double*) malloc(inst->dimension * sizeof(double));
+		assert(values != NULL);
+
+		for (int i = 0; i < inst->dimension; i++) {
+	        indices[nnz] = xpos(sol.path[i], sol.path[(i + 1) % inst->dimension], inst);
+			values[nnz++] = 1.0;
+	    }/* for */
 
 		if ((err = CPXaddmipstarts(env, lp, 1, nnz, &beg, indices, values, &effortlevel, NULL))){
 			print_error("CPXaddmipstarts() error", err, env, lp);	
 			return err;
-		}
+		}/* if */
+		
+		free(values);
+		free(indices);
 
 		if((*set).v)
 			printf("\n\nMIP start added successfully.\n\n");
@@ -717,8 +725,6 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	} else 
 		printf("\n\nMIP start not added: invalid solution.\n\n");
 	
-	free(values);
-	free(indices);
 	freeSol(&sol);
 
 	return 0;
