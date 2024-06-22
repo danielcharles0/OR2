@@ -17,6 +17,6 @@ typedef enum{
 
 int nearestNeighbor(const Settings*, const TSPInstance*, TSPSolution*);
 
-int best_start(const Settings*, const TSPInstance*, TSPSolution*);
+double best_start(const Settings*, const TSPInstance*, TSPSolution*);
 
 int NNRunConfiguration(NN_CONFIG, const Settings*, const TSPInstance*, TSPSolution*);

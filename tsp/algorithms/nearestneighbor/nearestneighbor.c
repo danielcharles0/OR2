@@ -125,7 +125,7 @@ void NNBar(clock_t start, int it, int n, int* ls){
 * OP sol solution, the best founded within the time limit
 * OR int execution seconds
 */
-int best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+double best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
 	clock_t start = clock();
 	TSPSolution temp;

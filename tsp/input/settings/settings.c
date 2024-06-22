@@ -78,7 +78,7 @@ void printSettings(const Settings* set){
     printf("\tseed: %d\n", set->seed);
 	if(set->n)
     	printf("\tnumber of nodes: %d\n", set->n);
-    printf("\ttime limit: %d\n", set->tl);
+    printf("\ttime limit: %lf\n", set->tl);
     printBool("\tverbose: ", set->v);
 	printf("\n");
 
