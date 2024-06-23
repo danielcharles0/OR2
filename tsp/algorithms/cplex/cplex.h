@@ -40,6 +40,8 @@ typedef struct{
 
 int optimize(const Settings*, const TSPInstance*, TSPSolution*);
 
+int optimize_offline(const Settings*, const TSPInstance*, bool, EXACTS, TSPSolution*, double*);
+
 int xpos(int, int, const TSPInstance*);
 
 void print_error(const char*, int, CPXENVptr, CPXLPptr);

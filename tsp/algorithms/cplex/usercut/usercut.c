@@ -14,7 +14,7 @@
 #include "../candidate/candidate.h"
 #include "../benders/benders.h"
 #include "../../refinement/2opt/2opt.h"
-
+#include "../../../utility/utility.h"
 #include "../../../output/output.h"
 
 /*
@@ -317,9 +317,11 @@ static int CPXPUBLIC dispatcher(CPXCALLBACKCONTEXTptr context, CPXLONG context_i
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
+* IP warm_start true if MIPSTART is required
+* OP et execution time in seconds
 * OR error code
 */
-int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start){
+int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start, double* et){
 
     int err = 0;
     clock_t start = clock();
@@ -353,6 +355,8 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     freeCPXInstance(&cpx_inst);
     freeSSol(&temp);
     freeComp(&comp);
+
+	*et = getSeconds(start);
 
     return 0;
 

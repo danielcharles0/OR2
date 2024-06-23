@@ -192,10 +192,11 @@ void patch(const Settings *set, const TSPInstance *inst, TSPSSolution *sol, COMP
 * IP lp CPLEX linear program
 * IOP sol solution to be updated
 * IP ptc patching function
+* OP et execution time in seconds
 * OR 0 if no error, error code otherwise
 * OV error message if any
 */
-int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start){
+int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, patchfunc ptc, bool warm_start, double* et){
 	
 	int err;
 	double lb = 0, ls = -1;
@@ -206,13 +207,11 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	allocComp(inst->dimension, &comp);
 	allocSSol(inst->dimension, &temp);
 
-	checkTimeLimit(set, start, &ls);
-
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
         update_time_limit(set, start, env, lp);
-    }
+    }/* if */
 
 	while(true){
 
@@ -223,7 +222,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			break;
 		
 		if(comp.nc == 1){
-			printf("\n\n");
+			if((*set).v)
+				printf("\n\n");
 			break;
 		}/* if */
 
@@ -249,7 +249,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			s.v = 0;
 			best_start(&s, inst, sol);
 			opt2(&s, inst, sol);
-			printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
+			// printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
 		} else
 			convertSSol(inst, &temp, sol);
 	} else
@@ -257,6 +257,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	freeSSol(&temp);
 	freeComp(&comp);
+
+	*et = getSeconds(start);
 
 	return err;
 

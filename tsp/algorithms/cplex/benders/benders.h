@@ -21,4 +21,4 @@ void dummypatch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
 
 void patch(const Settings*, const TSPInstance*, TSPSSolution*, COMP*);
 
-int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, patchfunc, bool);
+int benders(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, patchfunc, bool, double*);

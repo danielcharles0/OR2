@@ -5,15 +5,19 @@
 * File     : pprofile.c
 */
 
-#include "pprofile.h"
-#include "../utility/utility.h"
-#include "../input/generator/generator.h"
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "pprofile.h"
+#include "../utility/utility.h"
+#include "../input/generator/generator.h"
+#include "../algorithms/cplex/cplex.h"
+
 #define NOF_TEST_INSTANCES 20
 #define PPROF_OUT_FILE "./perfprof/pprof.csv"
-#define PP_PLOT_CMD "python3 ./perfprof/perfprof.py -D , -M 1.2 -T %d ./perfprof/pprof.csv ./perfprof/pprof.pdf -X \"Cost Ratio\" -P \"TSP Performance Profile\""
+#define PP_PLOT_EXACT_CMD "python3 ./perfprof/perfprof.py -D , -M 1.2 -T %lf ./perfprof/pprof.csv ./perfprof/pprof.pdf -X \"Time Ratio\" -P \"TSP Performance Profile\""
+#define PP_PLOT_HEUR_CMD "python3 ./perfprof/perfprof.py -D , -M 1.2 -T %lf ./perfprof/pprof.csv ./perfprof/pprof.pdf -X \"Cost Ratio\" -P \"TSP Performance Profile\""
+#define EXACT_METHODS_OFFSET PP___END_HEURISTIC
 
 /*
 * OV help section
@@ -23,7 +27,7 @@ void pp_help(void){
     printf("Performance profile options:\n");
 
     printf("\t-s, --seed  <seed_value>\tseed used for random generation (integer value)\n");
-    printf("\t-tl         <timelimit_value>\tset the execution time limit (in seconds) for an instance\n");
+    printf("\t-tl         <timelimit_value>\tset the execution time limit (in seconds) for an instance - default 30s\n");
 	printf("\t-n, --nodes <number_of_nodes>\tnumber of nodes for the random instances\n");
     printf("\t-h  --help\t\t\tto reach this section\n");
     printf("\n");
@@ -55,19 +59,36 @@ bool pp_validate(const Settings* set, CONF config){
 }/* pp_validate */
 
 /*
-* IP code of the algorithm
+* IP code of the heuristic algorithm
 * OR true if $code is a valid algorithm code, false otherwise
 */
-bool validateAlgCode(int code){
+bool validateHeurAlgCode(int code){
 
-	if(code < 1 || code == PP___END_HEURISTIC || PP___END_EXACT <= code){
+	if(code < 1 || code >= PP___END_HEURISTIC){
 		printf("\nError: Invalid algorithm code!\n");
 		return false;
 	}/* if */
 	
 	return true;
 
-}/* validateAlgCode */
+}/* validateHeurAlgCode */
+
+/*
+* IP partial_code code without offset of the exact algorithm
+* OR true if $code is a valid algorithm code, false otherwise
+*/
+bool validateExactAlgCode(int partial_code){
+
+	int code = partial_code + EXACT_METHODS_OFFSET;
+
+	if(partial_code < 1 || code >= PP___END_EXACT){
+		printf("\nError: Invalid algorithm code!\n");
+		return false;
+	}/* if */
+	
+	return true;
+
+}/* validateHeurAlgCode */
 
 /*
 * OV the random legend
@@ -138,11 +159,11 @@ void pp_nearest_neighbor_best_start_legend(void){
 }/* pp_nearest_neighbor_best_start_legend */
 
 /*
-* OV the legend
+* OV the heuristic algorithms legend
 */
-void pp_legend(void){
+void pp_heuristic_legend(void){
 	
-	printf("Available algorithms:\n");
+	printf("Available heuristic algorithms:\n");
 
 	pp_random_legend();
 	
@@ -151,6 +172,45 @@ void pp_legend(void){
 	pp_nearest_neighbor_random_node_legend();
 
 	pp_nearest_neighbor_best_start_legend();
+
+}/* pp_heuristic_legend */
+
+/*
+* OV the exact methods legend
+*/
+void pp_exact_legend(void){
+
+	printf("Available exact algorithms:\n");
+
+	printf("\t* BENDERS\n");
+    printf("\t\t- Code: %d, Algorithm: Benders loop\n", PP_BENDERS_NO_MIPSTART - EXACT_METHODS_OFFSET);
+    printf("\t\t- Code: %d, Algorithm: Benders loop + MIPSTART\n", PP_BENDERS_MIPSTART - EXACT_METHODS_OFFSET);
+	
+	printf("\t* BENDERS PATCH\n");
+    printf("\t\t- Code: %d, Algorithm: Benders patch\n", PP_BENDERS_PATCH_NO_MIPSTART - EXACT_METHODS_OFFSET);
+    printf("\t\t- Code: %d, Algorithm: Benders patch + MIPSTART\n", PP_BENDERS_PATCH_MIPSTART - EXACT_METHODS_OFFSET);
+
+	printf("\t* CANDIDATE CALLBACK\n");
+    printf("\t\t- Code: %d, Algorithm: Candidate callback\n", PP_CANDIDATE_CALLBACK_NO_MIPSTART - EXACT_METHODS_OFFSET);
+    printf("\t\t- Code: %d, Algorithm: Candidate callback + MIPSTART\n", PP_CANDIDATE_CALLBACK_MIPSTART - EXACT_METHODS_OFFSET);
+
+	printf("\t* USERCUT CALLBACK\n");
+    printf("\t\t- Code: %d, Algorithm: Usercut callback\n", PP_USERCUT_CALLBACK_NO_MIPSTART - EXACT_METHODS_OFFSET);
+    printf("\t\t- Code: %d, Algorithm: Usercut callback + MIPSTART\n", PP_USERCUT_CALLBACK_MIPSTART - EXACT_METHODS_OFFSET);
+    
+	printf("\n");
+
+}/* pp_exact_legend */
+
+/*
+* OV the legend
+*/
+void pp_legend(const PP_CONF* conf){
+	
+	if((*conf).isExact)
+		pp_exact_legend();
+	else
+		pp_heuristic_legend();
 
 }/* pp_legend */
 
@@ -162,9 +222,12 @@ bool readAlgorithms(PP_CONF* conf){
 	
 	bool result;
 
-	pp_legend();
+	pp_legend(conf);
 
-	result = readArrayDinaIntValidate("Insert the numer of algorithms you want to compare and their codes.\n\n", &((*conf).algs), (intvalidatorfunc)validateAlgCode);
+	if((*conf).isExact)
+		result = readArrayDinaIntValidate("Insert the numer of algorithms you want to compare and their codes.\n\n", &((*conf).algs), (intvalidatorfunc)validateExactAlgCode);
+	else
+		result = readArrayDinaIntValidate("Insert the numer of algorithms you want to compare and their codes.\n\n", &((*conf).algs), (intvalidatorfunc)validateHeurAlgCode);
 
 	if(!result)
 		return false;
@@ -192,6 +255,8 @@ bool readPPConfiguration(int argc, char* const* argv, PP_CONF* conf){
 	if(pp_validate(&((*conf).set), parseCMDLine(argc, argv, &((*conf).set))))
 		return true;
 	
+	(*conf).isExact = readBool("Do you want to compare exact methods? (yes/no): ");
+
 	return !readAlgorithms(conf);
 	
 }/* readConfiguration */
@@ -202,9 +267,10 @@ bool readPPConfiguration(int argc, char* const* argv, PP_CONF* conf){
 * OP sol solution
 * OR true if error, false otherwise
 */
-bool runPPAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol){
+bool runPPHeurAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol){
 
 	switch (alg){
+
 	    case PP_RANDOM:
 	        return offline_run_refinement(O_RANDOM, SKIP, inst, sol, set);
 		case PP_RANDOM_2OPT:
@@ -264,11 +330,67 @@ bool runPPAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* s
 			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, TABU_SAWTOO, inst, sol, set);
 		case PP_NEAREST_NEIGHBOR_BEST_START_VNS:
 			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, VNS, inst, sol, set);
-
+		
 	    default:
-	        printf("Error: Algorithm code not found.\n\n");
+	        printf("\nError: Algorithm code not found.\n");
 	        return true;
     }/* switch */
+	
+}/* runPPHeurAlg */
+
+/*
+* IP set settings to run
+* IP alg algorithm to run
+* OP sol solution
+* OP et execution time in seconds
+* OR true if error, false otherwise
+*/
+bool runPPExactAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol, double* et){
+
+	switch (alg){
+
+		case PP_BENDERS_NO_MIPSTART:
+			return optimize_offline(set, inst, false, BENDERS, sol, et);
+		case PP_BENDERS_MIPSTART:
+			return optimize_offline(set, inst, true, BENDERS, sol, et);
+
+		case PP_BENDERS_PATCH_NO_MIPSTART:
+			return optimize_offline(set, inst, false, BENDERS_PATCH, sol, et);
+		case PP_BENDERS_PATCH_MIPSTART:
+			return optimize_offline(set, inst, true, BENDERS_PATCH, sol, et);
+
+		case PP_CANDIDATE_CALLBACK_NO_MIPSTART:
+			return optimize_offline(set, inst, false, CANDIDATE_CALLBACK, sol, et);
+		case PP_CANDIDATE_CALLBACK_MIPSTART:
+			return optimize_offline(set, inst, true, CANDIDATE_CALLBACK, sol, et);
+
+		case PP_USERCUT_CALLBACK_NO_MIPSTART:
+			return optimize_offline(set, inst, false, USERCUT_CALLBACK, sol, et);
+		case PP_USERCUT_CALLBACK_MIPSTART:
+			return optimize_offline(set, inst, true, USERCUT_CALLBACK, sol, et);
+
+	    default:
+	        printf("\nError: Algorithm code not found.\n");
+	        return true;
+    }/* switch */
+
+}/* runPPExactAlg */
+
+/*
+* IP set settings to run
+* IP alg algorithm to run
+* OP sol solution
+* OP et execution time in seconds
+* OR true if error, false otherwise
+*/
+bool runPPAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol, double* et){
+	
+	if(alg < PP___END_HEURISTIC){
+		*et = (*set).tl;
+		return runPPHeurAlg(set, alg, inst, sol);
+	}/* if */
+
+	return runPPExactAlg(set, alg, inst, sol, et);
 
 }/* runPPAlg */
 
@@ -279,6 +401,9 @@ bool runPPAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* s
 void getAlgName(PP_ALG alg, char name[]){
 
 	switch (alg){
+		
+		/* HEURISTICS */
+
 	    case PP_RANDOM:
 	        sprintf(name, "rndm");
 			break;
@@ -366,9 +491,39 @@ void getAlgName(PP_ALG alg, char name[]){
 		case PP_NEAREST_NEIGHBOR_BEST_START_VNS:
 			sprintf(name, "nnbs_vns");
 			break;
+		
+		/* EXACTS */
+		
+		case PP_BENDERS_NO_MIPSTART:
+			sprintf(name, "benders");
+			break;
+		case PP_BENDERS_MIPSTART:
+			sprintf(name, "benders_mipstart");
+			break;
+
+		case PP_BENDERS_PATCH_NO_MIPSTART:
+			sprintf(name, "benders_patch");
+			break;
+		case PP_BENDERS_PATCH_MIPSTART:
+			sprintf(name, "benders_patch_mipstart");
+			break;
+
+		case PP_CANDIDATE_CALLBACK_NO_MIPSTART:
+			sprintf(name, "candidate_callback");
+			break;
+		case PP_CANDIDATE_CALLBACK_MIPSTART:
+			sprintf(name, "candidate_callback_mipstart");
+			break;
+
+		case PP_USERCUT_CALLBACK_NO_MIPSTART:
+			sprintf(name, "usercut_callback");
+			break;
+		case PP_USERCUT_CALLBACK_MIPSTART:
+			sprintf(name, "usercut_callback_mipstart");
+			break;
 
 	    default:
-	        printf("Error: Algorithm code not found.\n\n");
+	        printf("\nError: Algorithm code not found.\n");
 			sprintf(name, "UNKNOWN");
 
     }/* switch */
@@ -387,7 +542,16 @@ void writeHeader(const PP_CONF* conf, FILE *outF){
 	fprintf(outF, "%d", (*conf).algs.n);
 
 	for(i = 0; i < (*conf).algs.n; i++){
-		getAlgName((PP_ALG)(*conf).algs.v[i], name);
+		
+		PP_ALG alg;
+
+		if((*conf).isExact)
+			alg = (PP_ALG)((*conf).algs.v[i] + EXACT_METHODS_OFFSET);
+		else
+			alg = (PP_ALG)(*conf).algs.v[i];
+
+		getAlgName(alg, name);
+
 		fprintf(outF, ", %s", name);
 	}/* for */
 
@@ -402,6 +566,7 @@ void writeHeader(const PP_CONF* conf, FILE *outF){
 bool runPPConfiguration(const PP_CONF* conf){
 
 	int i, j;
+	double et;
 	char nametemp[MAX_FILE_NAME_SIZE];
 	TSPInstance inst;
 	TSPSolution sol;
@@ -421,7 +586,8 @@ bool runPPConfiguration(const PP_CONF* conf){
 
 	for(i = 0; i < NOF_TEST_INSTANCES; i++){
 
-		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%d_id%d", (*conf).set.n, (*conf).set.seed, (*conf).set.tl, i + 1);
+		sprintf(nametemp, "inst_nnodes%d_seed%d_tl%d_id%d", (*conf).set.n, (*conf).set.seed, (int)(*conf).set.tl, i + 1);
+
 		generateInstanceName(&((*conf).set), (i == 0), nametemp, &inst);
 
 		printf("* Working on instance %s\n", inst.name);
@@ -429,18 +595,28 @@ bool runPPConfiguration(const PP_CONF* conf){
 		fprintf(outF, "%s", inst.name);
 
 		for(j = 0; j < (*conf).algs.n; j++){
+			
+			PP_ALG alg;
 
-			getAlgName((PP_ALG)(*conf).algs.v[j], nametemp);
+			if((*conf).isExact)
+				alg = (PP_ALG)((*conf).algs.v[j] + EXACT_METHODS_OFFSET);
+			else
+				alg = (PP_ALG)(*conf).algs.v[j];
+
+			getAlgName(alg, nametemp);
 			printf("\t -> Running algorithm %s...\n", nametemp);
 
-			if(runPPAlg(&((*conf).set), (*conf).algs.v[j], &inst, &sol)){
+			if(runPPAlg(&((*conf).set), alg, &inst, &sol, &et)){
 				fclose(outF);
 				freeInst(&inst);
 				freeSol(&sol);
 				return true;
 			}/* if */
 			
-			fprintf(outF, ", %lf", sol.val);
+			if((*conf).isExact)
+				fprintf(outF, ", %lf", et);
+			else
+				fprintf(outF, ", %lf", sol.val);
 
 		}/* for */
 
@@ -464,7 +640,10 @@ void ppplot(const PP_CONF* conf){
 	
 	char cmd[MAX_FILE_NAME_SIZE * 5];
 	
-	sprintf(cmd, PP_PLOT_CMD, (*conf).set.tl);
+	if((*conf).isExact)
+		sprintf(cmd, PP_PLOT_EXACT_CMD, (*conf).set.tl);
+	else
+		sprintf(cmd, PP_PLOT_HEUR_CMD, (*conf).set.tl);
 
 	system(cmd);
 	
@@ -495,9 +674,8 @@ int main(int argc, char* const* argv){
 		return 0;
 	}/* if */
 
-	runPPConfiguration(&conf);
-
-	ppplot(&conf);
+	if(!runPPConfiguration(&conf))
+		ppplot(&conf);
 
 	freePPConf(&conf);
 

@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "utility.h"
 
@@ -405,3 +407,64 @@ void printError(const char err[]){
 double step(double x){
 	return x > 0 ? x : 0;
 }/* step */
+
+/*
+ * IOP str string to uppercase
+ */
+char* strupr(char* str){
+    
+    int i = 0;
+
+    while(str[i] != '\0'){
+        str[i] = toupper(str[i]);
+        i++;
+    }/* while */
+
+    return str;
+
+}/* strupr */
+
+/*
+* IP str string
+* IP arr array on which to search $str
+* IP n number of elements of $arr
+* OR index of $str in $arr, -1 if $str does not exists
+*/
+int strIndex(const char* str, const char* arr[], int n){
+    
+    int i = 0;
+
+    while(i < n){
+        if(strcmp(str, arr[i]) == 0)
+            return i;
+        i++;
+    }/* while */
+
+    return -1;
+
+}/* strIndex */
+
+/*
+* IP lab label for the output
+* OR boolean
+* The function will parse as a boolean any string in the list (no case sensitive):
+    ["Y", "YES", "TRUE", "N", "NO", "FALSE"]
+*/
+bool readBool(const char lab[]){
+    
+    int i = 0;
+    char str[MAX_STRING_LENGTH];
+    const char* arr[] = { "Y", "YES", "TRUE", "N", "NO", "FALSE" };
+    
+    do {
+        if(i < 0)
+            printf("Please choose one of the following values: \"y\", \"yes\", \"true\", \"n\", \"no\", \"false\"\n");
+
+        printf("%s", lab);
+        scanf("%s", str);
+                
+    } while ((i = strIndex(strupr(str), arr, 6)) < 0);
+    
+    return i < 3;
+
+}/* readBool */

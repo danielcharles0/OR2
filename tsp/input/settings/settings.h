@@ -13,7 +13,8 @@
 typedef struct{
 
     char input_file_name[MAX_FILE_NAME_SIZE];
-    int n, tl, seed;
+    int n, seed;
+	double tl;
     bool v;
     /* n    := number of nodes for the random instance */
     /* tl   := execution time limit (in seconds) */
