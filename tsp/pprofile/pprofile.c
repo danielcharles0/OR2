@@ -72,7 +72,7 @@ bool validateAlgCode(int code){
 /*
 * OV the random legend
 */
-void pp_random_legend(){
+void pp_random_legend(void){
 
 	printf("\t* Random\n");
     printf("\t\t- Code: %d, Algorithm: Just a random solution\n", PP_RANDOM);
@@ -89,7 +89,7 @@ void pp_random_legend(){
 /*
 * OV the nearest neighbor (start from first node version) legend
 */
-void pp_nearest_neighbor_first_node_legend(){
+void pp_nearest_neighbor_first_node_legend(void){
 
 	printf("\t* Nearest neighbor starting from the first node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from the first node\n", PP_NEAREST_NEIGHBOR_START_FIRST_NODE);
@@ -106,7 +106,7 @@ void pp_nearest_neighbor_first_node_legend(){
 /*
 * OV the nearest neighbor (start from random node version) legend
 */
-void pp_nearest_neighbor_random_node_legend(){
+void pp_nearest_neighbor_random_node_legend(void){
 
 	printf("\t* Nearest neighbor starting from a random node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from a random node\n", PP_NEAREST_NEIGHBOR_START_RANDOM_NODE);
@@ -123,7 +123,7 @@ void pp_nearest_neighbor_random_node_legend(){
 /*
 * OV the nearest neighbor (best start version) legend
 */
-void pp_nearest_neighbor_best_start_legend(){
+void pp_nearest_neighbor_best_start_legend(void){
 
 	printf("\t* Nearest neighbor best start\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor best start\n", PP_NEAREST_NEIGHBOR_BEST_START);
@@ -140,7 +140,7 @@ void pp_nearest_neighbor_best_start_legend(){
 /*
 * OV the legend
 */
-void pp_legend(){
+void pp_legend(void){
 	
 	printf("Available algorithms:\n");
 
