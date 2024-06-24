@@ -106,9 +106,15 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
 		build_sol_callback(cpx_inst, xstar);
 
-		patch(cpx_inst->set, cpx_inst->inst, cpx_inst->temp, &comp);
+		/* create temp sol to avoid race condition */
+		TSPSSolution temp;
+		allocSSol(cpx_inst->inst->dimension, &temp);
 
-		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+		cpSSol(cpx_inst->inst, cpx_inst->temp, &temp);
+
+		patch(cpx_inst->set, cpx_inst->inst, &temp, &comp);
+
+		convertSSol(cpx_inst->inst, &temp, &sol);
 
 		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
 
@@ -128,8 +134,8 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 			
 		}
 
+		freeSSol(&temp);
 		freeSol(&sol);
-
 
     } /* else we have a candidate solution but this can sometimes be improved, so we run 2opt and check validity -> NOT EFFICIENT */ 
 	/*else{
@@ -214,7 +220,7 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 
     optimize_model(inst, env, lp, &temp, &comp);
 
-	printf("\nTIME: %f\n", getSeconds(start));
+	printf("\n\tTIME: %f\n", getSeconds(start));
 
 	convertSSol(inst, &temp, sol);
 

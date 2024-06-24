@@ -366,6 +366,22 @@ void cpSol(const TSPInstance* inst, const TSPSolution* source, TSPSolution* dest
 }/* cpSol */
 
 /*
+* IP inst tsp instance
+* IP source solution we want to copy
+* OP destination solution that will be a copy of $source
+*/
+void cpSSol(const TSPInstance* inst, const TSPSSolution* source, TSPSSolution* destination){
+	
+	int i;
+
+	for(i = 0; i < (*inst).dimension; i++)
+		(*destination).succ[i] = (*source).succ[i];
+	
+	(*destination).val = (*source).val;
+
+}/* cpSSol */
+
+/*
 * Check that each element of the array appears once.
 * IP n dimension of the array
 * IP arr array
