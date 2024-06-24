@@ -98,18 +98,17 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
 
-    } else{
-
+		/* Patching and posting the solution */
 		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
 
 		TSPSolution sol;
 		allocSol(cpx_inst->inst->dimension, &sol);
 
 		build_sol_callback(cpx_inst, xstar);
-		
+
+		patch(cpx_inst->set, cpx_inst->inst, cpx_inst->temp, &comp);
+
 		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
-		
-		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
 
 		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
 
@@ -130,8 +129,43 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 		}
 
 		freeSol(&sol);
+
+
+    } /* else we have a candidate solution but this can sometimes be improved, so we run 2opt and check validity -> NOT EFFICIENT */ 
+	/*else{
+
+		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
+
+		TSPSolution sol;
+		allocSol(cpx_inst->inst->dimension, &sol);
+
+		build_sol_callback(cpx_inst, xstar);
 		
-    }
+		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+		
+		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
+
+		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); *//* Reusing xstar to not make memory explode with other allocations */
+		/*
+		if(checkSol(cpx_inst->inst, &sol)){
+
+			for(int i = 0; i < cpx_inst->inst->dimension; i++){
+				
+				int index = xpos(sol.path[i], sol.path[(i+1) % cpx_inst->inst->dimension], cpx_inst->inst);
+				xstar[index] = 1.0;
+
+			}	
+
+			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
+				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
+				exit(1);
+			}
+			
+		}
+
+		freeSol(&sol);
+		
+    }*/
     
     free(xstar);
     freeComp(&comp);
@@ -179,6 +213,8 @@ int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	}	
 
     optimize_model(inst, env, lp, &temp, &comp);
+
+	printf("\nTIME: %f\n", getSeconds(start));
 
 	convertSSol(inst, &temp, sol);
 

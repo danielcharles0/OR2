@@ -242,6 +242,8 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 
 	}/* while */
 
+	printf("\nTIME: %f\n", getSeconds(start));
+
 	if(!err){
 		if(comp.nc != 1){
 			Settings s;
