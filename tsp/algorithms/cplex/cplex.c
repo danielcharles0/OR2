@@ -79,7 +79,7 @@ void print_status(CPXENVptr env, CPXLPptr lp)
 
 	s = getStatus(env, lp, buffer);
 
-	printf("\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
+	printf("\n\nSTATUS CODE: %d\nMESSAGE: %s\n\n", s, buffer);
 
 	fflush(NULL); 
 
@@ -446,6 +446,24 @@ void freeComp(COMP *comp){
 }/* freeComp */
 
 /*
+ * This function will build the TSP successors solution starting from the given CPLEX xstar solution
+ * 
+ * IP inst input instance
+ * IP xstar solution found by CPLEX
+ * OP sol solution to evaluate ( assume that the solution was already initialized )
+ * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
+ */
+void build_sol_xstar(const TSPInstance *inst, const double *xstar, TSPSSolution *sol, COMP *comp){
+	
+	instance finst = { .nnodes = (*inst).dimension };
+	
+	build_sol_fischetti(xstar, &finst, (*sol).succ, (*comp).map, &((*comp).nc));
+	
+	(*sol).val = getSSolCost(inst, sol);
+
+}/* build_sol_xstar */
+
+/*
  * IP inst input instance
  * IP env CPLEX environment
  * IP lp CPLEX linear program
@@ -457,7 +475,6 @@ int build_sol(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution 
 
 	int err, ncols = CPXgetnumcols(env, lp);
 	double *xstar;
-	instance finst = { .nnodes = (*inst).dimension };
 
 	xstar = malloc(ncols * sizeof(double));
 	assert(xstar != NULL);
@@ -468,36 +485,13 @@ int build_sol(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolution 
 		return err;
 	} /* if */
 
-	build_sol_fischetti(xstar, &finst, (*sol).succ, (*comp).map, &((*comp).nc));
-	(*sol).val = getSSolCost(inst, sol);
+	build_sol_xstar(inst, xstar, sol, comp);
 
 	free(xstar);
 
 	return 0;
 
 }/* build_sol */
-
-/*
- * IP cpx_inst input instance
- * IP xstar CPLEX solution
- */
-int build_sol_callback(const CPXInstance* cpx_inst, double* xstar){
-
-	instance finst = { .nnodes = cpx_inst->inst->dimension };
-
-	TSPSSolution* sol = cpx_inst->temp;
-
-	COMP comp;
-	allocComp(cpx_inst->inst->dimension, &comp);
-
-	build_sol_fischetti(xstar, &finst, (*sol).succ, comp.map, &(comp.nc));
-	(*sol).val = getSSolCost(cpx_inst->inst, sol);
-
-	freeComp(&comp);
-
-	return 0;
-
-}/* build_sol_callback */
 
 /*
 * IP sol solution
@@ -596,6 +590,7 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 	double et;
 
 	bool start = readBool("Would you like a MIP start? (yes/no): ");
+	printf("\n");
 
 	exactAlgorithmLegend();
 
@@ -606,28 +601,29 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 /*
 * Initializes CPXinstance passed in input
 *
-* IP cpx_inst cplex instance to be initialized
+* OP cpx_inst cplex instance to be initialized
 * IP tsp_inst tsp instance to be passed to cplex instance
-* IP numCols number of columns of the variables table used by CPLEX
 * IP temp temporary succ solution to be used in callbacks
 * IP env cplex environment
 * IP lp cplex lp
 */
-void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, int numCols, TSPSSolution* temp, CPXENVptr env, CPXLPptr lp){
+void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, CPXENVptr env, CPXLPptr lp){
 
 	int k = 0;
 
-	int* ind = (int*) malloc(numCols * sizeof(int));
-	assert(ind != NULL);
-
+	(*cpx_inst).ncols = CPXgetnumcols(env, lp);
+	
+	cpx_inst->indices = malloc((*cpx_inst).ncols * sizeof(int));
+	assert(cpx_inst->indices != NULL);
+	
 	for(int i = 0; i < tsp_inst->dimension - 1; i++)
-		for(int j = i + 1; j < tsp_inst->dimension; j++)
-			ind[k++] = xpos(i, j, tsp_inst);
-
+		for(int j = i + 1; j < tsp_inst->dimension; j++){
+			cpx_inst->indices[k] = k;
+			k++;
+		}/* for */
+	
 	cpx_inst->inst = tsp_inst;
-	cpx_inst->temp = temp;
-	cpx_inst->ncols = numCols;
-	cpx_inst->indices = ind;
+	
 	cpx_inst->env = env;
 	cpx_inst->lp = lp;
 	cpx_inst->set = set;
@@ -638,27 +634,10 @@ void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInsta
 * IP cpx_inst instance to free
 */
 void freeCPXInstance(CPXInstance* cpx_inst){
-
+	
 	free(cpx_inst->indices);
 
 }/* freeCPXInstance */
-
-/*
- * IP cpx_inst cplex instance
- * OP comp array of components assumed to be initialized. It can be NULL if we don't need to compute the components.
- */
-void build_comp(CPXInstance* cpx_inst, double* xstar, COMP* comp){
-	
-	int* temp = malloc(cpx_inst->inst->dimension * sizeof(int));
-	assert(temp != NULL);
-
-	instance finst = { .nnodes = cpx_inst->inst->dimension };
-
-	build_sol_fischetti(xstar, &finst, temp, (*comp).map, &((*comp).nc));
-
-	free(temp);
-
-}/* build_comp */
 
 /*
 * Generates a solution with Nearest Neighbor + 2opt algorithms
@@ -730,3 +709,78 @@ int mip_start(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLP
 	return 0;
 
 }/* mip_start */
+
+/*
+* IP inst tsp instance
+* IP sol TSP path solution to be converted into CPLEX format
+* IP cpx_ncols number of columns of the cplex model
+* OP cpx_cols values of the CPLEX variables assumed to be initialized
+*/
+void convertCPXSol(const TSPInstance* inst, const TSPSolution* sol, int cpx_ncols, double* cpx_cols){
+	
+	int i;
+
+	for(i = 0; i < cpx_ncols; i++)
+		cpx_cols[i] = 0.0;
+
+	for(i = 0; i < (*inst).dimension; i++){
+		int idx = xpos((*sol).path[i], (*sol).path[(i + 1) % (*inst).dimension], inst);
+		cpx_cols[idx] = 1.0;
+	}/* for */
+
+}/* convertCPXSol */
+
+/*
+* This method will refine the solution found and post it
+*
+* IP cpx_inst CPLEX instance
+* IP ctx CPLEX callback context, handled internally by CPLEX
+* IOP sol TSP path solution to be refined and posted
+*/
+void postSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, TSPSolution* sol){
+	
+	int err;
+	double* cpx_cols;
+
+	opt2((*cpx_inst).set, (*cpx_inst).inst, sol);
+
+	if(!checkSol((*cpx_inst).inst, sol)){
+		if((*(*cpx_inst).set).v)
+			printf("\n\nInvalid solution! Exiting at postSol().\n");
+		exit(1);
+	}/* if */
+
+	cpx_cols = malloc(cpx_inst->ncols * sizeof(double));
+	assert(cpx_cols != NULL);
+
+	convertCPXSol((cpx_inst)->inst, sol, cpx_inst->ncols, cpx_cols);
+
+	if((err = CPXcallbackpostheursoln(ctx, cpx_inst->ncols, cpx_inst->indices, cpx_cols, (*sol).val, CPXCALLBACKSOLUTION_NOCHECK))){
+		print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
+		exit(1);
+	}/* if */
+
+	free(cpx_cols);
+
+}/* postSol */
+
+/*
+* This method will refine the solution found and post it
+*
+* IP cpx_inst CPLEX instance
+* IP ctx CPLEX callback context, handled internally by CPLEX
+* IP ssol TSP succ solution to be posted
+*/
+void postCPXSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, const TSPSSolution* ssol){
+	
+	TSPSolution sol;
+	
+	allocSol((*(*cpx_inst).inst).dimension, &sol);
+
+	convertSSol((*cpx_inst).inst, ssol, &sol);
+
+	postSol(cpx_inst, ctx, &sol);
+
+	freeSol(&sol);
+
+}/* postSSol */

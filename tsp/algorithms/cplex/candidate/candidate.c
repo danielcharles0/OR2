@@ -30,7 +30,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 
 	double* vls = malloc(ncols * sizeof(double));
 	assert(vls != NULL);
-
+	
 	for(int k = 1; k <= (*comp).nc; k++){
 
 		const int zero = 0;
@@ -52,15 +52,15 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 			}/* if */
 		
 		if(nnz > 0) /* means that the solution is infeasible and a violated cut has been found */
-		{	
 			if ((err = CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &zero, idxs, vls))){
-				print_error("CPXcallbackrejectcandidate() error", err, env, lp); 
+				print_error("CPXcallbackrejectcandidate() error", err, env, lp);
+				free(vls);
+				free(idxs);
 				exit(1);
 			}
-		}
 
 	}/* for */
-
+	
 	free(vls);
 	free(idxs);
 
@@ -76,65 +76,36 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 * IOP userhandle pointer to a structure external to CPLEX
 */
 static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
-
-    CPXInstance* cpx_inst = (CPXInstance*) userhandle; 
-    double objval = CPX_INFBOUND;
-    int err = 0;
+	
+	int err = 0;
+	double objval = CPX_INFBOUND;
     
-    COMP comp;
-    allocComp(cpx_inst->inst->dimension, &comp);
+	COMP comp;
+	TSPSSolution temp;
+	CPXInstance* cpx_inst = (CPXInstance*) userhandle;
 
     double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
     assert(xstar != NULL);
 
-    if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){ 
+    if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){
         print_error("CPXcallbackgetcandidatepoint error", err, cpx_inst->env, cpx_inst->lp);
+		free(xstar);
         exit(1);
-    }
+    }/* if */
 
-    build_comp(cpx_inst, xstar, &comp);
-
-    if(comp.nc > 1){
-
+	allocSSol(cpx_inst->inst->dimension, &temp);
+    allocComp(cpx_inst->inst->dimension, &comp);
+	
+	build_sol_xstar((*cpx_inst).inst, xstar, &temp, &comp);
+	
+    if(comp.nc > 1)
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-
-    } else{
-
-		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
-
-		TSPSolution sol;
-		allocSol(cpx_inst->inst->dimension, &sol);
-
-		build_sol_callback(cpx_inst, xstar);
-		
-		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
-		
-		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
-
-		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
-
-		if(checkSol(cpx_inst->inst, &sol)){
-
-			for(int i = 0; i < cpx_inst->inst->dimension; i++){
-				
-				int index = xpos(sol.path[i], sol.path[(i+1) % cpx_inst->inst->dimension], cpx_inst->inst);
-				xstar[index] = 1.0;
-
-			}	
-
-			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
-				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
-				exit(1);
-			}
-			
-		}
-
-		freeSol(&sol);
-		
-    }
+    else
+		postCPXSol(cpx_inst, context, &temp);
     
-    free(xstar);
     freeComp(&comp);
+	freeSSol(&temp);
+	free(xstar);
 
     return 0;
 
@@ -154,40 +125,40 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 */
 int candidate(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start, double* et){
 
-    CPXLONG context_id = CPX_CALLBACKCONTEXT_CANDIDATE;
 	int err = 0;
 	clock_t start = clock();
 
 	COMP comp;
-	allocComp(inst->dimension, &comp);
-
 	TSPSSolution temp;
-	allocSSol(inst->dimension, &temp);
-
 	CPXInstance cpx_inst;
-	allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
 
 	if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
         update_time_limit(set, start, env, lp);
-    }
+    }/* if */
 
-    if((err = CPXcallbacksetfunc(env, lp, context_id, checkCandidateSol, &cpx_inst))){
+	allocCPXInstance(&cpx_inst, set, inst, env, lp);
+	
+    if((err = CPXcallbacksetfunc(env, lp, CPX_CALLBACKCONTEXT_CANDIDATE, checkCandidateSol, &cpx_inst))){
         print_error("CPXcallbacksetfunc() error", err, env, lp);
+		freeCPXInstance(&cpx_inst);
 		return err;
-	}	
+	}/* if */
+
+	allocComp(inst->dimension, &comp);
+	allocSSol(inst->dimension, &temp);
 
     optimize_model(inst, env, lp, &temp, &comp);
-
+	
 	convertSSol(inst, &temp, sol);
-
-	freeCPXInstance(&cpx_inst);
+	
 	freeSSol(&temp);
 	freeComp(&comp);
+	freeCPXInstance(&cpx_inst);
 
 	*et = getSeconds(start);
 
-	return 0;
+	return err;
 
 }/* candidate */

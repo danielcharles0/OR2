@@ -167,11 +167,15 @@ void allocSol(int n, TSPSolution* sol){
 
 /*
 * IP n number of nodes of the instance
-* IP sol solution to initialize
+* IP ssol solution to initialize
 */
-void allocSSol(int n, TSPSSolution* sol){
+void allocSSol(int n, TSPSSolution* ssol){
+	
+	TSPSolution sol;
 
-    allocSol(n, (TSPSolution*)sol);
+    allocSol(n, &sol);
+
+	ssol->succ = sol.path;
 
 }/* allocSSol */
 
@@ -183,10 +187,16 @@ void freeSol(TSPSolution* sol){
 }/* freeSol */
 
 /*
-* IOP sol solution to free memory
+* IOP ssol solution to free memory
 */
-void freeSSol(TSPSSolution* sol){
-    freeSol((TSPSolution*)sol);
+void freeSSol(TSPSSolution* ssol){
+	
+	TSPSolution sol;
+
+	sol.path = ssol->succ;
+    
+	freeSol(&sol);
+
 }/* freeSSol */
 
 /*

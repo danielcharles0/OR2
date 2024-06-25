@@ -28,13 +28,13 @@ typedef struct{
 
 typedef struct{
 
-    const TSPInstance* inst;
-    const Settings* set;
     int ncols;
     int* indices;
-    TSPSSolution* temp;
-    CPXENVptr env;
-    CPXLPptr lp;
+
+	CPXLPptr lp;
+	CPXENVptr env;
+	const Settings* set;
+	const TSPInstance* inst;
 
 } CPXInstance;
 
@@ -58,12 +58,12 @@ int optimize_model(const TSPInstance*, CPXENVptr, CPXLPptr, TSPSSolution*, COMP*
 
 double solGap(const TSPSolution*, double);
 
-void allocCPXInstance(CPXInstance*, const Settings*, const TSPInstance*, int, TSPSSolution*, CPXENVptr, CPXLPptr);
+void allocCPXInstance(CPXInstance*, const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
 
 void freeCPXInstance(CPXInstance*);
 
-void build_comp(CPXInstance*, double*, COMP*);
-
 int mip_start(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
 
-int build_sol_callback(const CPXInstance*, double*);
+void build_sol_xstar(const TSPInstance*, const double*, TSPSSolution*, COMP*);
+
+void postCPXSol(const CPXInstance*, CPXCALLBACKCONTEXTptr, const TSPSSolution*);

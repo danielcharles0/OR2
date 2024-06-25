@@ -139,32 +139,36 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 	int err = 0;
 	
 	COMP comp;
-	allocComp(cpx_inst->inst->dimension, &comp);
+	TSPSSolution temp;
 
 	double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
     assert(xstar != NULL);
 
     if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){ 
-        print_error("CPXcallbackgetcandidatepoint() error", err, cpx_inst->env, cpx_inst->lp);
+        
+		print_error("CPXcallbackgetcandidatepoint() error", err, cpx_inst->env, cpx_inst->lp);
+		
+		free(xstar);
+
 		exit(1);
-	}
+	}/* if */
 
-	build_comp(cpx_inst, xstar, &comp);
+	allocComp(cpx_inst->inst->dimension, &comp);
+	allocSSol(cpx_inst->inst->dimension, &temp);
 
-	if(comp.nc > 1){
+	build_sol_xstar((*cpx_inst).inst, xstar, &temp, &comp);
 
+	if(comp.nc > 1)
         add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-
-    } else{
+    else{
 
 		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
 
 		TSPSolution sol;
-		allocSol(cpx_inst->inst->dimension, &sol);
 
-		build_sol_callback(cpx_inst, xstar);
+		allocSol(cpx_inst->inst->dimension, &sol);
 		
-		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
+		convertSSol(cpx_inst->inst, &temp, &sol);
 		
 		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
 
@@ -192,6 +196,7 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
     
     free(xstar);
 	freeComp(&comp);
+	freeSSol(&temp);
 
 	return 0;
 
@@ -327,13 +332,12 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     clock_t start = clock();
 
     COMP comp;
-    allocComp(inst->dimension, &comp);
-
-    TSPSSolution temp;
-    allocSSol(inst->dimension, &temp);
-
+	TSPSSolution temp;
     CPXInstance cpx_inst;
-    allocCPXInstance(&cpx_inst, set, inst, CPXgetnumcols(env, lp), &temp, env, lp);
+
+	allocComp(inst->dimension, &comp);
+	allocSSol(inst->dimension, &temp);
+    allocCPXInstance(&cpx_inst, set, inst, env, lp);
 
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
@@ -353,7 +357,7 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
     convertSSol(inst, &temp, sol);
 
     freeCPXInstance(&cpx_inst);
-    freeSSol(&temp);
+	freeSSol(&temp);
     freeComp(&comp);
 
 	*et = getSeconds(start);
