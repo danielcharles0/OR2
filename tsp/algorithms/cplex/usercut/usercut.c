@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "usercut.h"
+#include "../candidate/candidate.h"
 #include "../cplex.h"
 #include "concorde.h"
 #include "../candidate/candidate.h"
@@ -126,116 +127,10 @@ static int add_SEC_relaxation(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr conte
 }/* add_SEC_relaxation */
 
 /*
-* Checks candidate solution
-*
-* IP context CPLEX callback context, handled internally by CPLEX
-* IP context_id id of the callback context
-* IOP userhandle pointer to a structure external to CPLEX
+* Just a static proxy
 */
-static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
-
-    CPXInstance* cpx_inst = (CPXInstance*) userhandle; 
-    double objval = CPX_INFBOUND;
-	int err = 0;
-	
-	COMP comp;
-	TSPSSolution temp;
-
-    double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
-    assert(xstar != NULL);
-
-    if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){ 
-        
-		print_error("CPXcallbackgetcandidatepoint() error", err, cpx_inst->env, cpx_inst->lp);
-		
-		free(xstar);
-
-		exit(1);
-	}/* if */
-
-	allocComp(cpx_inst->inst->dimension, &comp);
-	allocSSol(cpx_inst->inst->dimension, &temp);
-
-	build_sol_xstar((*cpx_inst).inst, xstar, &temp, &comp);
-
-	if(comp.nc > 1)
-        add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-    else{
-
-		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
-
-		TSPSolution sol;
-
-		allocSol(cpx_inst->inst->dimension, &sol);
-		
-		convertSSol(cpx_inst->inst, &temp, &sol);
-		
-		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
-
-		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); /* Reusing xstar to not make memory explode with other allocations */
-
-		if(checkSol(cpx_inst->inst, &sol)){
-
-			for(int i = 0; i < cpx_inst->inst->dimension; i++){
-				
-				int index = xpos(sol.path[i], sol.path[(i+1) % cpx_inst->inst->dimension], cpx_inst->inst);
-				xstar[index] = 1.0;
-
-			}	
-
-			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
-				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
-				exit(1);
-			}
-			
-		}
-
-        freeSSol(&temp);
-		freeSol(&sol);
-
-
-    } /* else we have a candidate solution but this can sometimes be improved, so we run 2opt and check validity -> NOT EFFICIENT */ 
-	/*else{
-
-		CPXCALLBACKSOLUTIONSTRATEGY strat = CPXCALLBACKSOLUTION_NOCHECK;
-
-		TSPSolution sol;
-		allocSol(cpx_inst->inst->dimension, &sol);
-
-		build_sol_callback(cpx_inst, xstar);
-		
-		convertSSol(cpx_inst->inst, cpx_inst->temp, &sol);
-		
-		opt2(cpx_inst->set, cpx_inst->inst, &sol); 
-
-		memset(xstar, 0.0, cpx_inst->ncols * sizeof(double)); *//* Reusing xstar to not make memory explode with other allocations */
-		/*
-		if(checkSol(cpx_inst->inst, &sol)){
-
-			for(int i = 0; i < cpx_inst->inst->dimension; i++){
-				
-				int index = xpos(sol.path[i], sol.path[(i+1) % cpx_inst->inst->dimension], cpx_inst->inst);
-				xstar[index] = 1.0;
-
-			}	
-
-			if((err = CPXcallbackpostheursoln(context, cpx_inst->ncols, cpx_inst->indices, xstar, sol.val, strat))){
-				print_error("CPXcallbackpostheursoln() error", err, cpx_inst->env, cpx_inst->lp);
-				exit(1);
-			}
-			
-		}
-
-		freeSol(&sol);
-		
-    }*/
-    
-    free(xstar);
-	freeComp(&comp);
-	freeSSol(&temp);
-
-    return 0;
-
+static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, CPXInstance* cpx_inst){
+	return checkCandidateSSol(context, context_id, cpx_inst);
 }/* checkCandidateSol */
 
 /*
@@ -245,9 +140,8 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 * IP context_id id of the callback context
 * IOP userhandle pointer to a structure external to CPLEX
 */
-static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
+static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, CPXInstance* cpx_inst){
 
-    CPXInstance* cpx_inst = (CPXInstance*) userhandle; 
 	int err = 0;
 	int ncomp = 0;
 
@@ -339,12 +233,12 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 * IP context_id id of the callback context
 * IOP userhandle pointer to a structure external to CPLEX
 */
-static int CPXPUBLIC dispatcher(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
+static int CPXPUBLIC dispatcher(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void* userhandle){
 
     if(context_id == CPX_CALLBACKCONTEXT_CANDIDATE)
-        return checkCandidateSol(context, context_id, userhandle);
+        return checkCandidateSol(context, context_id, (CPXInstance*)userhandle);
     else if ( context_id == CPX_CALLBACKCONTEXT_RELAXATION)
-        return checkRelaxedSol(context, context_id, userhandle);
+        return checkRelaxedSol(context, context_id, (CPXInstance*)userhandle);
        
     return 0;
 
@@ -371,32 +265,32 @@ int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	TSPSSolution temp;
     CPXInstance cpx_inst;
 
-	allocComp(inst->dimension, &comp);
-	allocSSol(inst->dimension, &temp);
-    allocCPXInstance(&cpx_inst, set, inst, env, lp);
-
     if(warm_start){
         if((err = mip_start(set, inst, env, lp)))
             return err;
         update_time_limit(set, start, env, lp);
-    }
+    }/* if */
+
+    allocCPXInstance(&cpx_inst, set, inst, env, lp);
 
     CPXLONG context = CPX_CALLBACKCONTEXT_CANDIDATE | CPX_CALLBACKCONTEXT_RELAXATION;
 
     if((err = CPXcallbacksetfunc(env, lp, context, dispatcher, &cpx_inst))){
         print_error("CPXcallbacksetfunc() error: dispatcher", err, env, lp);
+		freeCPXInstance(&cpx_inst);
         return err;
-    }
+    }/* if */
+
+	allocComp(inst->dimension, &comp);
+	allocSSol(inst->dimension, &temp);
 
     optimize_model(inst, env, lp, &temp, &comp);
 
-    printf("\n\tTIME: %f\n", getSeconds(start));
-
     convertSSol(inst, &temp, sol);
-
-    freeCPXInstance(&cpx_inst);
+    
 	freeSSol(&temp);
     freeComp(&comp);
+	freeCPXInstance(&cpx_inst);
 
 	*et = getSeconds(start);
 

@@ -57,7 +57,7 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 				free(vls);
 				free(idxs);
 				exit(1);
-			}
+			}/* if */
 
 	}/* for */
 	
@@ -75,14 +75,13 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 * IP context_id id of the callback context
 * IOP userhandle pointer to a structure external to CPLEX
 */
-static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void *userhandle){
+int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, CPXInstance* cpx_inst){
 	
 	int err = 0;
 	double objval = CPX_INFBOUND;
     
 	COMP comp;
 	TSPSSolution temp;
-	CPXInstance* cpx_inst = (CPXInstance*) userhandle;
 
     double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
     assert(xstar != NULL);
@@ -109,6 +108,13 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 
     return 0;
 
+}/* checkCandidateSSol */
+
+/*
+* Just a static proxy
+*/
+static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, void* userhandle){
+	return checkCandidateSSol(context, context_id, (CPXInstance*)userhandle);
 }/* checkCandidateSol */
 
 /*
