@@ -77,34 +77,30 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 */
 int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, CPXInstance* cpx_inst){
 	
-	int err = 0;
-	double objval = CPX_INFBOUND;
-    
-	COMP comp;
-	TSPSSolution temp;
+	int err = 0, thread_id;
+	double objval = CPX_INFBOUND, *xstar;
 
-    double* xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
-    assert(xstar != NULL);
+	COMP* comp;
+	TSPSSolution* temp;
+
+	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &thread_id);
+
+	xstar = cpx_inst->xstars[thread_id];
 
     if((err = CPXcallbackgetcandidatepoint(context, xstar, 0, cpx_inst->ncols - 1, &objval))){
         print_error("CPXcallbackgetcandidatepoint error", err, cpx_inst->env, cpx_inst->lp);
-		free(xstar);
         exit(1);
     }/* if */
 
-	allocSSol(cpx_inst->inst->dimension, &temp);
-    allocComp(cpx_inst->inst->dimension, &comp);
+	temp = &(cpx_inst->ssols[thread_id]);
+    comp = &((*cpx_inst).comps[thread_id]);
 	
-	build_sol_xstar((*cpx_inst).inst, xstar, &temp, &comp);
+	build_sol_xstar((*cpx_inst).inst, xstar, temp, comp);
 	
-    if(comp.nc > 1)
-        add_SEC_candidate(cpx_inst->inst, &comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+    if((*comp).nc > 1)
+        add_SEC_candidate(cpx_inst->inst, comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
     else
-		postCPXSol(cpx_inst, context, &temp);
-    
-    freeComp(&comp);
-	freeSSol(&temp);
-	free(xstar);
+		postCPXSol(cpx_inst, context, temp);
 
     return 0;
 

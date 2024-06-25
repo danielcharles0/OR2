@@ -657,19 +657,45 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 */
 void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, CPXENVptr env, CPXLPptr lp){
 
-	int k = 0;
+	int i, k = 0, cc = get_hardware_concurrency();
 
 	(*cpx_inst).ncols = CPXgetnumcols(env, lp);
 	
 	cpx_inst->indices = malloc((*cpx_inst).ncols * sizeof(int));
 	assert(cpx_inst->indices != NULL);
+
+	cpx_inst->xstars = malloc(cc * sizeof(double*));
+	assert(cpx_inst->xstars != NULL);
+
+	for(i = 0; i < cc; i++){
+		cpx_inst->xstars[i] = malloc(cpx_inst->ncols * sizeof(double));  
+    	assert(cpx_inst->xstars[i] != NULL);
+	}/* for */
 	
-	for(int i = 0; i < tsp_inst->dimension - 1; i++)
+	for(i = 0; i < tsp_inst->dimension - 1; i++)
 		for(int j = i + 1; j < tsp_inst->dimension; j++){
 			cpx_inst->indices[k] = k;
 			k++;
 		}/* for */
-	
+
+	(*cpx_inst).ssols = malloc(cc * sizeof(TSPSSolution));
+	assert((*cpx_inst).ssols != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocSSol(tsp_inst->dimension, &((*cpx_inst).ssols[i]));
+
+	(*cpx_inst).sols = malloc(cc * sizeof(TSPSolution));
+	assert((*cpx_inst).sols != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocSol(tsp_inst->dimension, &((*cpx_inst).sols[i]));
+
+	(*cpx_inst).comps = malloc(cc * sizeof(COMP));
+	assert((*cpx_inst).comps != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocComp(tsp_inst->dimension, &((*cpx_inst).comps[i]));
+
 	cpx_inst->inst = tsp_inst;
 	
 	cpx_inst->env = env;
@@ -683,6 +709,28 @@ void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInsta
 */
 void freeCPXInstance(CPXInstance* cpx_inst){
 	
+	int i, cc = get_hardware_concurrency();
+
+	for(i = 0; i < cc; i++)
+		freeComp(&((*cpx_inst).comps[i]));
+
+	free((*cpx_inst).comps);
+
+	for(i = 0; i < cc; i++)
+		freeSol(&((*cpx_inst).sols[i]));
+
+	free((*cpx_inst).sols);
+
+	for(i = 0; i < cc; i++)
+		freeSSol(&((*cpx_inst).ssols[i]));
+
+	free((*cpx_inst).ssols);
+
+	for(i = 0; i < cc; i++)
+		free(cpx_inst->xstars[i]);
+
+	free(cpx_inst->xstars);
+
 	free(cpx_inst->indices);
 
 }/* freeCPXInstance */

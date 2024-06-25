@@ -35,6 +35,12 @@ typedef struct{
 	CPXENVptr env;
 	const Settings* set;
 	const TSPInstance* inst;
+	
+	/* Working memory allocated just once */
+	TSPSolution* sols;
+	TSPSSolution* ssols;
+	COMP* comps;
+	double** xstars;
 
 } CPXInstance;
 
