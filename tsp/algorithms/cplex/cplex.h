@@ -38,6 +38,16 @@ typedef struct{
 
 } CPXInstance;
 
+/*
+* Installs the candidate callback
+*
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* OP cpx_inst cplex instance
+* OR error code
+*/
+typedef int (*callback_installer)(CPXENVptr, CPXLPptr, CPXInstance*);
+
 int optimize(const Settings*, const TSPInstance*, TSPSolution*);
 
 int optimize_offline(const Settings*, const TSPInstance*, bool, EXACTS, TSPSolution*, double*);

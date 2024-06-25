@@ -384,6 +384,54 @@ void exactAlgorithmLegend(void){
 }/* exactAlgorithmLegend */
 
 /*
+* Installs the callbacks and runs the solver.
+*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* IP callback_installer
+* IOP sol solution to be updated
+* IP warm_start true if MIPSTART is required
+* OP et execution time in seconds
+* OR error code
+*/
+int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, callback_installer ci, TSPSolution* sol, bool warm_start, double* et){
+
+    int err = 0;
+    clock_t start = clock();
+
+    COMP comp;
+	TSPSSolution temp;
+    CPXInstance cpx_inst;
+
+    if(warm_start){
+        if((err = mip_start(set, inst, env, lp)))
+            return err;
+        update_time_limit(set, start, env, lp);
+    }/* if */
+
+	ci(env, lp, &cpx_inst);
+
+    allocCPXInstance(&cpx_inst, set, inst, env, lp);
+	allocComp(inst->dimension, &comp);
+	allocSSol(inst->dimension, &temp);
+
+    optimize_model(inst, env, lp, &temp, &comp);
+
+    convertSSol(inst, &temp, sol);
+    
+	freeSSol(&temp);
+    freeComp(&comp);
+	freeCPXInstance(&cpx_inst);
+
+	*et = getSeconds(start);
+
+    return 0;
+
+}/* callback_solver */
+
+/*
 * IP set settings
 * IP inst tsp instance
 * IP env CPLEX environment
@@ -401,7 +449,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 		case BENDERS_PATCH:
 			return benders(set, inst, env, lp, sol, (patchfunc)patch, start, et);
 		case CANDIDATE_CALLBACK:
-			return candidate(set, inst, env, lp, sol, start, et);
+			return callback_solver(set, inst, env, lp, (callback_installer)candidate, sol, start, et);
 		case USERCUT_CALLBACK:
 			return usercut(set, inst, env, lp, sol, start, et);
 	    default:
