@@ -11,6 +11,8 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include "utility.h"
 
@@ -468,3 +470,31 @@ bool readBool(const char lab[]){
     return i < 3;
 
 }/* readBool */
+
+/*
+* Function to know number of threads of the machine. For MacOS only.
+*/
+unsigned int get_hardware_concurrency(void) {
+    
+    int nm[2];
+    size_t len = 4;
+    uint32_t count;
+
+    nm[0] = CTL_HW;
+    nm[1] = HW_AVAILCPU;
+
+    sysctl(nm, 2, &count, &len, NULL, 0);
+
+    if (count < 1) {
+
+        nm[1] = HW_NCPU;
+        sysctl(nm, 2, &count, &len, NULL, 0);
+
+        if (count < 1)
+            count = 1; 
+
+    }
+
+    return count;
+
+}/* get_hardware_concurrency */
