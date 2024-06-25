@@ -62,3 +62,5 @@ double step(double);
 bool readBool(const char[]);
 
 double getSeconds(clock_t);
+
+unsigned int get_hardware_concurrency(void);

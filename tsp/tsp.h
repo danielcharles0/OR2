@@ -92,6 +92,8 @@ bool isDistinct(int, int*);
 
 void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
+void cpSSol(const TSPInstance*, const TSPSSolution*, TSPSSolution*);
+
 void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void convertSSol(const TSPInstance*, const TSPSSolution*, TSPSolution*);
