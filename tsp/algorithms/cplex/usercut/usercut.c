@@ -247,53 +247,22 @@ static int CPXPUBLIC dispatcher(CPXCALLBACKCONTEXTptr context, CPXLONG context_i
 /*
 * Installs the candidate and relaxation callbacks and runs the solver.
 *
-* IP set settings
-* IP inst tsp instance
 * IP env CPLEX environment
 * IP lp CPLEX linear program
-* IOP sol solution to be updated
-* IP warm_start true if MIPSTART is required
-* OP et execution time in seconds
+* OP cpx_inst cplex instance
 * OR error code
 */
-int usercut(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool warm_start, double* et){
-
-    int err = 0;
-    clock_t start = clock();
-
-    COMP comp;
-	TSPSSolution temp;
-    CPXInstance cpx_inst;
-
-    if(warm_start){
-        if((err = mip_start(set, inst, env, lp)))
-            return err;
-        update_time_limit(set, start, env, lp);
-    }/* if */
-
-    allocCPXInstance(&cpx_inst, set, inst, env, lp);
+int usercut(CPXENVptr env, CPXLPptr lp, CPXInstance* cpx_inst){
+	
+	int err;
 
     CPXLONG context = CPX_CALLBACKCONTEXT_CANDIDATE | CPX_CALLBACKCONTEXT_RELAXATION;
 
-    if((err = CPXcallbacksetfunc(env, lp, context, dispatcher, &cpx_inst))){
+    if((err = CPXcallbacksetfunc(env, lp, context, dispatcher, cpx_inst))){
         print_error("CPXcallbacksetfunc() error: dispatcher", err, env, lp);
-		freeCPXInstance(&cpx_inst);
         return err;
     }/* if */
 
-	allocComp(inst->dimension, &comp);
-	allocSSol(inst->dimension, &temp);
-
-    optimize_model(inst, env, lp, &temp, &comp);
-
-    convertSSol(inst, &temp, sol);
-    
-	freeSSol(&temp);
-    freeComp(&comp);
-	freeCPXInstance(&cpx_inst);
-
-	*et = getSeconds(start);
-
-    return 0;
+    return err;
 
 }/* usercut */

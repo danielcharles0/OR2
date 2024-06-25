@@ -14,4 +14,4 @@ typedef struct{
     CPXCALLBACKCONTEXTptr context;
 } CCInstance;
 
-int usercut(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, bool, double*);
+int usercut(CPXENVptr, CPXLPptr, CPXInstance*);
