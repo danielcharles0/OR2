@@ -15,7 +15,7 @@
 #include "../../../utility/utility.h"
 
 /*
- * IP inst input instance
+ * IP cpx_inst input instance
  * IP comp component array storing connected component each node belongs to
  * IP env CPLEX environment
  * IP lp CPLEX linear program
@@ -23,13 +23,15 @@
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, CPXLPptr lp, CPXCALLBACKCONTEXTptr context, int ncols){
+int add_SEC_candidate(CPXInstance* cpx_inst, const COMP* comp, CPXENVptr env, CPXLPptr lp, CPXCALLBACKCONTEXTptr context, int ncols){
 
-	int* idxs = malloc(ncols * sizeof(int));
-	assert(idxs != NULL);
+	int thread_id, *idxs;
+	double* vls;
 
-	double* vls = malloc(ncols * sizeof(double));
-	assert(vls != NULL);
+	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &thread_id);
+
+	idxs = cpx_inst->sec_idxs[thread_id];
+	vls = cpx_inst->sec_vls[thread_id];
 	
 	for(int k = 1; k <= (*comp).nc; k++){
 
@@ -38,14 +40,14 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 		int err, nnz = 0;
 		double rhs = -1.0;
 
-		for(int i = 0; i < inst->dimension; i++)
+		for(int i = 0; i < (*cpx_inst).inst->dimension; i++)
 			if((*comp).map[i] == k){
 				
 				rhs += 1;
 
-				for(int j = i + 1; j < inst->dimension; j++)
+				for(int j = i + 1; j < (*cpx_inst).inst->dimension; j++)
 					if((*comp).map[j] == k){
-						idxs[nnz] = xpos(i, j, inst);
+						idxs[nnz] = xpos(i, j, (*cpx_inst).inst);
 						vls[nnz] = 1.0;
 						nnz++;
 					}/* if */
@@ -54,15 +56,10 @@ int add_SEC_candidate(const TSPInstance* inst, const COMP* comp, CPXENVptr env, 
 		if(nnz > 0) /* means that the solution is infeasible and a violated cut has been found */
 			if ((err = CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &zero, idxs, vls))){
 				print_error("CPXcallbackrejectcandidate() error", err, env, lp);
-				free(vls);
-				free(idxs);
 				exit(1);
 			}/* if */
 
 	}/* for */
-	
-	free(vls);
-	free(idxs);
 
 	return 0;
 
@@ -98,7 +95,7 @@ int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_
 	build_sol_xstar((*cpx_inst).inst, xstar, temp, comp);
 	
     if((*comp).nc > 1)
-        add_SEC_candidate(cpx_inst->inst, comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
+        add_SEC_candidate(cpx_inst, comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
     else
 		postCPXSol(cpx_inst, context, temp);
 

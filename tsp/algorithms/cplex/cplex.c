@@ -647,6 +647,95 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 } /* optimize */
 
 /*
+* IP cc concurrency degree
+* IP n length of the array
+* OP arr int array to allocate
+*/
+void allocCPXInstanceIntArray(int cc, int n, int*** arr){
+	
+	int i;
+
+	*arr = malloc(cc * sizeof(int*));
+	assert(*arr != NULL);
+
+	for(i = 0; i < cc; i++){
+		(*arr)[i] = malloc(n * sizeof(int));  
+    	assert((*arr)[i] != NULL);
+	}/* for */
+
+}/* allocCPXInstanceIntArray */
+
+/*
+* IP cc concurrency degree
+* IP n length of the array
+* OP arr double array to allocate
+*/
+void allocCPXInstanceDoubleArray(int cc, int n, double*** arr){
+	
+	int i;
+
+	*arr = malloc(cc * sizeof(double*));
+	assert(*arr != NULL);
+
+	for(i = 0; i < cc; i++){
+		(*arr)[i] = malloc(n * sizeof(double));  
+    	assert((*arr)[i] != NULL);
+	}/* for */
+
+}/* allocCPXInstanceIntArray */
+
+/*
+* IP cc concurrency degree
+* IP n size of the instance
+* OP ssols array of solutions to allocate
+*/
+void allocCPXInstanceSSol(int cc, int n, TSPSSolution** ssols){
+	
+	int i;
+
+	*ssols = malloc(cc * sizeof(TSPSSolution));
+	assert(*ssols != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocSSol(n, &((*ssols)[i]));
+
+}/* allocCPXInstanceSSol */
+
+/*
+* IP cc concurrency degree
+* IP n size of the instance
+* OP sols array of solutions to allocate
+*/
+void allocCPXInstanceSol(int cc, int n, TSPSolution** sols){
+	
+	int i;
+
+	*sols = malloc(cc * sizeof(TSPSSolution));
+	assert(*sols != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocSol(n, &((*sols)[i]));
+
+}/* allocCPXInstanceSol */
+
+/*
+* IP cc concurrency degree
+* IP n size of the instance
+* OP comps array of components to allocate
+*/
+void allocCPXInstanceComp(int cc, int n, COMP** comps){
+	
+	int i;
+
+	*comps = malloc(cc * sizeof(COMP));
+	assert(*comps != NULL);
+
+	for(i = 0; i < cc; i++)
+		allocComp(n, &((*comps)[i]));
+
+}/* allocCPXInstanceComp */
+
+/*
 * Initializes CPXinstance passed in input
 *
 * OP cpx_inst cplex instance to be initialized
@@ -657,79 +746,127 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 */
 void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInstance* tsp_inst, CPXENVptr env, CPXLPptr lp){
 
-	int i, k = 0, cc = get_hardware_concurrency();
-
-	(*cpx_inst).ncols = CPXgetnumcols(env, lp);
+	int i, cc = get_hardware_concurrency();
 	
-	cpx_inst->indices = malloc((*cpx_inst).ncols * sizeof(int));
-	assert(cpx_inst->indices != NULL);
-
-	cpx_inst->xstars = malloc(cc * sizeof(double*));
-	assert(cpx_inst->xstars != NULL);
-
-	for(i = 0; i < cc; i++){
-		cpx_inst->xstars[i] = malloc(cpx_inst->ncols * sizeof(double));  
-    	assert(cpx_inst->xstars[i] != NULL);
-	}/* for */
-	
-	for(i = 0; i < tsp_inst->dimension - 1; i++)
-		for(int j = i + 1; j < tsp_inst->dimension; j++){
-			cpx_inst->indices[k] = k;
-			k++;
-		}/* for */
-
-	(*cpx_inst).ssols = malloc(cc * sizeof(TSPSSolution));
-	assert((*cpx_inst).ssols != NULL);
-
-	for(i = 0; i < cc; i++)
-		allocSSol(tsp_inst->dimension, &((*cpx_inst).ssols[i]));
-
-	(*cpx_inst).sols = malloc(cc * sizeof(TSPSolution));
-	assert((*cpx_inst).sols != NULL);
-
-	for(i = 0; i < cc; i++)
-		allocSol(tsp_inst->dimension, &((*cpx_inst).sols[i]));
-
-	(*cpx_inst).comps = malloc(cc * sizeof(COMP));
-	assert((*cpx_inst).comps != NULL);
-
-	for(i = 0; i < cc; i++)
-		allocComp(tsp_inst->dimension, &((*cpx_inst).comps[i]));
-
+	cpx_inst->ncols = CPXgetnumcols(env, lp);
 	cpx_inst->inst = tsp_inst;
-	
 	cpx_inst->env = env;
 	cpx_inst->lp = lp;
 	cpx_inst->set = set;
+	
+	cpx_inst->indices = malloc((*cpx_inst).ncols * sizeof(int));
+	assert(cpx_inst->indices != NULL);
+	
+	for(i = 0; i < (*cpx_inst).ncols; i++)
+		cpx_inst->indices[i] = i;
+	
+	allocCPXInstanceDoubleArray(cc, cpx_inst->ncols, &(cpx_inst->xstars));
+	
+	allocCPXInstanceIntArray(cc, cpx_inst->ncols, &(cpx_inst->sec_idxs));
+	
+	allocCPXInstanceDoubleArray(cc, cpx_inst->ncols, &(cpx_inst->sec_vls));
+	
+	allocCPXInstanceSSol(cc, tsp_inst->dimension, &((*cpx_inst).ssols));
+	
+	allocCPXInstanceSol(cc, tsp_inst->dimension, &((*cpx_inst).sols));
+	
+	allocCPXInstanceComp(cc, tsp_inst->dimension, &((*cpx_inst).comps));
 
 }/* allocCPXInstance */
+
+/*
+* IP cc concurrency degree
+* OP arr double array to free
+*/
+void freeCPXInstanceDoubleArray(int cc, double** arr){
+	
+	int i;
+
+	for(i = 0; i < cc; i++)
+		free(arr[i]);
+
+	free(arr);
+
+}/* freeCPXInstanceDoubleArray */
+
+/*
+* IP cc concurrency degree
+* OP arr int array to free
+*/
+void freeCPXInstanceIntArray(int cc, int** arr){
+	
+	int i;
+
+	for(i = 0; i < cc; i++)
+		free(arr[i]);
+
+	free(arr);
+
+}/* freeCPXInstanceIntArray */
+
+/*
+* IP cc concurrency degree
+* OP comps components array to free
+*/
+void freeCPXInstanceComp(int cc, COMP* comps){
+	
+	int i;
+
+	for(i = 0; i < cc; i++)
+		freeComp(&(comps[i]));
+
+	free(comps);
+
+}/* freeCPXInstanceComp */
+
+/*
+* IP cc concurrency degree
+* OP sols solutions array to free
+*/
+void freeCPXInstanceSol(int cc, TSPSolution* sols){
+	
+	int i;
+
+	for(i = 0; i < cc; i++)
+		freeSol(&(sols[i]));
+
+	free(sols);
+
+}/* freeCPXInstanceSol */
+
+/*
+* IP cc concurrency degree
+* OP ssols solutions array to free
+*/
+void freeCPXInstanceSSol(int cc, TSPSSolution* ssols){
+	
+	int i;
+
+	for(i = 0; i < cc; i++)
+		freeSSol(&(ssols[i]));
+
+	free(ssols);
+
+}/* freeCPXInstanceSSol */
 
 /*
 * IP cpx_inst instance to free
 */
 void freeCPXInstance(CPXInstance* cpx_inst){
 	
-	int i, cc = get_hardware_concurrency();
+	int cc = get_hardware_concurrency();
 
-	for(i = 0; i < cc; i++)
-		freeComp(&((*cpx_inst).comps[i]));
+	freeCPXInstanceComp(cc, (*cpx_inst).comps);
 
-	free((*cpx_inst).comps);
+	freeCPXInstanceSol(cc, (*cpx_inst).sols);
 
-	for(i = 0; i < cc; i++)
-		freeSol(&((*cpx_inst).sols[i]));
+	freeCPXInstanceSSol(cc, (*cpx_inst).ssols);
 
-	free((*cpx_inst).sols);
+	freeCPXInstanceDoubleArray(cc, cpx_inst->sec_vls);
 
-	for(i = 0; i < cc; i++)
-		freeSSol(&((*cpx_inst).ssols[i]));
+	freeCPXInstanceIntArray(cc, cpx_inst->sec_idxs);
 
-	free((*cpx_inst).ssols);
-
-	for(i = 0; i < cc; i++)
-		free(cpx_inst->xstars[i]);
-
-	free(cpx_inst->xstars);
+	freeCPXInstanceDoubleArray(cc, cpx_inst->xstars);
 
 	free(cpx_inst->indices);
 

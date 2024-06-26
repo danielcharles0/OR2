@@ -37,10 +37,12 @@ typedef struct{
 	const TSPInstance* inst;
 	
 	/* Working memory allocated just once */
+	int** sec_idxs;
+	double** sec_vls;
+	double** xstars;
 	TSPSolution* sols;
 	TSPSSolution* ssols;
 	COMP* comps;
-	double** xstars;
 
 } CPXInstance;
 
