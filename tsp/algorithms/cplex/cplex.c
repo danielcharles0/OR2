@@ -964,18 +964,16 @@ void convertCPXSol(const TSPInstance* inst, const TSPSolution* sol, int cpx_ncol
 }/* convertCPXSol */
 
 /*
-* This method will refine the solution found and post it
+* This method will post the solution to CPX
 *
-* IP cpx_inst CPLEX instance
+* IOP cpx_inst CPLEX instance
 * IP ctx CPLEX callback context, handled internally by CPLEX
 * IOP sol TSP path solution to be refined and posted
 */
-void postSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, TSPSolution* sol){
+void postSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, TSPSolution* sol){
 	
-	int err;
+	int err, thread_id;
 	double* cpx_cols;
-
-	opt2((*cpx_inst).set, (*cpx_inst).inst, sol);
 
 	if(!checkSol((*cpx_inst).inst, sol)){
 		if((*(*cpx_inst).set).v)
@@ -983,8 +981,9 @@ void postSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, TSPSolution
 		exit(1);
 	}/* if */
 
-	cpx_cols = malloc(cpx_inst->ncols * sizeof(double));
-	assert(cpx_cols != NULL);
+	CPXcallbackgetinfoint(ctx, CPXCALLBACKINFO_THREADID, &thread_id);
+
+	cpx_cols = cpx_inst->xstars[thread_id];
 
 	convertCPXSol((cpx_inst)->inst, sol, cpx_inst->ncols, cpx_cols);
 
@@ -993,27 +992,29 @@ void postSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, TSPSolution
 		exit(1);
 	}/* if */
 
-	free(cpx_cols);
-
-}/* postSol */
+}/* postSol2CPX */
 
 /*
-* This method will refine the solution found and post it
+* This method will patch the solution found and post it
 *
-* IP cpx_inst CPLEX instance
+* IOP cpx_inst CPLEX instance
 * IP ctx CPLEX callback context, handled internally by CPLEX
-* IP ssol TSP succ solution to be posted
+* IP comp components of the $sol
+* IOP ssol TSP succ solution to be refined and posted
 */
-void postCPXSol(const CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, const TSPSSolution* ssol){
-	
-	TSPSolution sol;
-	
-	allocSol((*(*cpx_inst).inst).dimension, &sol);
+void postPatchedSSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, COMP* comp, TSPSSolution* ssol){
 
-	convertSSol((*cpx_inst).inst, ssol, &sol);
+	int thread_id;
+	TSPSolution* sol;
 
-	postSol(cpx_inst, ctx, &sol);
+	CPXcallbackgetinfoint(ctx, CPXCALLBACKINFO_THREADID, &thread_id);
 
-	freeSol(&sol);
+	sol = &(cpx_inst->sols[thread_id]);
 
-}/* postSSol */
+	patch(cpx_inst->set, cpx_inst->inst, ssol, comp);
+
+	convertSSol(cpx_inst->inst, ssol, sol);
+
+	postSol2CPX(cpx_inst, ctx, sol);
+
+}/* postPatchedSSol2CPX */

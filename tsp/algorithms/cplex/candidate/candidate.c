@@ -94,10 +94,11 @@ int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_
 	
 	build_sol_xstar((*cpx_inst).inst, xstar, temp, comp);
 	
-    if((*comp).nc > 1)
+	/* if we have one component we do not post a 2opt refined version of it because it is too much time consuming */
+    if((*comp).nc > 1){
         add_SEC_candidate(cpx_inst, comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
-    else
-		postCPXSol(cpx_inst, context, temp);
+		postPatchedSSol2CPX(cpx_inst, context, comp, temp);
+	}/* if */
 
     return 0;
 

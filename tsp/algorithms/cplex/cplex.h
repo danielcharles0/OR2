@@ -84,4 +84,4 @@ int mip_start(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
 
 void build_sol_xstar(const TSPInstance*, const double*, TSPSSolution*, COMP*);
 
-void postCPXSol(const CPXInstance*, CPXCALLBACKCONTEXTptr, const TSPSSolution*);
+void postPatchedSSol2CPX(CPXInstance*, CPXCALLBACKCONTEXTptr, COMP*, TSPSSolution*);
