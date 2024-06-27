@@ -141,33 +141,27 @@ static int CPXPUBLIC checkCandidateSol(CPXCALLBACKCONTEXTptr context, CPXLONG co
 * IOP userhandle pointer to a structure external to CPLEX
 */
 static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_id, CPXInstance* cpx_inst){
-
-	int err = 0;
-	int ncomp = 0;
-
-	double* xstar = NULL;
-    int* elist = NULL;
-    int *compscount = NULL; 
-    int *comps = NULL;
-    double objval = CPX_INFBOUND;
-    int k = 0, num_edges = 0, node = -1;
-
-    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
-
+	
+	int k = 0, err = 0, ncomp = 0, num_edges = 0, node = -1, *elist, *compscount, *comps, thread_id;
+	double *xstar, objval = CPX_INFBOUND;;
+	
+	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
+	
     /* user cuts applied (approximately) once every 10 calls */
-    if(node % 10 != 0)
+    if(node % 10)
         return 0;
+	
+	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &thread_id);
 
-    xstar = (double*) malloc(cpx_inst->ncols * sizeof(double));  
-    assert(xstar != NULL);
-
-    elist = (int*) malloc(2*cpx_inst->ncols * sizeof(int)); // elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
-    assert(elist != NULL);
-
+    xstar = cpx_inst->xstars[thread_id];
+	
     if((err = CPXcallbackgetrelaxationpoint(context, xstar, 0, cpx_inst->ncols - 1 , &objval))){
         print_error("CPXcallbackgetrelaxationpoint() error", err, cpx_inst->env, cpx_inst->lp);
         exit(1);
-    }
+    }/* if */
+	
+	// elist contains each pair of vertex such as (1,2), (1,3), (1,4), (2, 3), (2,4), (3,4) so in list becomes: 1,2,1,3,1,4,2,3,2,4,3,4
+	elist = cpx_inst->elist[thread_id];
 
     for (int i = 0; i < cpx_inst->inst->dimension; i++)
         for (int j = i+1; j < cpx_inst->inst->dimension; j++) {
@@ -193,10 +187,7 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 
     } else if (ncomp > 1) {
 
-        int startindex = 0;
-        
-        int* components = (int*) malloc(cpx_inst->inst->dimension * sizeof(int));
-        assert(components != NULL);
+        int startindex = 0, *components = cpx_inst->usercut_comps[thread_id];
 
         /* Transforming the concorde's component format into our component format in order to use our add_SEC_relaxation function */
         for (int subtour = 0; subtour < ncomp; subtour++) {
@@ -209,18 +200,13 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
             startindex += compscount[subtour];
             
         }
-
+		
         if((err = add_SEC_relaxation(cpx_inst, context, ncomp, components)))
             return err;
-
-        free(components);
-        
     }
     
     free(comps);
     free(compscount);
-	free(elist);
-	free(xstar);
 
 	return 0;
 

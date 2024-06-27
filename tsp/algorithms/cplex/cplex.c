@@ -760,6 +760,10 @@ void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInsta
 	for(i = 0; i < (*cpx_inst).ncols; i++)
 		cpx_inst->indices[i] = i;
 	
+	allocCPXInstanceIntArray(cc, cpx_inst->inst->dimension, &(cpx_inst->usercut_comps));
+	
+	allocCPXInstanceIntArray(cc, 2 * cpx_inst->ncols, &(cpx_inst->elist));
+	
 	allocCPXInstanceDoubleArray(cc, cpx_inst->ncols, &(cpx_inst->xstars));
 	
 	allocCPXInstanceIntArray(cc, cpx_inst->ncols, &(cpx_inst->sec_idxs));
@@ -771,7 +775,7 @@ void allocCPXInstance(CPXInstance* cpx_inst, const Settings* set, const TSPInsta
 	allocCPXInstanceSol(cc, tsp_inst->dimension, &((*cpx_inst).sols));
 	
 	allocCPXInstanceComp(cc, tsp_inst->dimension, &((*cpx_inst).comps));
-
+	
 }/* allocCPXInstance */
 
 /*
@@ -867,6 +871,10 @@ void freeCPXInstance(CPXInstance* cpx_inst){
 	freeCPXInstanceIntArray(cc, cpx_inst->sec_idxs);
 
 	freeCPXInstanceDoubleArray(cc, cpx_inst->xstars);
+	
+	freeCPXInstanceIntArray(cc, cpx_inst->elist);
+
+	freeCPXInstanceIntArray(cc, cpx_inst->usercut_comps);
 
 	free(cpx_inst->indices);
 
@@ -1014,6 +1022,8 @@ void postPatchedSSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, COMP*
 	patch(cpx_inst->set, cpx_inst->inst, ssol, comp);
 
 	convertSSol(cpx_inst->inst, ssol, sol);
+
+	// opt2(cpx_inst->set, cpx_inst->inst, sol);
 
 	postSol2CPX(cpx_inst, ctx, sol);
 

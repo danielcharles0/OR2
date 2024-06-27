@@ -29,7 +29,6 @@ typedef struct{
 typedef struct{
 
     int ncols;
-    int* indices;
 
 	CPXLPptr lp;
 	CPXENVptr env;
@@ -37,7 +36,7 @@ typedef struct{
 	const TSPInstance* inst;
 	
 	/* Working memory allocated just once */
-	int** sec_idxs;
+	int *indices, **elist, **sec_idxs, **usercut_comps;
 	double** sec_vls;
 	double** xstars;
 	TSPSolution* sols;

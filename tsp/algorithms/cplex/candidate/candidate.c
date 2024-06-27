@@ -79,7 +79,7 @@ int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_
 
 	COMP* comp;
 	TSPSSolution* temp;
-
+	
 	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &thread_id);
 
 	xstar = cpx_inst->xstars[thread_id];
@@ -99,7 +99,7 @@ int CPXPUBLIC checkCandidateSSol(CPXCALLBACKCONTEXTptr context, CPXLONG context_
         add_SEC_candidate(cpx_inst, comp, cpx_inst->env, cpx_inst->lp, context, cpx_inst->ncols);
 		postPatchedSSol2CPX(cpx_inst, context, comp, temp);
 	}/* if */
-
+	
     return 0;
 
 }/* checkCandidateSSol */
