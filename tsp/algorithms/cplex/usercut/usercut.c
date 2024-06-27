@@ -149,8 +149,9 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
     int* elist = NULL;
     int *compscount = NULL; 
     int *comps = NULL;
+    int* ptr;
     double objval = CPX_INFBOUND;
-    int k = 0, num_edges = 0, node = -1;
+    int num_edges = 0, node = -1;
 
     CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
 
@@ -169,10 +170,15 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
         exit(1);
     }
 
+    ptr = elist;
     for (int i = 0; i < cpx_inst->inst->dimension; i++)
         for (int j = i+1; j < cpx_inst->inst->dimension; j++) {
-            elist[k++] = i;
-            elist[k++] = j;
+            
+            *ptr = i;
+			ptr++;
+			*ptr = j;
+			ptr++;
+
             num_edges++;
         }
 
