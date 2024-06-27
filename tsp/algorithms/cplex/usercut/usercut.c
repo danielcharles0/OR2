@@ -146,7 +146,6 @@ static int CPXPUBLIC checkRelaxedSol(CPXCALLBACKCONTEXTptr context, CPXLONG cont
 	double *xstar, objval = CPX_INFBOUND;;
 	
 	CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &node);
-	
     /* user cuts applied (approximately) once every 10 calls */
     if(node % 10)
         return 0;
