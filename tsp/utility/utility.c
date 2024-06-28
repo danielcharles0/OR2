@@ -498,3 +498,45 @@ unsigned int get_hardware_concurrency(void) {
     return count;
 
 }/* get_hardware_concurrency */
+
+/*
+* IP d1 first double
+* IP d2 second double
+* OR the minimum between $d1 and $d2
+*/
+double min_dbl(double d1, double d2){
+	return d1 < d2 ? d1 : d2;
+}/* min_dbl */
+
+/*
+* IP p probability of success (p = 80 => 80%)
+* OR sample
+*/
+bool bernoulli(int p){
+	return rand0N(100) < p;
+}/* bernoulli */
+
+/*
+* The array are assumed to be already allocated
+*
+* IP stream source stream
+* OP sample sample set
+* OR false if error, true otherwise
+*/
+bool reservoirSampling(const ArrayDinaInt* stream, ArrayDinaInt* sample){
+
+	int i;
+
+	if(sample->n > stream->n)
+		return false;
+
+	for(i = 0; i < sample->n; i++)
+		sample->v[i] = stream->v[i];
+
+	for(; i < stream->n; i++)
+		if(bernoulli(sample->n * 100 / i))
+			sample->v[rand0N(sample->n)] = stream->v[i];
+
+	return true;
+
+}/* reservoirSampling */
