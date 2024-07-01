@@ -269,9 +269,6 @@ bool offline_run(OFFLINE_ALGORITHM alg, const TSPInstance* inst, TSPSolution* so
 	        if((et = NNRunConfiguration(BEST_START, set, inst, sol)) == -1)
 				return true;
 	        break;
-
-		// case O_CPLEX:
-		// 	return optimize(set, inst, sol);
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        return true;
@@ -328,6 +325,8 @@ bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Setting
 		Settings s;
 		cpSet(set, &s);
 		s.tl = (*set).tl > et ? (*set).tl - et : 0;
+		printf("\ntl: %lf\n", s.tl);
+		s.v = false;
 		return runRefinement(&s, inst, sol);
 	}/* if */
 
