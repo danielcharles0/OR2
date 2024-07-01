@@ -68,3 +68,7 @@ unsigned int get_hardware_concurrency(void);
 double min_dbl(double, double);
 
 bool reservoirSampling(const ArrayDinaInt*, ArrayDinaInt*);
+
+bool reservoirSamplingIndices(const ArrayDinaInt*, ArrayDinaInt*);
+
+bool checkTimeLimitV(const Settings*, clock_t, bool, double*);

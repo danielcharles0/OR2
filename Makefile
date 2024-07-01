@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o
+OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o ./obj/matheuristics.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -87,6 +87,9 @@ main: ./obj/main.o $(OBJS)
 
 ./obj/pprof.o: ./tsp/pprofile/pprofile.h ./tsp/pprofile/pprofile.c
 	gcc $(FLAGS) ./tsp/pprofile/pprofile.c -o ./obj/pprof.o -I $(CPLEX_LIB_PATH)
+
+./obj/matheuristics.o: ./tsp/algorithms/cplex/matheuristics/matheuristics.h ./tsp/algorithms/cplex/matheuristics/matheuristics.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/matheuristics/matheuristics.c -o ./obj/matheuristics.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1

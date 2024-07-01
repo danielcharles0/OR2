@@ -32,11 +32,15 @@ typedef struct {
 } TSPSSolution;
 
 typedef enum {
-    RANDOM,
+    /* HEURISTICS */
+	RANDOM,
     NEAREST_NEIGHBOR,
-	/* HERE MORE HEURISTICS */
 	__END_HEURISTIC,
-	CPLEX
+	/* EXACTS */
+	CPLEX,
+	__END_EXACTS,
+	/* MATHEURISTICS */
+	MATHEURISTIC
 } ALGORITHM;
 
 typedef enum {
@@ -94,7 +98,7 @@ void cpSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void cpSSol(const TSPInstance*, const TSPSSolution*, TSPSSolution*);
 
-void updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
+bool updateIncumbentSol(const TSPInstance*, const TSPSolution*, TSPSolution*);
 
 void convertSSol(const TSPInstance*, const TSPSSolution*, TSPSolution*);
 

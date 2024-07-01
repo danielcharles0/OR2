@@ -11,8 +11,10 @@
 #include "cplex.h"
 #include "../../tsp.h"
 #include "benders/benders.h"
-#include "candidate/candidate.h"
 #include "usercut/usercut.h"
+#include "candidate/candidate.h"
+#include "matheuristics/matheuristics.h"
+
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"
 #include "../nearestneighbor/nearestneighbor.h"
@@ -149,6 +151,7 @@ int setintparam(int param, int val, CPXENVptr env, CPXLPptr lp){
 * IP val double value of the parameter $param
 * OP env CPLEX environment
 * OP lp CPLEX linear program
+* OR 0 if no error, CPLEX error code otherwise
 */
 int setdblparam(int param, double val, CPXENVptr env, CPXLPptr lp){
 	
@@ -394,7 +397,7 @@ void exactAlgorithmLegend(void){
 * IOP sol solution to be updated
 * IP warm_start true if MIPSTART is required
 * OP et execution time in seconds
-* OR error code
+* OR 0 if no error, error code otherwise
 */
 int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, callback_installer ci, TSPSolution* sol, bool warm_start, double* et){
 
@@ -440,6 +443,7 @@ int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 * IP alg algorithm to run
 * IOP sol solution to be updated
 * OP et execution time
+* OR 0 if no error, error code otherwise
 */
 int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, TSPSolution* sol, double* et){
 	
@@ -452,6 +456,9 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 			return callback_solver(set, inst, env, lp, (callback_installer)candidate, sol, start, et);
 		case USERCUT_CALLBACK:
 			return callback_solver(set, inst, env, lp, (callback_installer)usercut, sol, start, et);
+		case _HARD_FIXING:
+			return hard_fixing(set, inst, env, lp, sol, start, et);
+		case _LOCAL_BRANCHING:
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
 	        return 1;
@@ -469,7 +476,8 @@ void update_time_limit(const Settings *set, clock_t start, CPXENVptr env, CPXLPp
 {
 	double ntl = step((*set).tl - getSeconds(start));
 
-	setdblparam(CPX_PARAM_TILIM, ntl, env, lp);
+	if(setdblparam(CPX_PARAM_TILIM, ntl, env, lp))
+		exit(1);
 
 } /* update_time_limit */
 

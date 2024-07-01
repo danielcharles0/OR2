@@ -298,15 +298,25 @@ void timeBar(clock_t start, int tl, double* ls){
 /*
 * IP set settings
 * IP start starting time of processing
+* IP v verbose
+* IOP ls last stamp second from the execution start
+*/
+bool checkTimeLimitV(const Settings* set, clock_t start, bool v, double* ls){
+	
+	if(v)
+    	timeBar(start, (*set).tl, ls);
+    
+	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl, v);
+
+}/* checkTimeLimitV */
+
+/*
+* IP set settings
+* IP start starting time of processing
 * IOP ls last stamp second from the execution start
 */
 bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
-	
-	if((*set).v)
-    	timeBar(start, (*set).tl, ls);
-    
-	return isTimeOutWarning(TIMEOUT_WARNING_MESSAGE, start, (*set).tl, (*set).v);
-
+	return checkTimeLimitV(set, start, (*set).v, ls);
 }/* checkTimeLimit */
 
 /*
@@ -517,7 +527,7 @@ bool bernoulli(int p){
 }/* bernoulli */
 
 /*
-* The array are assumed to be already allocated
+* The array are assumed to be already allocated. This function will sample the values of the stream.
 *
 * IP stream source stream
 * OP sample sample set
@@ -536,6 +546,31 @@ bool reservoirSampling(const ArrayDinaInt* stream, ArrayDinaInt* sample){
 	for(; i < stream->n; i++)
 		if(bernoulli(sample->n * 100 / i))
 			sample->v[rand0N(sample->n)] = stream->v[i];
+
+	return true;
+
+}/* reservoirSampling */
+
+/*
+* The array are assumed to be already allocated. This function will sample the indices of the stream.
+*
+* IP stream source stream
+* OP sample sample set
+* OR false if error, true otherwise
+*/
+bool reservoirSamplingIndices(const ArrayDinaInt* stream, ArrayDinaInt* sample){
+
+	int i;
+
+	if(sample->n > stream->n)
+		return false;
+
+	for(i = 0; i < sample->n; i++)
+		sample->v[i] = i;
+
+	for(; i < stream->n; i++)
+		if(bernoulli(sample->n * 100 / i))
+			sample->v[rand0N(sample->n)] = i;
 
 	return true;
 

@@ -15,6 +15,7 @@
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 #include "algorithms/cplex/cplex.h"
+#include "algorithms/cplex/matheuristics/matheuristics.h"
 #include "utility/utility.h"
 
 /*
@@ -228,6 +229,7 @@ void algorithmLegend(void){
     printf("\t- Code: %d, Algorithm: Just a random solution\n", RANDOM);
     printf("\t- Code: %d, Algorithm: Nearest neighbor search\n", NEAREST_NEIGHBOR);
 	printf("\t- Code: %d, Algorithm: CPLEX exact method\n", CPLEX);
+	printf("\t- Code: %d, Algorithm: MATHEURISTIC method\n", MATHEURISTIC);
     printf("\n");
     
 }/* algorithmLegend */
@@ -237,7 +239,7 @@ void algorithmLegend(void){
 * OR true if it is an exact method, false otherwise
 */
 bool isExactMethod(ALGORITHM alg){
-	return alg > __END_HEURISTIC;
+	return __END_HEURISTIC < alg && alg < __END_EXACTS;
 }/* isExactMethod */
 
 /*
@@ -297,12 +299,12 @@ bool offline_run_refinement(OFFLINE_ALGORITHM alg, REFINEMENT_ALGORITHM ref, con
 * IP inst tsp instance
 * IOP sol solution
 * IP set settings
-* OP error true if an error occurred, false otherwise.
+* OR error true if an error occurred, false otherwise.
 */
 bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Settings* set){
     
 	int et; /* execution time in seconds */
-    
+
     switch (alg){
 	    case RANDOM:
 	        et = randomSol(inst, sol);
@@ -313,6 +315,10 @@ bool run(ALGORITHM alg, const TSPInstance* inst, TSPSolution* sol, const Setting
 	        break;
 		case CPLEX:
 			return optimize(set, inst, sol);
+		case MATHEURISTIC:
+			if((et = matheur(set, inst, sol)) == -1)
+				return true;
+	        break;
 	    default:
 	        printf("Error: Algorithm code not found.\n\n");
 	        return true;
@@ -424,11 +430,16 @@ bool isDistinct(int n, int* arr){
 * IP inst tsp instance
 * IP temp current solution found
 * IOP sol best solution 
+* OR true if the incumbent is updated, false otherwise
 */
-void updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSolution* sol){
+bool updateIncumbentSol(const TSPInstance* inst, const TSPSolution* temp, TSPSolution* sol){
 
-    if((*temp).val < (*sol).val && checkSol(inst, temp))
-        cpSol(inst, temp, sol);
+    if((*temp).val < (*sol).val && checkSol(inst, temp)){
+		cpSol(inst, temp, sol);
+		return true;
+	}/* if */
+        
+	return false;
 
 } /* updateIncumbentSol */
 

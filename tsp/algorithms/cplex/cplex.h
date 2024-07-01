@@ -13,10 +13,15 @@
 #include "../../tsp.h"
 
 typedef enum{
+	/* EXACTS */
     BENDERS,
 	BENDERS_PATCH,
     CANDIDATE_CALLBACK,
-    USERCUT_CALLBACK
+    USERCUT_CALLBACK,
+	__END,
+	/* MATHEURISTICS */
+	_HARD_FIXING,
+	_LOCAL_BRANCHING
 } EXACTS;
 
 typedef struct{
@@ -84,3 +89,7 @@ int mip_start(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr);
 void build_sol_xstar(const TSPInstance*, const double*, TSPSSolution*, COMP*);
 
 void postPatchedSSol2CPX(CPXInstance*, CPXCALLBACKCONTEXTptr, COMP*, TSPSSolution*);
+
+int callback_solver(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, callback_installer, TSPSolution*, bool, double*);
+
+int setdblparam(int, double, CPXENVptr, CPXLPptr);
