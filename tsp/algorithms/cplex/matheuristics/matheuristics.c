@@ -119,14 +119,13 @@ void initLB(const TSPInstance* inst, char** lbc, double *lb[2]){
 /*
 * IP set settings
 * IP inst tsp instance
-* IP lb lower bound
-* OP sol solution
 * IP env CPLEX environment
 * IP lp CPLEX linear program
+* OP sol solution
 * OP et execution time in seconds
-* OR error code
+* OR 0 if no error, error code otherwise
 */
-int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, bool mipstart, double* et){
+int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 	
 	int err;
 	char *lbc;
@@ -162,7 +161,7 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPX
 		fix_edges(set, inst, sol, lbc, lb, env, lp, &fe);
 		
 		/* TO CHECK THAT IT IS THE BEST METHOD by doing perfprof */
-		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, mipstart, &mipet)){
+		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, false, &mipet)){
 			if((*set).v)
 				printf("Error while calling the solver.\nReturning best found solution so far.");
 			break;

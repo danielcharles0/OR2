@@ -457,7 +457,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 		case USERCUT_CALLBACK:
 			return callback_solver(set, inst, env, lp, (callback_installer)usercut, sol, start, et);
 		case _HARD_FIXING:
-			return hard_fixing(set, inst, env, lp, sol, start, et);
+			return hard_fixing(set, inst, env, lp, sol, et);
 		case _LOCAL_BRANCHING:
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");

@@ -15,4 +15,4 @@ typedef enum {
 
 int matheur(const Settings*, const TSPInstance*, TSPSolution*);
 
-int hard_fixing(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, bool, double*);
+int hard_fixing(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, double*);
