@@ -119,13 +119,14 @@ void initLB(const TSPInstance* inst, char** lbc, double *lb[2]){
 /*
 * IP set settings
 * IP inst tsp instance
+* IP fef fixed edges fraction (0, 1)
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * OP sol solution
 * OP et execution time in seconds
 * OR 0 if no error, error code otherwise
 */
-int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
+int hard_fixing(const Settings* set, const TSPInstance* inst, double fef, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 	
 	int err;
 	char *lbc;
@@ -135,6 +136,14 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPX
 	TSPSolution temp;
 	clock_t start = clock();
 
+	if(fef <= 0 || fef >= 1){
+		printf("Error: wrong parameter, the fixed edges fraction must belong to the interval (0, 1).");
+		exit(1);
+	}/* if */
+
+	if((*set).v)
+		printf("Running heuristics and refinement:\n\n");
+
 	if((err = offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, OPT2, inst, sol, set))){
 		if((*set).v)
 			printf("Error while computing the heuristic solution.");
@@ -142,7 +151,7 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPX
 	}/* if */
 
 	if((*set).v)
-		printf("\n\nInitial cost: %lf\n", sol->val);
+		printf("\n\nInitial cost: %lf\n\n", sol->val);
 	
 	cpSet(set, &mipset);
 	mipset.v = 0;
@@ -152,7 +161,12 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPX
 	
 	initLB(inst, &lbc, lb);
 
-	fe.n = ((double)(*inst).dimension) * .8; /* we can make it dinamic by analizing wheater the mip solver does not find new good solutions or it exeedes the tl */
+	fe.n = ((double)(*inst).dimension) * fef; /* we can make it dinamic by analizing wheater the mip solver does not find new good solutions or it exeedes the tl */
+
+	if((*set).v)
+		printf("Running hard fixing with %d fixed edges:\n\n", fe.n);
+
+	checkTimeLimit(set, start, &ls);
 
 	while (true){
 		
@@ -169,12 +183,12 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPX
 
 		if(updateIncumbentSol(inst, &temp, sol))
 			if((*set).v)
-				printf("New cost: %lf\n", sol->val);
+				printf(" Better solution cost found: %lf", sol->val);
 
 		// if(mipet > (mipset.tl)); /* we reached the timelimit */
 		// update fe.n
 
-		if(checkTimeLimitV(set, start, false, &ls))
+		if(checkTimeLimit(set, start, &ls))
 			break;
 
 		/* Free edges */

@@ -90,6 +90,23 @@ int readInt(const char lab[]){
 }/* readInt */
 
 /*
+* Read double in input.
+* IP lab label for the output
+* OR double passed in input
+*/
+double readDouble(const char lab[]){
+    
+	double num;
+
+    printf("%s", lab);
+    scanf("%lf", &num);
+    printf("\n");
+
+    return num;
+
+}/* readDouble */
+
+/*
 * IP start starting value of the range
 * IP end end value of the range
 * IP lab label for the output
