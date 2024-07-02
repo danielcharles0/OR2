@@ -249,6 +249,9 @@ void processBar(int ni, int tni){
     int n;
     double frac;
 
+	if(ni < 0 || tni < 0 || ni > tni || (ni == tni && tni == 0))
+		return;
+
     frac = (double) ni / tni;
 
     n = (frac * PROCESS_BAR_PRECISION);
