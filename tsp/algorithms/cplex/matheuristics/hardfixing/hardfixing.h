@@ -5,8 +5,8 @@
 * File     : metaheuristics.h
 */
 
-#include "../../../tsp.h"
-#include "../../../input/settings/settings.h"
+#include "../../../../tsp.h"
+#include "../../../../input/settings/settings.h"
 
 typedef enum {
     HARD_FIXING,

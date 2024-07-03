@@ -13,7 +13,7 @@
 #include "benders/benders.h"
 #include "usercut/usercut.h"
 #include "candidate/candidate.h"
-#include "matheuristics/matheuristics.h"
+#include "matheuristics/hardfixing/hardfixing.h"
 
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"

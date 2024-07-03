@@ -15,7 +15,7 @@
 #include "algorithms/nearestneighbor/nearestneighbor.h"
 #include "algorithms/random/random.h"
 #include "algorithms/cplex/cplex.h"
-#include "algorithms/cplex/matheuristics/matheuristics.h"
+#include "algorithms/cplex/matheuristics/hardfixing/hardfixing.h"
 #include "utility/utility.h"
 
 /*

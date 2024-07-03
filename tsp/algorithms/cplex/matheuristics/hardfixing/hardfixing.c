@@ -7,10 +7,10 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "../cplex.h"
-#include "matheuristics.h"
-#include "../usercut/usercut.h"
-#include "../../../utility/utility.h"
+#include "../../cplex.h"
+#include "hardfixing.h"
+#include "../../usercut/usercut.h"
+#include "../../../../utility/utility.h"
 
 #define MIP_TIMELIMIT_FRACTION 10.
 
