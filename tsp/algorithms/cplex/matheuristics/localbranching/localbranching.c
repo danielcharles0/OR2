@@ -5,6 +5,7 @@
 * File     : localbranching.c
 */
 
+#include "../../cplex.h"
 #include "localbranching.h"
 
 /*
