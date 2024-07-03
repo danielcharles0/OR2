@@ -1,5 +1,5 @@
 STD_FLAGS = -std=c99 -Werror -Wall -pedantic -c
-OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o ./obj/hardfixing.o
+OBJS = ./obj/settings.o ./obj/utility.o ./obj/validator.o ./obj/reader.o ./obj/generator.o ./obj/point.o ./obj/output.o ./obj/tsp.o ./obj/nearestneighbor.o ./obj/random.o ./obj/2opt.o ./obj/tabu.o ./obj/vns.o ./obj/array.o ./obj/refinement.o ./obj/cplex.o ./obj/benders.o ./obj/fischetti.o ./obj/candidate.o ./obj/usercut.o ./obj/hardfixing.o ./obj/localbranching.o
 # OBJS = $(find ./obj -exec printf '%s ' {} +)
 # OBJS = $(wildcard ./obj/*.o)
 
@@ -90,6 +90,9 @@ main: ./obj/main.o $(OBJS)
 
 ./obj/hardfixing.o: ./tsp/algorithms/cplex/matheuristics/hardfixing/hardfixing.h ./tsp/algorithms/cplex/matheuristics/hardfixing/hardfixing.c
 	gcc $(FLAGS) ./tsp/algorithms/cplex/matheuristics/hardfixing/hardfixing.c -o ./obj/hardfixing.o -I $(CPLEX_LIB_PATH)
+
+./obj/localbranching.o: ./tsp/algorithms/cplex/matheuristics/localbranching/localbranching.h ./tsp/algorithms/cplex/matheuristics/localbranching/localbranching.c
+	gcc $(FLAGS) ./tsp/algorithms/cplex/matheuristics/localbranching/localbranching.c -o ./obj/localbranching.o -I $(CPLEX_LIB_PATH)
 
 debug:
 	make DEBUG=1

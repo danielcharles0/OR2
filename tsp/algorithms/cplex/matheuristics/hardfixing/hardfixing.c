@@ -2,7 +2,7 @@
 * Project  : Travelling Salesman Problem implementations
 * Authors  : Luigi Frigione, Daniel Carlesso
 * IDs      : 2060685, 2088626
-* File     : metaheuristics.c
+* File     : hardfixing.c
 */
 
 #include <stdio.h>
@@ -13,18 +13,6 @@
 #include "../../../../utility/utility.h"
 
 #define MIP_TIMELIMIT_FRACTION 10.
-
-/*
-* Print algorithm configurations.
-*/
-void matheuristics_legend(void){
-    
-    printf("Available MATHEURISTICS:\n");
-    printf("\t- Code: %d, Algorithm: Hard fixing\n", HARD_FIXING);
-    printf("\t- Code: %d, Algorithm: Local branching\n", LOCAL_BRANCHING);
-    printf("\n");
-    
-}/* algorithmLegend */
 
 /*
  * IP set settings
@@ -207,47 +195,3 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, double fef, CPXENV
 	return 0;
 
 }/* hard_fixing */
-
-/*
-* IP alg matheuristic algorithm to run
-* IP set settings
-* IP inst tsp instance
-* OP sol solution
-* OR int execution seconds, -1 if error
-*/
-double runMatheurConfiguration(MATHEURISTICS alg, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-
-	int err;
-	double et;
-
-	switch (alg){
-	    case HARD_FIXING:
-			if((err = optimize_offline(set, inst, true, _HARD_FIXING, sol, &et)))
-				return -1;
-			return et;
-	    case LOCAL_BRANCHING:
-	        // return NN_solver(rand0N((*inst).dimension), inst, sol);
-	        break;
-	    default:
-	        printf("Error: Algorithm code not found.\n\n");
-	        break;
-    }/* switch */
-	
-	return -1;
-
-}/* runConfiguration */
-
-/*
-* IP set settings
-* IP inst tsp instance
-* IOP sol solution
-* OP false if found a valid solution, true otherwise.
-* OR int execution seconds, -1 if error
-*/
-int matheur(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
-
-	matheuristics_legend();
-
-	return runMatheurConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
-
-}/* matheur */

@@ -14,6 +14,7 @@
 #include "usercut/usercut.h"
 #include "candidate/candidate.h"
 #include "matheuristics/hardfixing/hardfixing.h"
+#include "matheuristics/localbranching/localbranching.h"
 
 #include "../../utility/utility.h"
 #include "../../lib/fischetti/fischetti.h"
@@ -479,6 +480,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 		case _HARD_FIXING:
 			return hard_fixing(set, inst, readHFFnf(), env, lp, sol, et);
 		case _LOCAL_BRANCHING:
+			return local_branching(set, inst, env, lp, sol, et);
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
 	        return 1;
@@ -1056,3 +1058,60 @@ void postPatchedSSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, COMP*
 	postSol2CPX(cpx_inst, ctx, sol);
 
 }/* postPatchedSSol2CPX */
+
+/*
+* Print algorithm configurations.
+*/
+void matheuristics_legend(void){
+    
+    printf("Available MATHEURISTICS:\n");
+    printf("\t- Code: %d, Algorithm: Hard fixing\n", HARD_FIXING);
+    printf("\t- Code: %d, Algorithm: Local branching\n", LOCAL_BRANCHING);
+    printf("\n");
+    
+}/* algorithmLegend */
+
+/*
+* IP alg matheuristic algorithm to run
+* IP set settings
+* IP inst tsp instance
+* OP sol solution
+* OR double execution seconds, -1 if error
+*/
+double runMatheurConfiguration(MATHEURISTICS alg, const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+
+	int err;
+	double et;
+
+	switch (alg){
+	    case HARD_FIXING:
+			if((err = optimize_offline(set, inst, false, _HARD_FIXING, sol, &et)))
+				return -1;
+			return et;
+	    case LOCAL_BRANCHING:
+	        if((err = optimize_offline(set, inst, false, _LOCAL_BRANCHING, sol, &et)))
+				return -1;
+			return et;
+	    default:
+	        printf("Error: Algorithm code not found.\n\n");
+	        break;
+    }/* switch */
+	
+	return -1;
+
+}/* runConfiguration */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IOP sol solution
+* OP false if found a valid solution, true otherwise.
+* OR int execution seconds, -1 if error
+*/
+int matheur(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
+
+	matheuristics_legend();
+
+	return runMatheurConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
+
+}/* matheur */

@@ -24,6 +24,11 @@ typedef enum{
 	_LOCAL_BRANCHING
 } EXACTS;
 
+typedef enum {
+    HARD_FIXING,
+	LOCAL_BRANCHING
+} MATHEURISTICS;
+
 typedef struct{
     
     int nc;		/* nc	:= number of components */
@@ -93,3 +98,5 @@ void postPatchedSSol2CPX(CPXInstance*, CPXCALLBACKCONTEXTptr, COMP*, TSPSSolutio
 int callback_solver(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, callback_installer, TSPSolution*, bool, double*);
 
 int setdblparam(int, double, CPXENVptr, CPXLPptr);
+
+int matheur(const Settings*, const TSPInstance*, TSPSolution*);
