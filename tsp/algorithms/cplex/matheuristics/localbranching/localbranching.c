@@ -18,6 +18,20 @@
 */
 int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 
-	return 1;
+	int err;
+
+	if((*set).v)
+		printf("Running heuristics and refinement:\n\n");
+
+	if((err = offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, OPT2, inst, sol, set))){
+		if((*set).v)
+			printf("Error while computing the heuristic solution.");
+		return err;
+	}/* if */
+
+	if((*set).v)
+		printf("\n\nInitial cost: %lf\n\n", sol->val);
+
+	return 0;
 
 }/* local_branching */
