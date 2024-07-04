@@ -438,7 +438,7 @@ int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 /*
 * OR the Hard fixing fef hyperparamether
 */
-double readHFFnf(){
+double readHFFnf(void){
 
 	double fef;
 	
