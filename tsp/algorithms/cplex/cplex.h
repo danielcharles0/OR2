@@ -100,3 +100,5 @@ int callback_solver(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, ca
 int setdblparam(int, double, CPXENVptr, CPXLPptr);
 
 int matheur(const Settings*, const TSPInstance*, TSPSolution*);
+
+void update_solver_time_limit(const Settings*, clock_t, Settings*, CPXENVptr, CPXLPptr);

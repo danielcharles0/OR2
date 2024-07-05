@@ -12,26 +12,6 @@
 #include "../../usercut/usercut.h"
 #include "../../../../utility/utility.h"
 
-#define MIP_TIMELIMIT_FRACTION 10.
-
-/*
- * IP set settings
- * IP start execution time
- * OP mipset settings to update timelimit
- * OP env CPLEX environment
- * OP lp CPLEX linear program
- */
-void update_solver_time_limit(const Settings* set, clock_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
-{
-	double /* remining time */ rt = step((*set).tl - getSeconds(start));
-
-	(*mipset).tl = min_dbl((*set).tl / MIP_TIMELIMIT_FRACTION, rt);
-
-	if(setdblparam(CPX_PARAM_TILIM, (*mipset).tl, env, lp))
-		exit(1);
-
-} /* update_time_limit */
-
 /*
 * IP inst tsp instance
 * IP sol solution
@@ -60,22 +40,20 @@ void convertSolIndicesIntoCPXXPos(const TSPInstance* inst, const TSPSolution* so
 */
 void fix_edges(const Settings* set, const TSPInstance* inst, const TSPSolution* sol, const char* lbc, double *lb[2], CPXENVptr env, CPXLPptr lp, ArrayDinaInt* fe){
 
+	int err;
 	ArrayDinaInt soledges;
 	
 	soledges.n = (*inst).dimension;
 	soledges.v = (*sol).path;
 
-	// if((*set).v)
-	// 	printf("Fixing %d edges\n", fe->n);
-
 	reservoirSamplingIndices(&soledges, fe);
 
 	convertSolIndicesIntoCPXXPos(inst, sol, fe);
 
-	CPXchgbds(env, lp, fe->n, fe->v, lbc, lb[1]);
-
-	// if((*set).v)
-	// 	printf("%d edges fixed\n", fe->n);
+	if((err = CPXchgbds(env, lp, fe->n, fe->v, lbc, lb[1]))){
+		print_error("CPXchgbds() error", err, env, lp);
+		exit(1);
+	}/* if */
 
 }/* fix_edges */
 
@@ -171,7 +149,7 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, double fef, CPXENV
 
 		if(updateIncumbentSol(inst, &temp, sol))
 			if((*set).v)
-				printf(" Better solution cost found: %lf", sol->val);
+				printf(" | Best solution cost found: %lf", sol->val);
 
 		// if(mipet > (mipset.tl)); /* we reached the timelimit */
 		// update fe.n

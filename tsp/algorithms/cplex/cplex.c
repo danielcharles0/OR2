@@ -32,6 +32,7 @@
 #define PARAM_NODELIM 1000
 #define MAX_LINE_LENGTH 133 /* 132 characters + '\n' */
 #define MAX_OUTPUT_MODEL_FILE_DIMENSION 11
+#define MIP_TIMELIMIT_FRACTION 10.
 
 /*
  * IP env CPX environment, can be NULL to be able to translate CPXopenCPLEX routine errors
@@ -1115,3 +1116,21 @@ int matheur(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	return runMatheurConfiguration(readInt("Insert the configuration code you want to run: "), set, inst, sol);
 
 }/* matheur */
+
+/*
+ * IP set settings
+ * IP start execution time
+ * OP mipset settings to update timelimit
+ * OP env CPLEX environment
+ * OP lp CPLEX linear program
+ */
+void update_solver_time_limit(const Settings* set, clock_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
+{
+	double /* remining time */ rt = step((*set).tl - getSeconds(start));
+
+	(*mipset).tl = min_dbl((*set).tl / MIP_TIMELIMIT_FRACTION, rt);
+
+	if(setdblparam(CPX_PARAM_TILIM, (*mipset).tl, env, lp))
+		exit(1);
+
+} /* update_time_limit */

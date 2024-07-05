@@ -74,3 +74,5 @@ bool reservoirSamplingIndices(const ArrayDinaInt*, ArrayDinaInt*);
 bool checkTimeLimitV(const Settings*, clock_t, bool, double*);
 
 double readDouble(const char[]);
+
+double cutfunc(double, double);

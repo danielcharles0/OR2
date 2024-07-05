@@ -5,8 +5,77 @@
 * File     : localbranching.c
 */
 
+#include <assert.h>
 #include "../../cplex.h"
 #include "localbranching.h"
+#include "../../usercut/usercut.h"
+#include "../../../../utility/utility.h"
+
+#define K_MIN 5
+#define K_START 10
+#define K_STEP 5
+
+/*
+* IP inst tsp instance
+* IP sol solution
+* IP k number of edges that can change starting from the current best solution
+* IP vls coefficients
+* OP idxs indexes of the involved CPLEX variables
+* OP env CPLEX environment
+* OP lp CPLEX linear program
+*/
+void fix_dges(const TSPInstance* inst, const TSPSolution* sol, int k, const double* vls, int* idxs, CPXENVptr env, CPXLPptr lp){
+
+	int i, err;
+	const int zero = 0;
+	const char sense = 'G';
+	const double rhs = (*inst).dimension - k;
+	
+	for(i = 0; i < inst->dimension; i++)
+		idxs[i] = xpos(sol->path[i], sol->path[(i + 1) % inst->dimension], inst);
+
+	if ((err = CPXaddrows(env, lp, 0, 1, (*inst).dimension, &rhs, &sense, &zero, idxs, vls, NULL, NULL))){
+		print_error("Wrong CPXaddrows(..)", err, env, lp);
+		exit(1);
+	} /* if */
+
+}/* fix_dges */
+
+/*
+* IP n size of the array
+* OP vls array to allocate and initialize
+*/
+void initIdxsVls(int n, int** idxs, double** vls){
+	
+	int i;
+	
+	*idxs = malloc(n * sizeof(int));
+	assert(*idxs != NULL);
+
+	*vls = malloc(n * sizeof(double));
+	assert(*vls != NULL);
+
+	for(i = 0; i < n; i++)
+		(*vls)[i] = 1.;
+
+}/* initVls */
+
+/*
+* IP inst tsp instance
+* OP env CPLEX environment
+* OP lp CPLEX linear program
+*/
+void release_edges(const TSPInstance* inst, CPXENVptr env, CPXLPptr lp){
+
+	int err;
+	
+	/* We have 1 row for each degree constraint + the fix edges row. The indexes starts by 0 */
+	if ((err = CPXdelrows(env, lp, inst->dimension, inst->dimension))){
+		print_error("CPXdelrows() error", err, env, lp);
+		exit(1);
+	} /* if */
+
+}/* release_edges */
 
 /*
 * IP set settings
@@ -19,7 +88,11 @@
 */
 int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 
-	int err;
+	int *idxs, err, stat, k = K_START;
+	double *vls, mipet, ls = -1;
+	Settings mipset;
+	TSPSolution temp;
+	clock_t start = clock();
 
 	if((*set).v)
 		printf("Running heuristics and refinement:\n\n");
@@ -33,6 +106,65 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 	if((*set).v)
 		printf("\n\nInitial cost: %lf\n\n", sol->val);
 
-	return 0;
+	cpSet(set, &mipset);
+	mipset.v = 0;
+
+	allocSol((*inst).dimension, &temp);
+	
+	initIdxsVls(inst->dimension, &idxs, &vls);
+
+	checkTimeLimit(set, start, &ls);
+
+	while (true){
+		
+		/* true if an improvement was made by the solver */
+		bool imp;
+
+		update_solver_time_limit(set, start, &mipset, env, lp);
+
+		fix_dges(inst, sol, k, vls, idxs, env, lp);
+
+		if(set->v)
+			printf(" | Blocking %2d edges", k);
+		
+		/* TO CHECK THAT IT IS THE BEST METHOD by doing perfprof */
+		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, false, &mipet)){
+			if((*set).v)
+				printf("Error while calling the solver.\nReturning best found solution so far.");
+			break;
+		}/* if */
+
+		if((imp = updateIncumbentSol(inst, &temp, sol)))
+			if((*set).v)
+				printf(" | Best solution cost found: %lf", sol->val);
+
+		if(checkTimeLimit(set, start, &ls))
+			break;
+
+		stat = CPXgetstat(env, lp);
+
+		/* Time limit reached */
+		if(stat == CPXMIP_TIME_LIM_FEAS || stat == CPXMIP_TIME_LIM_INFEAS){
+			k = -cutfunc(-k + K_STEP, -K_MIN);
+			if(set->v)
+				printf(" | The solver reached the tl, status: %3d", stat);
+		} else {
+			if(!imp)
+				k += K_STEP;
+			if(set->v)
+				printf(" | ILCPLEX was able to compute for k = %2d", k);
+		}/* else */
+
+		release_edges(inst, env, lp);
+
+	}/* while */
+
+	free(vls);
+	free(idxs);
+	freeSol(&temp);
+
+	*et = getSeconds(start);
+
+	return err;
 
 }/* local_branching */
