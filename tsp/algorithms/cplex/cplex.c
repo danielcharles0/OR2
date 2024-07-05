@@ -377,7 +377,7 @@ int build_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPX
 /*
 * Prints exact algorithms legend.
 */
-void exactAlgorithmLegend(void){
+void exactAlgorithmLegend(){
 
 	printf("Available exact algorithms:\n");
     printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
@@ -439,7 +439,7 @@ int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 /*
 * OR the Hard fixing fef hyperparamether
 */
-double readHFFnf(void){
+double readHFFef(){
 
 	double fef;
 	
@@ -463,11 +463,12 @@ double readHFFnf(void){
 * IP lp CPLEX linear program
 * IP start boolean indicating whether to use mipstart
 * IP alg algorithm to run
+* IP fef fixed edges fraction, just for hard fixing, ignored in the other cases
 * IOP sol solution to be updated
 * OP et execution time
 * OR 0 if no error, error code otherwise
 */
-int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, TSPSolution* sol, double* et){
+int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, double fef, TSPSolution* sol, double* et){
 	
 	switch (alg){
 	    case BENDERS:
@@ -479,7 +480,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 		case USERCUT_CALLBACK:
 			return callback_solver(set, inst, env, lp, (callback_installer)usercut, sol, start, et);
 		case _HARD_FIXING:
-			return hard_fixing(set, inst, readHFFnf(), env, lp, sol, et);
+			return hard_fixing(set, inst, fef, env, lp, sol, et);
 		case _LOCAL_BRANCHING:
 			return local_branching(set, inst, env, lp, sol, et);
 	    default:
@@ -611,12 +612,13 @@ int optimize_model(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolu
  * IP inst input instance
  * IP start boolean indicating whether to use mipstart
  * IP alg algorithm to run
+ * IP fef fixed edges fraction, just for hard fixing, ignored in the other cases
  * OP sol solution to evaluate ( assume that the solution was already initialized )
  * OP et execution time
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, EXACTS alg, TSPSolution *sol, double* et)
+int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, EXACTS alg, double fef, TSPSolution *sol, double* et)
 {
 
 	int err;
@@ -642,7 +644,7 @@ int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, E
 		else
 		{
 			if (!(err = build_model(set, inst, env, lp)))
-				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, sol, et)))
+				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, fef, sol, et)))
 					if((*set).v)
 						print_status(env, lp);
 
@@ -673,7 +675,7 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 
 	exactAlgorithmLegend();
 
-	return optimize_offline(set, inst, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), sol, &et);
+	return optimize_offline(set, inst, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), 0, sol, &et);
 
 } /* optimize */
 
@@ -1063,7 +1065,7 @@ void postPatchedSSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, COMP*
 /*
 * Print algorithm configurations.
 */
-void matheuristics_legend(void){
+void matheuristics_legend(){
     
     printf("Available MATHEURISTICS:\n");
     printf("\t- Code: %d, Algorithm: Hard fixing\n", HARD_FIXING);
@@ -1086,11 +1088,11 @@ double runMatheurConfiguration(MATHEURISTICS alg, const Settings* set, const TSP
 
 	switch (alg){
 	    case HARD_FIXING:
-			if((err = optimize_offline(set, inst, false, _HARD_FIXING, sol, &et)))
+			if((err = optimize_offline(set, inst, false, _HARD_FIXING, readHFFef(), sol, &et)))
 				return -1;
 			return et;
 	    case LOCAL_BRANCHING:
-	        if((err = optimize_offline(set, inst, false, _LOCAL_BRANCHING, sol, &et)))
+	        if((err = optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, sol, &et)))
 				return -1;
 			return et;
 	    default:

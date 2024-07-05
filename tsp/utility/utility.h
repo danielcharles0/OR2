@@ -63,7 +63,7 @@ bool readBool(const char[]);
 
 double getSeconds(clock_t);
 
-unsigned int get_hardware_concurrency(void);
+unsigned int get_hardware_concurrency();
 
 double min_dbl(double, double);
 

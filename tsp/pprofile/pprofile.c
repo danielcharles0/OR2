@@ -22,7 +22,7 @@
 /*
 * OV help section
 */
-void pp_help(void){
+void pp_help(){
 
     printf("Performance profile options:\n");
 
@@ -93,7 +93,7 @@ bool validateExactAlgCode(int partial_code){
 /*
 * OV the random legend
 */
-void pp_random_legend(void){
+void pp_random_legend(){
 
 	printf("\t* Random\n");
     printf("\t\t- Code: %d, Algorithm: Just a random solution\n", PP_RANDOM);
@@ -110,7 +110,7 @@ void pp_random_legend(void){
 /*
 * OV the nearest neighbor (start from first node version) legend
 */
-void pp_nearest_neighbor_first_node_legend(void){
+void pp_nearest_neighbor_first_node_legend(){
 
 	printf("\t* Nearest neighbor starting from the first node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from the first node\n", PP_NEAREST_NEIGHBOR_START_FIRST_NODE);
@@ -127,7 +127,7 @@ void pp_nearest_neighbor_first_node_legend(void){
 /*
 * OV the nearest neighbor (start from random node version) legend
 */
-void pp_nearest_neighbor_random_node_legend(void){
+void pp_nearest_neighbor_random_node_legend(){
 
 	printf("\t* Nearest neighbor starting from a random node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from a random node\n", PP_NEAREST_NEIGHBOR_START_RANDOM_NODE);
@@ -144,7 +144,7 @@ void pp_nearest_neighbor_random_node_legend(void){
 /*
 * OV the nearest neighbor (best start version) legend
 */
-void pp_nearest_neighbor_best_start_legend(void){
+void pp_nearest_neighbor_best_start_legend(){
 
 	printf("\t* Nearest neighbor best start\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor best start\n", PP_NEAREST_NEIGHBOR_BEST_START);
@@ -159,9 +159,27 @@ void pp_nearest_neighbor_best_start_legend(void){
 }/* pp_nearest_neighbor_best_start_legend */
 
 /*
+* OV the matheuristic algorithms legend
+*/
+void pp_matheuristic_legend(){
+	
+	printf("\t* Hard Fixing\n");
+    printf("\t\t- Code: %d, Algorithm: Hard Fixing with 60%% edges fixed\n", PP_HARD_FIXING_60);
+    printf("\t\t- Code: %d, Algorithm: Hard Fixing with 70%% edges fixed\n", PP_HARD_FIXING_70);
+	printf("\t\t- Code: %d, Algorithm: Hard Fixing with 80%% edges fixed\n", PP_HARD_FIXING_80);
+	printf("\t\t- Code: %d, Algorithm: Hard Fixing with 90%% edges fixed\n", PP_HARD_FIXING_90);
+	printf("\n");
+
+	printf("\t* Local Branching\n");
+	printf("\t\t- Code: %d, Algorithm: Local Branching\n", PP_LOCAL_BRANCHING);
+    printf("\n");
+
+}/* pp_matheuristic_legend */
+
+/*
 * OV the heuristic algorithms legend
 */
-void pp_heuristic_legend(void){
+void pp_heuristic_legend(){
 	
 	printf("Available heuristic algorithms:\n");
 
@@ -173,12 +191,16 @@ void pp_heuristic_legend(void){
 
 	pp_nearest_neighbor_best_start_legend();
 
+	printf("Available matheuristic algorithms:\n");
+
+	pp_matheuristic_legend();
+
 }/* pp_heuristic_legend */
 
 /*
 * OV the exact methods legend
 */
-void pp_exact_legend(void){
+void pp_exact_legend(){
 
 	printf("Available exact algorithms:\n");
 
@@ -267,6 +289,41 @@ bool readPPConfiguration(int argc, char* const* argv, PP_CONF* conf){
 * OP sol solution
 * OR true if error, false otherwise
 */
+bool runPPMathheurAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol){
+
+	double et;
+
+	switch (alg){
+		case PP_HARD_FIXING_60:
+			return optimize_offline(set, inst, false, _HARD_FIXING, .6, sol, &et);
+			break;
+		case PP_HARD_FIXING_70:
+			return optimize_offline(set, inst, false, _HARD_FIXING, .7, sol, &et);
+			break;
+		case PP_HARD_FIXING_80:
+			return optimize_offline(set, inst, false, _HARD_FIXING, .8, sol, &et);
+			break;
+		case PP_HARD_FIXING_90:
+			return optimize_offline(set, inst, false, _HARD_FIXING, .9, sol, &et);
+			break;
+
+		case PP_LOCAL_BRANCHING:
+			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, sol, &et);
+			break;
+
+		default:
+	        printf("\nError: Algorithm code not found.\n");
+	        return true;
+	}/* switch */
+
+}/* runPPMathheurAlg */
+
+/*
+* IP set settings to run
+* IP alg algorithm to run
+* OP sol solution
+* OR true if error, false otherwise
+*/
 bool runPPHeurAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolution* sol){
 
 	switch (alg){
@@ -332,8 +389,7 @@ bool runPPHeurAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSolutio
 			return offline_run_refinement(O_NEAREST_NEIGHBOR_BEST_START, VNS, inst, sol, set);
 		
 	    default:
-	        printf("\nError: Algorithm code not found.\n");
-	        return true;
+	        return runPPMathheurAlg(set, alg, inst, sol);
     }/* switch */
 	
 }/* runPPHeurAlg */
@@ -350,24 +406,24 @@ bool runPPExactAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSoluti
 	switch (alg){
 
 		case PP_BENDERS_NO_MIPSTART:
-			return optimize_offline(set, inst, false, BENDERS, sol, et);
+			return optimize_offline(set, inst, false, BENDERS, 0, sol, et);
 		case PP_BENDERS_MIPSTART:
-			return optimize_offline(set, inst, true, BENDERS, sol, et);
+			return optimize_offline(set, inst, true, BENDERS, 0, sol, et);
 
 		case PP_BENDERS_PATCH_NO_MIPSTART:
-			return optimize_offline(set, inst, false, BENDERS_PATCH, sol, et);
+			return optimize_offline(set, inst, false, BENDERS_PATCH, 0, sol, et);
 		case PP_BENDERS_PATCH_MIPSTART:
-			return optimize_offline(set, inst, true, BENDERS_PATCH, sol, et);
+			return optimize_offline(set, inst, true, BENDERS_PATCH, 0, sol, et);
 
 		case PP_CANDIDATE_CALLBACK_NO_MIPSTART:
-			return optimize_offline(set, inst, false, CANDIDATE_CALLBACK, sol, et);
+			return optimize_offline(set, inst, false, CANDIDATE_CALLBACK, 0, sol, et);
 		case PP_CANDIDATE_CALLBACK_MIPSTART:
-			return optimize_offline(set, inst, true, CANDIDATE_CALLBACK, sol, et);
+			return optimize_offline(set, inst, true, CANDIDATE_CALLBACK, 0, sol, et);
 
 		case PP_USERCUT_CALLBACK_NO_MIPSTART:
-			return optimize_offline(set, inst, false, USERCUT_CALLBACK, sol, et);
+			return optimize_offline(set, inst, false, USERCUT_CALLBACK, 0, sol, et);
 		case PP_USERCUT_CALLBACK_MIPSTART:
-			return optimize_offline(set, inst, true, USERCUT_CALLBACK, sol, et);
+			return optimize_offline(set, inst, true, USERCUT_CALLBACK, 0, sol, et);
 
 	    default:
 	        printf("\nError: Algorithm code not found.\n");
@@ -492,6 +548,25 @@ void getAlgName(PP_ALG alg, char name[]){
 			sprintf(name, "nnbs_vns");
 			break;
 		
+		/* MATHEURISTICS */
+
+		case PP_HARD_FIXING_60:
+			sprintf(name, "hard_fixing_60");
+			break;
+		case PP_HARD_FIXING_70:
+			sprintf(name, "hard_fixing_70");
+			break;
+		case PP_HARD_FIXING_80:
+			sprintf(name, "hard_fixing_80");
+			break;
+		case PP_HARD_FIXING_90:
+			sprintf(name, "hard_fixing_90");
+			break;
+
+		case PP_LOCAL_BRANCHING:
+			sprintf(name, "local_branching");
+			break;
+
 		/* EXACTS */
 		
 		case PP_BENDERS_NO_MIPSTART:

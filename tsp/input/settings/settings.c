@@ -30,7 +30,7 @@ static struct option long_options[] = {
 /*
 * OV help section
 */
-void help(void){
+void help(){
 
     printf("TSP solver options:\n");
 	                                                            /* remember that the last character contains the special EOS value '\0' */
