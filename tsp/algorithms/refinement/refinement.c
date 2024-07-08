@@ -55,7 +55,7 @@ bool runRefAlg(REFINEMENT_ALGORITHM alg, const Settings* set, const TSPInstance*
 /*
 * Print refinement algorithm legend.
 */
-void refinementaAlgorithmLegend(){
+void refinementaAlgorithmLegend(void){
 
 	printf("Available refinement algorithms:\n");
 	printf("\t- Code: %d to skip refinement\n", SKIP);

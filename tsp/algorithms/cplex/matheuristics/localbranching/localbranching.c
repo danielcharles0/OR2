@@ -11,7 +11,7 @@
 #include "../../usercut/usercut.h"
 #include "../../../../utility/utility.h"
 
-#define K_START 5
+#define K_START 10
 #define K_STEP 5
 
 /*

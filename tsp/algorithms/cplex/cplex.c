@@ -377,7 +377,7 @@ int build_model(const Settings *set, const TSPInstance *inst, CPXENVptr env, CPX
 /*
 * Prints exact algorithms legend.
 */
-void exactAlgorithmLegend(){
+void exactAlgorithmLegend(void){
 
 	printf("Available exact algorithms:\n");
     printf("\t- Code: %d, Algorithm: Benders' loop\n", BENDERS);
@@ -439,7 +439,7 @@ int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 /*
 * OR the Hard fixing fef hyperparamether
 */
-double readHFFef(){
+double readHFFef(void){
 
 	double fef;
 	
@@ -1065,7 +1065,7 @@ void postPatchedSSol2CPX(CPXInstance* cpx_inst, CPXCALLBACKCONTEXTptr ctx, COMP*
 /*
 * Print algorithm configurations.
 */
-void matheuristics_legend(){
+void matheuristics_legend(void){
     
     printf("Available MATHEURISTICS:\n");
     printf("\t- Code: %d, Algorithm: Hard fixing\n", HARD_FIXING);

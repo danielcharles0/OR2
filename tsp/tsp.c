@@ -223,7 +223,7 @@ void printInst(const TSPInstance* inst){
 /*
 * Print algorithm legend.
 */
-void algorithmLegend(){
+void algorithmLegend(void){
     
     printf("Available algorithms:\n");
     printf("\t- Code: %d, Algorithm: Just a random solution\n", RANDOM);

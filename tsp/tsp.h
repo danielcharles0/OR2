@@ -78,7 +78,7 @@ void computeDistances(TSPInstance*);
 
 void printInst(const TSPInstance*);
 
-void algorithmLegend();
+void algorithmLegend(void);
 
 bool run(ALGORITHM, const TSPInstance*, TSPSolution*, const Settings*);
 

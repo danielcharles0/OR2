@@ -90,7 +90,7 @@ int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
 /*
 * Print algorithm configurations.
 */
-void algorithmConfigurations(){
+void algorithmConfigurations(void){
     
     printf("Available nearest neighbor search configurations:\n");
     printf("\t- Code: %d, Algorithm: Search starts from the first node\n", START_FIRST_NODE);

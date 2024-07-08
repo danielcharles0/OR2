@@ -504,7 +504,7 @@ bool readBool(const char lab[]){
 /*
 * Function to know number of threads of the machine. For MacOS only.
 */
-unsigned int get_hardware_concurrency() {
+unsigned int get_hardware_concurrency(void) {
     
     int nm[2];
     size_t len = 4;

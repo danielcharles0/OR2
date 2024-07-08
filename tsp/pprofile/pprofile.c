@@ -22,7 +22,7 @@
 /*
 * OV help section
 */
-void pp_help(){
+void pp_help(void){
 
     printf("Performance profile options:\n");
 
@@ -93,7 +93,7 @@ bool validateExactAlgCode(int partial_code){
 /*
 * OV the random legend
 */
-void pp_random_legend(){
+void pp_random_legend(void){
 
 	printf("\t* Random\n");
     printf("\t\t- Code: %d, Algorithm: Just a random solution\n", PP_RANDOM);
@@ -110,7 +110,7 @@ void pp_random_legend(){
 /*
 * OV the nearest neighbor (start from first node version) legend
 */
-void pp_nearest_neighbor_first_node_legend(){
+void pp_nearest_neighbor_first_node_legend(void){
 
 	printf("\t* Nearest neighbor starting from the first node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from the first node\n", PP_NEAREST_NEIGHBOR_START_FIRST_NODE);
@@ -127,7 +127,7 @@ void pp_nearest_neighbor_first_node_legend(){
 /*
 * OV the nearest neighbor (start from random node version) legend
 */
-void pp_nearest_neighbor_random_node_legend(){
+void pp_nearest_neighbor_random_node_legend(void){
 
 	printf("\t* Nearest neighbor starting from a random node\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor starting from a random node\n", PP_NEAREST_NEIGHBOR_START_RANDOM_NODE);
@@ -144,7 +144,7 @@ void pp_nearest_neighbor_random_node_legend(){
 /*
 * OV the nearest neighbor (best start version) legend
 */
-void pp_nearest_neighbor_best_start_legend(){
+void pp_nearest_neighbor_best_start_legend(void){
 
 	printf("\t* Nearest neighbor best start\n");
     printf("\t\t- Code: %d, Algorithm: Just nearest neighbor best start\n", PP_NEAREST_NEIGHBOR_BEST_START);
@@ -161,7 +161,7 @@ void pp_nearest_neighbor_best_start_legend(){
 /*
 * OV the matheuristic algorithms legend
 */
-void pp_matheuristic_legend(){
+void pp_matheuristic_legend(void){
 	
 	printf("\t* Hard Fixing\n");
     printf("\t\t- Code: %d, Algorithm: Hard Fixing with 60%% edges fixed\n", PP_HARD_FIXING_60);
@@ -179,7 +179,7 @@ void pp_matheuristic_legend(){
 /*
 * OV the heuristic algorithms legend
 */
-void pp_heuristic_legend(){
+void pp_heuristic_legend(void){
 	
 	printf("Available heuristic algorithms:\n");
 
@@ -200,7 +200,7 @@ void pp_heuristic_legend(){
 /*
 * OV the exact methods legend
 */
-void pp_exact_legend(){
+void pp_exact_legend(void){
 
 	printf("Available exact algorithms:\n");
 
