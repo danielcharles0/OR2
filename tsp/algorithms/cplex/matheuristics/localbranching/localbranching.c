@@ -123,8 +123,10 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 
 		fix_dges(inst, sol, k, vls, idxs, env, lp);
 
-		if(set->v)
+		if(set->v){
 			printf(" | Blocking %2d edges", k);
+			fflush(NULL);
+		}
 		
 		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, false, &mipet)){
 			if((*set).v)
@@ -139,8 +141,7 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 		if(checkTimeLimit(set, start, &ls))
 			break;
 
-		if(!imp)
-			k += K_STEP;
+		k += K_STEP;
 
 		release_edges(inst, env, lp);
 
