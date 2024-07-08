@@ -140,7 +140,6 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, double fef, CPXENV
 
 		fix_edges(set, inst, sol, lbc, lb, env, lp, &fe);
 		
-		/* TO CHECK THAT IT IS THE BEST METHOD by doing perfprof */
 		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, false, &mipet)){
 			if((*set).v)
 				printf("Error while calling the solver.\nReturning best found solution so far.");

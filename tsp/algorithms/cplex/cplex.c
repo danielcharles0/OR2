@@ -1126,13 +1126,26 @@ int matheur(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
  * OP env CPLEX environment
  * OP lp CPLEX linear program
  */
-void update_solver_time_limit(const Settings* set, clock_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
+void update_solver_time_limit_fraction(const Settings* set, clock_t start, double frac, Settings* mipset, CPXENVptr env, CPXLPptr lp)
 {
 	double /* remining time */ rt = step((*set).tl - getSeconds(start));
 
-	(*mipset).tl = min_dbl((*set).tl / MIP_TIMELIMIT_FRACTION, rt);
+	(*mipset).tl = min_dbl((*set).tl / frac, rt);
 
 	if(setdblparam(CPX_PARAM_TILIM, (*mipset).tl, env, lp))
 		exit(1);
+
+} /* update_time_limit_fraction */
+
+/*
+ * IP set settings
+ * IP start execution time
+ * OP mipset settings to update timelimit
+ * OP env CPLEX environment
+ * OP lp CPLEX linear program
+ */
+void update_solver_time_limit(const Settings* set, clock_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
+{
+	update_solver_time_limit_fraction(set, start, MIP_TIMELIMIT_FRACTION, mipset, env, lp);
 
 } /* update_time_limit */

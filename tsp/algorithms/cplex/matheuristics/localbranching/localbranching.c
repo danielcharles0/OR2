@@ -11,8 +11,7 @@
 #include "../../usercut/usercut.h"
 #include "../../../../utility/utility.h"
 
-#define K_MIN 5
-#define K_START 10
+#define K_START 5
 #define K_STEP 5
 
 /*
@@ -88,7 +87,7 @@ void release_edges(const TSPInstance* inst, CPXENVptr env, CPXLPptr lp){
 */
 int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 
-	int *idxs, err, stat, k = K_START;
+	int *idxs, err, k = K_START;
 	double *vls, mipet, ls = -1;
 	Settings mipset;
 	TSPSolution temp;
@@ -120,14 +119,13 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 		/* true if an improvement was made by the solver */
 		bool imp;
 
-		update_solver_time_limit(set, start, &mipset, env, lp);
+		update_solver_time_limit_fraction(set, start, 1, &mipset, env, lp);
 
 		fix_dges(inst, sol, k, vls, idxs, env, lp);
 
 		if(set->v)
 			printf(" | Blocking %2d edges", k);
 		
-		/* TO CHECK THAT IT IS THE BEST METHOD by doing perfprof */
 		if(callback_solver(&mipset, inst, env, lp, (callback_installer)usercut, &temp, false, &mipet)){
 			if((*set).v)
 				printf("Error while calling the solver.\nReturning best found solution so far.");
@@ -141,19 +139,8 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 		if(checkTimeLimit(set, start, &ls))
 			break;
 
-		stat = CPXgetstat(env, lp);
-
-		/* Time limit reached */
-		if(stat == CPXMIP_TIME_LIM_FEAS || stat == CPXMIP_TIME_LIM_INFEAS){
-			k = -cutfunc(-k + K_STEP, -K_MIN);
-			if(set->v)
-				printf(" | The solver reached the tl, status: %3d", stat);
-		} else {
-			if(!imp)
-				k += K_STEP;
-			if(set->v)
-				printf(" | ILCPLEX was able to compute for k = %2d", k);
-		}/* else */
+		if(!imp)
+			k += K_STEP;
 
 		release_edges(inst, env, lp);
 
