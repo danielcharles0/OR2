@@ -73,7 +73,7 @@ void NN_initSol(int sp, const TSPInstance* inst, TSPSolution* sol){
 */
 int NN_solver(int sp, const TSPInstance* inst, TSPSolution* sol){
     
-	clock_t start = clock();
+	time_t start = time(0);
 	int curr;
 
     NN_initSol(sp, inst, sol);
@@ -107,7 +107,7 @@ void algorithmConfigurations(void){
 * IP n total number of iterations
 * OV process bar
 */
-void NNBar(clock_t start, int it, int n, int* ls){
+void NNBar(time_t start, int it, int n, int* ls){
 	
 	int s = getSeconds(start);
 
@@ -127,7 +127,7 @@ void NNBar(clock_t start, int it, int n, int* ls){
 */
 double best_start(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 	
-	clock_t start = clock();
+	time_t start = time(0);
 	TSPSolution temp;
 	int i, ls = -1;
 

@@ -73,7 +73,7 @@ int xpos(int, int, const TSPInstance*);
 
 void print_error(const char*, int, CPXENVptr, CPXLPptr);
 
-void update_time_limit(const Settings*, clock_t, CPXENVptr, CPXLPptr);
+void update_time_limit(const Settings*, time_t, CPXENVptr, CPXLPptr);
 
 void allocComp(int, COMP*);
 
@@ -101,6 +101,6 @@ int setdblparam(int, double, CPXENVptr, CPXLPptr);
 
 int matheur(const Settings*, const TSPInstance*, TSPSolution*);
 
-void update_solver_time_limit(const Settings*, clock_t, Settings*, CPXENVptr, CPXLPptr);
+void update_solver_time_limit(const Settings*, time_t, Settings*, CPXENVptr, CPXLPptr);
 
-void update_solver_time_limit_fraction(const Settings*, clock_t, double, Settings*, CPXENVptr, CPXLPptr);
+void update_solver_time_limit_fraction(const Settings*, time_t, double, Settings*, CPXENVptr, CPXLPptr);

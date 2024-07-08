@@ -214,7 +214,7 @@ void tabuMove(const TSPInstance* inst, int it, int i, int j, TABU_LIST* tl, TSPS
 */
 void tabu(const Settings* set, const TSPInstance* inst, TSPSolution* sol, tenurefunc tf){
 
-	clock_t start = clock();
+	time_t start = time(0);
 	TSPSolution temp;
 	TABU_LIST tl; /* TABU list */
 	FILE* cost_pipe;

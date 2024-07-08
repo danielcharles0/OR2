@@ -91,7 +91,7 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 	double *vls, mipet, ls = -1;
 	Settings mipset;
 	TSPSolution temp;
-	clock_t start = clock();
+	time_t start = time(0);
 
 	if((*set).v)
 		printf("Running heuristics and refinement:\n\n");

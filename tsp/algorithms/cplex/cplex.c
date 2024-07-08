@@ -404,7 +404,7 @@ void exactAlgorithmLegend(void){
 int callback_solver(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, callback_installer ci, TSPSolution* sol, bool warm_start, double* et){
 
     int err = 0;
-    clock_t start = clock();
+    time_t start = time(0);
 
     COMP comp;
 	TSPSSolution temp;
@@ -496,7 +496,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
  * OP env CPLEX environment
  * IP lp CPLEX linear program
  */
-void update_time_limit(const Settings *set, clock_t start, CPXENVptr env, CPXLPptr lp)
+void update_time_limit(const Settings *set, time_t start, CPXENVptr env, CPXLPptr lp)
 {
 	double ntl = step((*set).tl - getSeconds(start));
 
@@ -1126,7 +1126,7 @@ int matheur(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
  * OP env CPLEX environment
  * OP lp CPLEX linear program
  */
-void update_solver_time_limit_fraction(const Settings* set, clock_t start, double frac, Settings* mipset, CPXENVptr env, CPXLPptr lp)
+void update_solver_time_limit_fraction(const Settings* set, time_t start, double frac, Settings* mipset, CPXENVptr env, CPXLPptr lp)
 {
 	double /* remining time */ rt = step((*set).tl - getSeconds(start));
 
@@ -1144,7 +1144,7 @@ void update_solver_time_limit_fraction(const Settings* set, clock_t start, doubl
  * OP env CPLEX environment
  * OP lp CPLEX linear program
  */
-void update_solver_time_limit(const Settings* set, clock_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
+void update_solver_time_limit(const Settings* set, time_t start, Settings* mipset, CPXENVptr env, CPXLPptr lp)
 {
 	update_solver_time_limit_fraction(set, start, MIP_TIMELIMIT_FRACTION, mipset, env, lp);
 

@@ -100,7 +100,7 @@ int hard_fixing(const Settings* set, const TSPInstance* inst, double fef, CPXENV
 	ArrayDinaInt fe;
 	Settings mipset;
 	TSPSolution temp;
-	clock_t start = clock();
+	time_t start = time(0);
 
 	if(fef <= 0 || fef >= 1){
 		printf("Error: wrong parameter, the fixed edges fraction must belong to the interval (0, 1).");

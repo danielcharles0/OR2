@@ -90,7 +90,7 @@ double getOpt2OptMove(const TSPInstance* inst, const TSPSolution* sol, int* opti
 */
 double opt2(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
-	clock_t start = clock();
+	time_t start = time(0);
 	double ls = -1;
 	int opti, optj; /* opti and optj are indexes in the sol->path array */
 	

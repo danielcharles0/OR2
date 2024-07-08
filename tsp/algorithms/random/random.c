@@ -15,7 +15,7 @@
 */
 int randomSol(const TSPInstance* inst, TSPSolution* sol){
 	
-	clock_t start = clock();
+	time_t start = time(0);
 	int i;
 
 	ascendentSol(inst, sol);

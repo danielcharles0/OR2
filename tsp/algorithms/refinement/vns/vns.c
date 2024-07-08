@@ -114,7 +114,7 @@ void kickSol(const TSPInstance* inst, TSPSolution* sol){
 */
 void vns(const Settings* set, const TSPInstance* inst, TSPSolution* sol){
 
-    clock_t start = clock();
+    time_t start = time(0);
     TSPSolution temp;
     FILE* pipe;
     Settings vns_set;

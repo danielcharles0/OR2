@@ -159,9 +159,10 @@ bool isEqual(double a, double b){
 * IP end ending execution time
 * OR execution time in seconds
 */
-double getSeconds(clock_t start){
+double getSeconds(time_t start){
 
-    return (double)(clock() - start) / CLOCKS_PER_SEC;
+    //return (double)(clock() - start) / CLOCKS_PER_SEC;
+    return difftime(time(0), start);
 
 }/* getSeconds */
 
@@ -218,7 +219,7 @@ void printSeconds(const char lab[], int sec){
 * IP tl time limit in seconds
 * OR true if the execution time exceeded the time limit, false otherwise
 */
-bool isTimeOut(clock_t start, int tl){
+bool isTimeOut(time_t start, int tl){
 
     return getSeconds(start) > tl;
 
@@ -230,7 +231,7 @@ bool isTimeOut(clock_t start, int tl){
 * IP tl time limit in seconds
 * OR true if the execution time exceeded the time limit, false otherwise
 */
-bool isTimeOutWarning(const char war[], clock_t start, int tl, bool v){
+bool isTimeOutWarning(const char war[], time_t start, int tl, bool v){
 
 	if(!isTimeOut(start, tl))
 		return false;
@@ -292,7 +293,7 @@ void processBar(int ni, int tni){
 * IP freq printing frequency
 * IOP ls last stamp second from the execution time start
 */
-void timeBarPrecision(clock_t start, int tl, double freq, double* ls){
+void timeBarPrecision(time_t start, int tl, double freq, double* ls){
 	
 	double s = getSeconds(start);
 
@@ -309,7 +310,7 @@ void timeBarPrecision(clock_t start, int tl, double freq, double* ls){
 * IP tl time limit
 * IOP ls last stamp second from the execution time start
 */
-void timeBar(clock_t start, int tl, double* ls){
+void timeBar(time_t start, int tl, double* ls){
 	
     timeBarPrecision(start, tl, PRINT_FREQUENCY, ls);
 
@@ -321,7 +322,7 @@ void timeBar(clock_t start, int tl, double* ls){
 * IP v verbose
 * IOP ls last stamp second from the execution start
 */
-bool checkTimeLimitV(const Settings* set, clock_t start, bool v, double* ls){
+bool checkTimeLimitV(const Settings* set, time_t start, bool v, double* ls){
 	
 	if(v)
     	timeBar(start, (*set).tl, ls);
@@ -335,7 +336,7 @@ bool checkTimeLimitV(const Settings* set, clock_t start, bool v, double* ls){
 * IP start starting time of processing
 * IOP ls last stamp second from the execution start
 */
-bool checkTimeLimit(const Settings* set, clock_t start, double* ls){
+bool checkTimeLimit(const Settings* set, time_t start, double* ls){
 	return checkTimeLimitV(set, start, (*set).v, ls);
 }/* checkTimeLimit */
 
@@ -409,7 +410,7 @@ void sortIntArray(int n, int* arr){
 * IP freq frequency to plot 
 * IOP ls last stamp second from the execution time start
 */
-bool timeToPlot(clock_t start, double freq, double* ls){
+bool timeToPlot(time_t start, double freq, double* ls){
 
     double s = getSeconds(start);
 

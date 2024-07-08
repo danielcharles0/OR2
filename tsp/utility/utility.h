@@ -29,7 +29,7 @@ bool isEqualPrecision(double, double, double);
 
 bool isEqual(double, double);
 
-double getSeconds(clock_t);
+double getSeconds(time_t);
 
 void printSeconds(const char[], int);
 
@@ -37,15 +37,15 @@ int readIntRange(int, int, const char[]);
 
 void invertArray(int, int, int*);
 
-bool isTimeOut(clock_t, int);
+bool isTimeOut(time_t, int);
 
-bool isTimeOutWarning(const char[], clock_t, int, bool);
+bool isTimeOutWarning(const char[], time_t, int, bool);
 
-bool checkTimeLimit(const Settings*, clock_t, double*);
+bool checkTimeLimit(const Settings*, time_t, double*);
 
 void processBar(int ni, int tni);
 
-void timeBar(clock_t, int, double*);
+void timeBar(time_t, int, double*);
 
 int max(int, int);
 
@@ -53,15 +53,13 @@ void sortInt(int*, int*, int*);
 
 void sortIntArray(int, int*);
 
-bool timeToPlot(clock_t, double, double*);
+bool timeToPlot(time_t, double, double*);
 
 void printError(const char[]);
 
 double step(double);
 
 bool readBool(const char[]);
-
-double getSeconds(clock_t);
 
 unsigned int get_hardware_concurrency(void);
 
@@ -71,7 +69,7 @@ bool reservoirSampling(const ArrayDinaInt*, ArrayDinaInt*);
 
 bool reservoirSamplingIndices(const ArrayDinaInt*, ArrayDinaInt*);
 
-bool checkTimeLimitV(const Settings*, clock_t, bool, double*);
+bool checkTimeLimitV(const Settings*, time_t, bool, double*);
 
 double readDouble(const char[]);
 

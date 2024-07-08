@@ -200,7 +200,7 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 	
 	int err;
 	double lb = 0, ls = -1;
-	clock_t start = clock();
+	time_t start = time(0);
 	TSPSSolution temp;
 	COMP comp;
 	
