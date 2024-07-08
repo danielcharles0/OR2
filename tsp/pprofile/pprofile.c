@@ -745,7 +745,7 @@ int main(int argc, char* const* argv){
     printf("\nPerformance Profile program started...\n\n");
 
 	if(readPPConfiguration(argc, argv, &conf)){
-		printf("\nPerformance Profile progran ended.\n\n");
+		printf("\nPerformance Profile program ended.\n\n");
 		return 0;
 	}/* if */
 
@@ -754,7 +754,7 @@ int main(int argc, char* const* argv){
 
 	freePPConf(&conf);
 
-    printf("\nPerformance Profile progran ended.\n\n");
+    printf("\nPerformance Profile program ended.\n\n");
     
     return 0;
 

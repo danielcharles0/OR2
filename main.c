@@ -105,7 +105,7 @@ int main(int argc, char* const* argv){
 
     runConfig(config, &set);
 
-    printf("Progran ended.\n");
+    printf("Program ended.\n");
     
     return 0;
 
