@@ -252,8 +252,12 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 			// printf("Lower Bound: %lf\nBest Solution found: %lf\nGAP: %4.2lf%%\n\n", lb, sol->val, solGap(sol, lb));
 		} else
 			convertSSol(inst, &temp, sol);
-	} else
-		print_error("Error in BENDERS\n", err, env, lp);
+	} else {
+		if(CPXgetstat(env, lp) == CPXMIP_TIME_LIM_INFEAS)
+			err = 0;
+		else
+			print_error("Error in BENDERS\n", err, env, lp);
+	}	
 
 	freeSSol(&temp);
 	freeComp(&comp);
