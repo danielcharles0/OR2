@@ -67,7 +67,7 @@ typedef int (*callback_installer)(CPXENVptr, CPXLPptr, CPXInstance*);
 
 int optimize(const Settings*, const TSPInstance*, TSPSolution*);
 
-int optimize_offline(const Settings*, const TSPInstance*, bool, EXACTS, double, TSPSolution*, double*);
+int optimize_offline(const Settings*, const TSPInstance*, bool, EXACTS, double, int, TSPSolution*, double*);
 
 int xpos(int, int, const TSPInstance*);
 

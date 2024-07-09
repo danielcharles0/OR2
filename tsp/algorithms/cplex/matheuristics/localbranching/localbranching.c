@@ -79,15 +79,17 @@ void release_edges(const TSPInstance* inst, CPXENVptr env, CPXLPptr lp){
 /*
 * IP set settings
 * IP inst tsp instance
+* IP k_start k starting value
+* IP k_step k step increment value
 * IP env CPLEX environment
 * IP lp CPLEX linear program
 * OP sol solution
 * OP et execution time in seconds
 * OR 0 if no error, error code otherwise
 */
-int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
+int local_branching_k_start_step(const Settings* set, const TSPInstance* inst, int k_start, int k_step, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
 
-	int *idxs, err, k = K_START;
+	int *idxs, err, k = k_start;
 	double *vls, mipet, ls = -1;
 	Settings mipset;
 	TSPSolution temp;
@@ -124,7 +126,7 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 		fix_dges(inst, sol, k, vls, idxs, env, lp);
 
 		if(set->v){
-			printf(" | Blocking %2d edges", k);
+			printf(" | Blocking %4d edges", inst->dimension - k);
 			fflush(NULL);
 		}
 		
@@ -138,10 +140,10 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 			if((*set).v)
 				printf(" | Best solution cost found: %lf", sol->val);
 
-		if(checkTimeLimit(set, start, &ls))
+		if(k >= inst->dimension || checkTimeLimit(set, start, &ls))
 			break;
 
-		k += K_STEP;
+		k += k_step;
 
 		release_edges(inst, env, lp);
 
@@ -155,4 +157,36 @@ int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env,
 
 	return err;
 
+}/* local_branching_k_start_step */
+
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* OP sol solution
+* OP et execution time in seconds
+* OR 0 if no error, error code otherwise
+*/
+int local_branching(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
+
+	return local_branching_k_start_step(set, inst, K_START, K_STEP, env, lp, sol, et);
+
 }/* local_branching */
+
+/*
+* IP set settings
+* IP inst tsp instance
+* IP k_start k starting value
+* IP env CPLEX environment
+* IP lp CPLEX linear program
+* OP sol solution
+* OP et execution time in seconds
+* OR 0 if no error, error code otherwise
+*/
+int local_branching_k_start(const Settings* set, const TSPInstance* inst, int k_start, CPXENVptr env, CPXLPptr lp, TSPSolution* sol, double* et){
+
+	return local_branching_k_start_step(set, inst, k_start, K_STEP, env, lp, sol, et);
+
+}/* local_branching_k_start */

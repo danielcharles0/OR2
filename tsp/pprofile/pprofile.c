@@ -171,7 +171,10 @@ void pp_matheuristic_legend(void){
 	printf("\n");
 
 	printf("\t* Local Branching\n");
-	printf("\t\t- Code: %d, Algorithm: Local Branching\n", PP_LOCAL_BRANCHING);
+	printf("\t\t- Code: %d, Algorithm: Local Branching with 20 free edges\n", PP_LOCAL_BRANCHING_20);
+	printf("\t\t- Code: %d, Algorithm: Local Branching with 30 free edges\n", PP_LOCAL_BRANCHING_30);
+	printf("\t\t- Code: %d, Algorithm: Local Branching with 40 free edges\n", PP_LOCAL_BRANCHING_40);
+	printf("\t\t- Code: %d, Algorithm: Local Branching with 50 free edges\n", PP_LOCAL_BRANCHING_50);
     printf("\n");
 
 }/* pp_matheuristic_legend */
@@ -295,20 +298,29 @@ bool runPPMathheurAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSol
 
 	switch (alg){
 		case PP_HARD_FIXING_60:
-			return optimize_offline(set, inst, false, _HARD_FIXING, .6, sol, &et);
+			return optimize_offline(set, inst, false, _HARD_FIXING, .6, 0, sol, &et);
 			break;
 		case PP_HARD_FIXING_70:
-			return optimize_offline(set, inst, false, _HARD_FIXING, .7, sol, &et);
+			return optimize_offline(set, inst, false, _HARD_FIXING, .7, 0, sol, &et);
 			break;
 		case PP_HARD_FIXING_80:
-			return optimize_offline(set, inst, false, _HARD_FIXING, .8, sol, &et);
+			return optimize_offline(set, inst, false, _HARD_FIXING, .8, 0, sol, &et);
 			break;
 		case PP_HARD_FIXING_90:
-			return optimize_offline(set, inst, false, _HARD_FIXING, .9, sol, &et);
+			return optimize_offline(set, inst, false, _HARD_FIXING, .9, 0, sol, &et);
 			break;
 
-		case PP_LOCAL_BRANCHING:
-			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, sol, &et);
+		case PP_LOCAL_BRANCHING_20:
+			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, 20, sol, &et);
+			break;
+		case PP_LOCAL_BRANCHING_30:
+			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, 30, sol, &et);
+			break;
+		case PP_LOCAL_BRANCHING_40:
+			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, 40, sol, &et);
+			break;
+		case PP_LOCAL_BRANCHING_50:
+			return optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, 50, sol, &et);
 			break;
 
 		default:
@@ -406,24 +418,24 @@ bool runPPExactAlg(const Settings* set, PP_ALG alg, TSPInstance* inst, TSPSoluti
 	switch (alg){
 
 		case PP_BENDERS_NO_MIPSTART:
-			return optimize_offline(set, inst, false, BENDERS, 0, sol, et);
+			return optimize_offline(set, inst, false, BENDERS, 0, 0, sol, et);
 		case PP_BENDERS_MIPSTART:
-			return optimize_offline(set, inst, true, BENDERS, 0, sol, et);
+			return optimize_offline(set, inst, true, BENDERS, 0, 0, sol, et);
 
 		case PP_BENDERS_PATCH_NO_MIPSTART:
-			return optimize_offline(set, inst, false, BENDERS_PATCH, 0, sol, et);
+			return optimize_offline(set, inst, false, BENDERS_PATCH, 0, 0, sol, et);
 		case PP_BENDERS_PATCH_MIPSTART:
-			return optimize_offline(set, inst, true, BENDERS_PATCH, 0, sol, et);
+			return optimize_offline(set, inst, true, BENDERS_PATCH, 0, 0, sol, et);
 
 		case PP_CANDIDATE_CALLBACK_NO_MIPSTART:
-			return optimize_offline(set, inst, false, CANDIDATE_CALLBACK, 0, sol, et);
+			return optimize_offline(set, inst, false, CANDIDATE_CALLBACK, 0, 0, sol, et);
 		case PP_CANDIDATE_CALLBACK_MIPSTART:
-			return optimize_offline(set, inst, true, CANDIDATE_CALLBACK, 0, sol, et);
+			return optimize_offline(set, inst, true, CANDIDATE_CALLBACK, 0, 0, sol, et);
 
 		case PP_USERCUT_CALLBACK_NO_MIPSTART:
-			return optimize_offline(set, inst, false, USERCUT_CALLBACK, 0, sol, et);
+			return optimize_offline(set, inst, false, USERCUT_CALLBACK, 0, 0, sol, et);
 		case PP_USERCUT_CALLBACK_MIPSTART:
-			return optimize_offline(set, inst, true, USERCUT_CALLBACK, 0, sol, et);
+			return optimize_offline(set, inst, true, USERCUT_CALLBACK, 0, 0, sol, et);
 
 	    default:
 	        printf("\nError: Algorithm code not found.\n");
@@ -563,8 +575,17 @@ void getAlgName(PP_ALG alg, char name[]){
 			sprintf(name, "hard_fixing_90");
 			break;
 
-		case PP_LOCAL_BRANCHING:
-			sprintf(name, "local_branching");
+		case PP_LOCAL_BRANCHING_20:
+			sprintf(name, "local_branching_20");
+			break;
+		case PP_LOCAL_BRANCHING_30:
+			sprintf(name, "local_branching_30");
+			break;
+		case PP_LOCAL_BRANCHING_40:
+			sprintf(name, "local_branching_40");
+			break;
+		case PP_LOCAL_BRANCHING_50:
+			sprintf(name, "local_branching_50");
 			break;
 
 		/* EXACTS */

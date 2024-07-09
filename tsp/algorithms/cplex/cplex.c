@@ -464,11 +464,12 @@ double readHFFef(void){
 * IP start boolean indicating whether to use mipstart
 * IP alg algorithm to run
 * IP fef fixed edges fraction, just for hard fixing, ignored in the other cases
+* IP k_start k_start value for local branching
 * IOP sol solution to be updated
 * OP et execution time
 * OR 0 if no error, error code otherwise
 */
-int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, double fef, TSPSolution* sol, double* et){
+int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPptr lp, bool start, EXACTS alg, double fef, int k_start, TSPSolution* sol, double* et){
 	
 	switch (alg){
 	    case BENDERS:
@@ -482,7 +483,7 @@ int run_exact_offline(const Settings* set, const TSPInstance* inst, CPXENVptr en
 		case _HARD_FIXING:
 			return hard_fixing(set, inst, fef, env, lp, sol, et);
 		case _LOCAL_BRANCHING:
-			return local_branching(set, inst, env, lp, sol, et);
+			return local_branching_k_start(set, inst, k_start, env, lp, sol, et);
 	    default:
 	        printf("Error: Exact algorithm code not found.\n\n");
 	        return 1;
@@ -613,12 +614,13 @@ int optimize_model(const TSPInstance *inst, CPXENVptr env, CPXLPptr lp, TSPSSolu
  * IP start boolean indicating whether to use mipstart
  * IP alg algorithm to run
  * IP fef fixed edges fraction, just for hard fixing, ignored in the other cases
+ * IP k_start k_start value for local branching
  * OP sol solution to evaluate ( assume that the solution was already initialized )
  * OP et execution time
  * OR 0 if no error, error code otherwise
  * OV error message if any
  */
-int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, EXACTS alg, double fef, TSPSolution *sol, double* et)
+int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, EXACTS alg, double fef, int k_start, TSPSolution *sol, double* et)
 {
 
 	int err;
@@ -644,7 +646,7 @@ int optimize_offline(const Settings *set, const TSPInstance *inst, bool start, E
 		else
 		{
 			if (!(err = build_model(set, inst, env, lp)))
-				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, fef, sol, et)))
+				if(!(err = run_exact_offline(set, inst, env, lp, start, alg, fef, k_start, sol, et)))
 					if((*set).v)
 						print_status(env, lp);
 
@@ -675,7 +677,7 @@ int optimize(const Settings *set, const TSPInstance *inst, TSPSolution *sol)
 
 	exactAlgorithmLegend();
 
-	return optimize_offline(set, inst, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), 0, sol, &et);
+	return optimize_offline(set, inst, start, (EXACTS)readInt("Insert the code of the exact algorithm you want to run: "), 0, 0, sol, &et);
 
 } /* optimize */
 
@@ -1075,6 +1077,26 @@ void matheuristics_legend(void){
 }/* algorithmLegend */
 
 /*
+* OR the local branching k_start hyperparamether
+*/
+double readKStart(void){
+
+	int k_start;
+	
+	do{
+
+		k_start = readInt("Insert the k_start value { 20, 30, 40, 50}: ");
+		
+		if(k_start < 20 || k_start > 50 || k_start % 10)
+			printf("Error: Please insert a valid value!\n\n");
+	
+	}while(k_start < 20 || k_start > 50 || k_start % 10);
+
+	return k_start;
+
+}/* readHFFnf */
+
+/*
 * IP alg matheuristic algorithm to run
 * IP set settings
 * IP inst tsp instance
@@ -1088,11 +1110,11 @@ double runMatheurConfiguration(MATHEURISTICS alg, const Settings* set, const TSP
 
 	switch (alg){
 	    case HARD_FIXING:
-			if((err = optimize_offline(set, inst, false, _HARD_FIXING, readHFFef(), sol, &et)))
+			if((err = optimize_offline(set, inst, false, _HARD_FIXING, readHFFef(), 0, sol, &et)))
 				return -1;
 			return et;
 	    case LOCAL_BRANCHING:
-	        if((err = optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, sol, &et)))
+	        if((err = optimize_offline(set, inst, false, _LOCAL_BRANCHING, 0, readKStart(), sol, &et)))
 				return -1;
 			return et;
 	    default:

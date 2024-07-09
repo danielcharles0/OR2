@@ -9,3 +9,7 @@
 #include "../../../../input/settings/settings.h"
 
 int local_branching(const Settings*, const TSPInstance*, CPXENVptr, CPXLPptr, TSPSolution*, double*);
+
+int local_branching_k_start_step(const Settings*, const TSPInstance*, int, int, CPXENVptr, CPXLPptr, TSPSolution*, double*);
+
+int local_branching_k_start(const Settings*, const TSPInstance*, int, CPXENVptr, CPXLPptr, TSPSolution*, double*);
