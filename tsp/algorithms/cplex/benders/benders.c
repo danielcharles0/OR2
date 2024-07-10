@@ -253,8 +253,11 @@ int benders(const Settings* set, const TSPInstance* inst, CPXENVptr env, CPXLPpt
 		} else
 			convertSSol(inst, &temp, sol);
 	} else {
-		if(CPXgetstat(env, lp) == CPXMIP_TIME_LIM_INFEAS)
+		if((err = CPXgetstat(env, lp)) == CPXMIP_TIME_LIM_INFEAS || err == CPXMIP_TIME_LIM_FEAS){
+			/* time limit exceeded, returning a basic and non-time-consuming solution */
+			ascendentSol(inst, sol);
 			err = 0;
+		}
 		else
 			print_error("Error in BENDERS\n", err, env, lp);
 	}	
