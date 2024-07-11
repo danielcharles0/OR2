@@ -136,14 +136,15 @@ int local_branching_k_start_step(const Settings* set, const TSPInstance* inst, i
 			break;
 		}/* if */
 
-		if((imp = updateIncumbentSol(inst, &temp, sol)))
+		if((imp = updateIncumbentSol(inst, &temp, sol))){
 			if((*set).v)
 				printf(" | Best solution cost found: %lf", sol->val);
+		}
+		else
+			k += k_step;
 
 		if(k >= inst->dimension || checkTimeLimit(set, start, &ls))
 			break;
-
-		k += k_step;
 
 		release_edges(inst, env, lp);
 
