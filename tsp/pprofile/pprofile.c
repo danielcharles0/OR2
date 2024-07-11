@@ -763,10 +763,10 @@ int main(int argc, char* const* argv){
     
 	PP_CONF conf;
 
-    printf("\nPerformance Profile program started...\n\n");
+    printf("Performance Profile program started...\n\n");
 
 	if(readPPConfiguration(argc, argv, &conf)){
-		printf("\nPerformance Profile program ended.\n\n");
+		printf("\nPerformance Profile program ended.\n");
 		return 0;
 	}/* if */
 
